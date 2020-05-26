@@ -7,7 +7,7 @@
     "create-wasm-app": ".bin/create-wasm-app.js"
   },
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.prod.config.js",
     "start": "webpack-dev-server"
   },
   "repository": {
@@ -27,10 +27,16 @@
   },
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "devDependencies": {
-    "hello-wasm-pack": "^0.1.0",
+    "copy-webpack-plugin": "^5.0.0",
+    "wasm-game-of-life": "file:./wasm/pkg",
+    "husky": "^4.2.5",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.5",
-    "copy-webpack-plugin": "^5.0.0"
+    "webpack-dev-server": "^3.1.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "wasm-pack build wasm && npm run build"
+    }
   }
 }

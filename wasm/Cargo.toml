@@ -1,5 +1,5 @@
 [package]
-name = "wasm"
+name = "wasm-game-of-life"
 version = "0.1.0"
 authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
 edition = "2018"
@@ -25,6 +25,12 @@ console_error_panic_hook = { version = "0.1.1", optional = true }
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.2", optional = true }
+
+[dependencies.web-sys]
+version = "0.3"
+features = [
+  "console",
+]
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2"
