@@ -2,6 +2,7 @@
 // extern crate web_sys;
 // use web_sys::console;
 use rand::Rng;
+use std::f32::consts;
 use std::iter;
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -9,15 +10,18 @@ use std::iter;
 // #[global_allocator]
 // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+const RAD_TO_DEG: f32 = 180f32 / consts::PI;
+const DEG_TO_RAD: f32 = consts::PI / 180f32;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RGB(u8, u8, u8);
 
 // #[wasm_bindgen]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-struct Hue(u16);
+struct Hue(usize);
 
 impl Hue {
-    fn new(hue: u16) -> Result<Hue, String> {
+    fn new(hue: usize) -> Result<Hue, String> {
         if hue < 360 {
             Ok(Hue(hue))
         } else {
@@ -25,14 +29,15 @@ impl Hue {
         }
     }
 
-    fn get(&self) -> u16 {
+    fn get(self) -> usize {
         self.0
     }
 
-    fn to_rgb(&self) -> RGB {
+    fn to_rgb(self) -> RGB {
         let hue = self.0;
         let primary = 255;
         let secondary = ((1f32 - ((hue as f32 / 60f32) % 2f32 - 1f32).abs()) * 255f32) as u8;
+        assert!(hue < 360);
         match hue / 60 {
             0 => RGB(primary, secondary, 0),
             1 => RGB(secondary, primary, 0),
@@ -68,7 +73,7 @@ impl Source {
     }
 
     pub fn hue_vectors(&self) -> (f32, f32) {
-        let hue_val = self.hue.get() as f32;
+        let hue_val = self.hue.get() as f32 * DEG_TO_RAD;
         (hue_val.cos(), hue_val.sin())
     }
 }
@@ -85,15 +90,26 @@ pub fn draw_spectrum(width: usize, height: usize, num_sources: usize) -> Vec<Vec
         .take(num_sources)
         .collect();
 
-    let mut spectrum = (0..width)
+    (0..width)
         .map(|x| {
             (0..height)
-                .map(|y| RGB(0, (x % 255) as u8, (y % 255) as u8))
+                .map(|y| {
+                    let (mut hue_vector_x, mut hue_vector_y) = (0f32, 0f32);
+                    sources.iter().for_each(|source| {
+                        let (source_vector_x, source_vector_y) = source.hue_vectors();
+                        hue_vector_x += source_vector_x / ((x - source.x()) as f32).abs();
+                        hue_vector_y += source_vector_y / ((y - source.y()) as f32).abs();
+                    });
+                    Hue::new(
+                        ((hue_vector_y / hue_vector_x).atan() % (2f32 * consts::PI) * RAD_TO_DEG)
+                            as usize,
+                    )
+                    .unwrap()
+                    .to_rgb()
+                })
                 .collect()
         })
-        .collect();
-
-    spectrum
+        .collect()
 }
 
 // #[wasm_bindgen]
