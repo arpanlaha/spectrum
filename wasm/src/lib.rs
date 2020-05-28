@@ -36,7 +36,7 @@ impl Hue {
         if hue < 360 {
             Ok(Hue(hue))
         } else {
-            Err(String::from("Hue cannot be 360 or above"))
+            Err(format!("provided hue({}) cannot be over 360", hue))
         }
     }
 
@@ -89,14 +89,26 @@ struct Source {
     x: usize,
     y: usize,
     hue: Hue,
+    hue_vectors: (f32, f32),
 }
 
 impl Source {
-    pub fn new(width: usize, height: usize, hue: Hue) -> Source {
+    pub fn new(width: usize, height: usize) -> Source {
+        let x = (Math::random() * width as f64) as usize;
+        let y = (Math::random() * height as f64) as usize;
+        let hue = Hue::new((Math::random() * 360f64) as usize).unwrap();
+
+        let hue_val = hue.get() as f32 * DEG_TO_RAD;
+        // log_usize(x);
+        // log_usize(y);
+        // log_usize(hue.get());
+        // log_usize(0);
+
         Source {
-            x: (Math::random() * width as f64) as usize,
-            y: (Math::random() * height as f64) as usize,
+            x,
+            y,
             hue,
+            hue_vectors: (hue_val.cos(), hue_val.sin()),
         }
     }
 
@@ -108,13 +120,12 @@ impl Source {
         self.y
     }
 
-    // pub fn hue(&self) -> Hue {
-    //     self.hue
-    // }
+    pub fn hue(&self) -> Hue {
+        self.hue
+    }
 
     pub fn hue_vectors(&self) -> (f32, f32) {
-        let hue_val = self.hue.get() as f32 * DEG_TO_RAD;
-        (hue_val.cos(), hue_val.sin())
+        self.hue_vectors
     }
 }
 
@@ -131,13 +142,7 @@ pub struct Spectrum {
 impl Spectrum {
     pub fn new(width: usize, height: usize, num_sources: usize) -> Spectrum {
         let sources: Vec<Source> = iter::repeat(())
-            .map(|()| {
-                Source::new(
-                    width,
-                    height,
-                    Hue::new((Math::random() * 360f64) as usize).unwrap(),
-                )
-            })
+            .map(|()| Source::new(width, height))
             .take(num_sources)
             .collect();
         let mut spectrum = Spectrum {
@@ -155,21 +160,48 @@ impl Spectrum {
 
         let width = self.width;
         let height = self.height;
+
+        log_usize(width);
+        log_usize(height);
+
+        let diagonal = ((width.pow(2) + height.pow(2)) as f32).sqrt();
+
         for x in 0..width {
             for y in 0..height {
-                let (mut hue_vector_x, mut hue_vector_y) = (0f32, 0f32);
+                let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
-                    let (source_vector_x, source_vector_y) = source.hue_vectors();
-                    hue_vector_x += source_vector_x / (((x - source.x()) as f32).abs() + 1f32);
-                    hue_vector_y += source_vector_y / (((y - source.y()) as f32).abs() + 1f32);
+                    let (source_vector_cos, source_vector_sin) = source.hue_vectors();
+                    let dist_factor =
+                        (((x - source.x()).pow(2) + (y - source.y()).pow(2)) as f32 + 1f32);
+                    hue_vector_cos += source_vector_cos / dist_factor;
+                    hue_vector_sin += source_vector_sin / dist_factor;
                 }
-                let hue = Hue::new(
-                    (hue_vector_y.atan2(hue_vector_x) % (2f32 * consts::PI) * RAD_TO_DEG) as usize,
-                )
-                .unwrap();
+
+                let mut hue_val = ((hue_vector_sin / hue_vector_cos).atan() * RAD_TO_DEG);
+                let original = hue_val;
+
+                if hue_vector_cos < 0f32 {
+                    hue_val += 180f32;
+                } else if hue_vector_sin < 0f32 {
+                    hue_val += 360f32;
+                    if hue_val >= 359.5f32 {
+                        hue_val = 0f32;
+                    }
+                }
+
+                let hue = Hue::new(hue_val as usize).expect(
+                    &format!(
+                        "{}, {}, {}, {}",
+                        original, hue_val, hue_vector_cos, hue_vector_sin
+                    )[..],
+                );
                 let rgba = hue.to_rgba();
 
-                self.data[x * width + y] = rgba;
+                // if hue_val >= 265 && hue_val <= 300 {
+                //     log("here");
+                // }
+
+                self.data[x + y * width] = rgba;
             }
         }
     }

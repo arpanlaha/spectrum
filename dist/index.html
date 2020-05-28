@@ -16,6 +16,14 @@
         justify-content: center;
       }
 
+      canvas {
+        width: 400px;
+        height: 400px;
+        border: solid;
+        border-color: #000;
+        border-width: 1px;
+      }
+
       #fps {
         white-space: pre;
         font-family: monospace;
@@ -24,9 +32,7 @@
   </head>
 
   <body>
-    <button id="play-pause"></button>
-    <div id="fps"></div>
-    <canvas id="game-of-life-canvas"></canvas>
+    <canvas id="spectrum-canvas"></canvas>
     <script src="./bootstrap.js"></script>
   </body>
 </html>
