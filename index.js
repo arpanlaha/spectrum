@@ -1,3 +1,33 @@
+import { Spectrum } from "wasm-spectrum";
+import { memory } from "wasm-spectrum/spectrum_bg";
+
+console.log("Hello");
+
+const canvas = document.getElementById("spectrum-canvas");
+const context = canvas.getContext("2d");
+const width = 400;
+const height = 400;
+const numSources = 10;
+const spectrum = Spectrum.new(width, height, numSources);
+console.log("goodbye");
+const spectrumData = spectrum.data();
+// console.log(spectrumData);
+const spectrumArray = new Uint8ClampedArray(
+  memory.buffer,
+  spectrumData,
+  width * height * 4
+);
+
+const spectrumImageData = new ImageData(spectrumArray, width, height);
+context.putImageData(spectrumImageData, 0, 0);
+// canvas.data = spectrumArray;
+// [
+//   [0, "r"],
+//   [1, "g"],
+//   [2, "b"],
+//   [3, "a"],
+// ].forEach(([num, channel]) => console.log(`$${channel}: ${canvas.data[num]}`));
+
 // // Import the WebAssembly memory at the top of the file.
 // import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 // import { Universe, Cell } from "wasm-game-of-life";

@@ -28,7 +28,7 @@
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.0",
-    "wasm-game-of-life": "file:./wasm/pkg",
+    "wasm-spectrum": "file:wasm/pkg",
     "husky": "^4.2.5",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
