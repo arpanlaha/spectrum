@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-mod utils;
+// mod utils;
 
 extern crate web_sys;
 use js_sys::Math;
@@ -10,9 +10,9 @@ use std::iter;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+// #[cfg(feature = "wee_alloc")]
+// #[global_allocator]
+// static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 const RAD_TO_DEG: f32 = 180f32 / consts::PI;
 const DEG_TO_RAD: f32 = consts::PI / 180f32;
@@ -59,36 +59,35 @@ impl Hue {
     }
 }
 
-#[wasm_bindgen]
-extern "C" {
-    // Use `js_namespace` here to bind `console.log(..)` instead of just
-    // `log(..)`
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+// #[wasm_bindgen]
+// extern "C" {
+//     // Use `js_namespace` here to bind `console.log(..)` instead of just
+//     // `log(..)`
+//     #[wasm_bindgen(js_namespace = console)]
+//     fn log(s: &str);
 
-    // The `console.log` is quite polymorphic, so we can bind it with multiple
-    // signatures. Note that we need to use `js_name` to ensure we always call
-    // `log` in JS.
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_usize(a: usize);
+//     // The `console.log` is quite polymorphic, so we can bind it with multiple
+//     // signatures. Note that we need to use `js_name` to ensure we always call
+//     // `log` in JS.
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_usize(a: usize);
 
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_u32(a: u32);
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_u32(a: u32);
 
-    // Multiple arguments too!
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_f32(a: f32);
+//     // Multiple arguments too!
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_f32(a: f32);
 
-    // Multiple arguments too!
-    #[wasm_bindgen(js_namespace = console, js_name = log)]
-    fn log_f32_pair(a: f32, b: f32);
-}
+//     // Multiple arguments too!
+//     #[wasm_bindgen(js_namespace = console, js_name = log)]
+//     fn log_f32_pair(a: f32, b: f32);
+// }
 
 #[wasm_bindgen]
 struct Source {
     x: usize,
     y: usize,
-    hue: Hue,
     hue_vectors: (f32, f32),
 }
 
@@ -107,7 +106,6 @@ impl Source {
         Source {
             x,
             y,
-            hue,
             hue_vectors: (hue_val.cos(), hue_val.sin()),
         }
     }
@@ -120,9 +118,9 @@ impl Source {
         self.y
     }
 
-    pub fn hue(&self) -> Hue {
-        self.hue
-    }
+    // pub fn hue(&self) -> Hue {
+    //     self.hue
+    // }
 
     pub fn hue_vectors(&self) -> (f32, f32) {
         self.hue_vectors
@@ -156,29 +154,26 @@ impl Spectrum {
     }
 
     pub fn draw(&mut self) {
-        utils::set_panic_hook();
+        // utils::set_panic_hook();
 
-        let width = self.width;
-        let height = self.height;
+        // let width = self.width;
+        // let height = self.height;
 
-        log_usize(width);
-        log_usize(height);
+        // log_usize(width);
+        // log_usize(height);
 
-        let diagonal = ((width.pow(2) + height.pow(2)) as f32).sqrt();
-
-        for x in 0..width {
-            for y in 0..height {
+        for x in 0..self.width {
+            for y in 0..self.height {
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
                     let dist_factor =
-                        (((x - source.x()).pow(2) + (y - source.y()).pow(2)) as f32 + 1f32);
+                        ((x - source.x()).pow(2) + (y - source.y()).pow(2)) as f32 + 1f32;
                     hue_vector_cos += source_vector_cos / dist_factor;
                     hue_vector_sin += source_vector_sin / dist_factor;
                 }
 
-                let mut hue_val = ((hue_vector_sin / hue_vector_cos).atan() * RAD_TO_DEG);
-                let original = hue_val;
+                let mut hue_val = (hue_vector_sin / hue_vector_cos).atan() * RAD_TO_DEG;
 
                 if hue_vector_cos < 0f32 {
                     hue_val += 180f32;
@@ -189,19 +184,20 @@ impl Spectrum {
                     }
                 }
 
-                let hue = Hue::new(hue_val as usize).expect(
-                    &format!(
-                        "{}, {}, {}, {}",
-                        original, hue_val, hue_vector_cos, hue_vector_sin
-                    )[..],
-                );
-                let rgba = hue.to_rgba();
+                // let hue = Hue::new(((x * width + y) % 360) as usize).expect(
+                //     // &format!(
+                //     //     "{}, {}, {}, {}",
+                //     //     original, hue_val, hue_vector_cos, hue_vector_sin
+                //     // )[..],
+                //     "hello",
+                // );
+                // let rgba = hue.to_rgba();
 
                 // if hue_val >= 265 && hue_val <= 300 {
                 //     log("here");
                 // }
 
-                self.data[x + y * width] = rgba;
+                self.data[x + y * self.width] = Hue::new(hue_val as usize).unwrap().to_rgba();
             }
         }
     }
