@@ -1,5 +1,5 @@
 [package]
-name = "wasm-game-of-life"
+name = "spectrum"
 version = "0.1.0"
 authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
 edition = "2018"

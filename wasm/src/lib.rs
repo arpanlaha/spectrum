@@ -1,4 +1,4 @@
-// use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::*;
 // extern crate web_sys;
 // use web_sys::console;
 use rand::Rng;
@@ -13,11 +13,18 @@ use std::iter;
 const RAD_TO_DEG: f32 = 180f32 / consts::PI;
 const DEG_TO_RAD: f32 = consts::PI / 180f32;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct RGB(u8, u8, u8);
+#[wasm_bindgen]
+#[derive(Clone, Copy, Debug)]
+pub struct RGBA(u8, u8, u8, u8);
 
-// #[wasm_bindgen]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+impl RGBA {
+    fn from_rgb(r: u8, g: u8, b: u8) -> RGBA {
+        RGBA(r, g, b, 255)
+    }
+}
+
+#[wasm_bindgen]
+#[derive(Clone, Copy, Debug)]
 struct Hue(usize);
 
 impl Hue {
@@ -33,22 +40,23 @@ impl Hue {
         self.0
     }
 
-    fn to_rgb(self) -> RGB {
+    fn to_rgb(self) -> RGBA {
         let hue = self.0;
         let primary = 255;
         let secondary = ((1f32 - ((hue as f32 / 60f32) % 2f32 - 1f32).abs()) * 255f32) as u8;
         assert!(hue < 360);
         match hue / 60 {
-            0 => RGB(primary, secondary, 0),
-            1 => RGB(secondary, primary, 0),
-            2 => RGB(0, primary, secondary),
-            3 => RGB(0, secondary, primary),
-            4 => RGB(secondary, 0, primary),
-            _ => RGB(primary, 0, secondary),
+            0 => RGBA::from_rgb(primary, secondary, 0),
+            1 => RGBA::from_rgb(secondary, primary, 0),
+            2 => RGBA::from_rgb(0, primary, secondary),
+            3 => RGBA::from_rgb(0, secondary, primary),
+            4 => RGBA::from_rgb(secondary, 0, primary),
+            _ => RGBA::from_rgb(primary, 0, secondary),
         }
     }
 }
 
+#[wasm_bindgen]
 struct Source {
     x: usize,
     y: usize,
@@ -78,39 +86,94 @@ impl Source {
     }
 }
 
-pub fn draw_spectrum(width: usize, height: usize, num_sources: usize) -> Vec<Vec<RGB>> {
-    let sources: Vec<Source> = iter::repeat(())
-        .map(|()| {
-            Source::new(
-                width,
-                height,
-                Hue::new(rand::thread_rng().gen_range(0, 360)).unwrap(),
-            )
-        })
-        .take(num_sources)
-        .collect();
-
-    (0..width)
-        .map(|x| {
-            (0..height)
-                .map(|y| {
-                    let (mut hue_vector_x, mut hue_vector_y) = (0f32, 0f32);
-                    sources.iter().for_each(|source| {
-                        let (source_vector_x, source_vector_y) = source.hue_vectors();
-                        hue_vector_x += source_vector_x / ((x - source.x()) as f32).abs();
-                        hue_vector_y += source_vector_y / ((y - source.y()) as f32).abs();
-                    });
-                    Hue::new(
-                        ((hue_vector_y / hue_vector_x).atan() % (2f32 * consts::PI) * RAD_TO_DEG)
-                            as usize,
-                    )
-                    .unwrap()
-                    .to_rgb()
-                })
-                .collect()
-        })
-        .collect()
+pub struct Spectrum {
+    width: usize,
+    height: usize,
+    sources: Vec<Source>,
+    data: Vec<RGBA>,
 }
+
+impl Spectrum {
+    pub fn new(width: usize, height: usize, num_sources: usize) -> Spectrum {
+        let mut spectrum = Spectrum {
+            width,
+            height,
+            sources: iter::repeat(())
+                .map(|()| {
+                    Source::new(
+                        width,
+                        height,
+                        Hue::new(rand::thread_rng().gen_range(0, 360)).unwrap(),
+                    )
+                })
+                .take(num_sources)
+                .collect(),
+            data: vec![RGBA::from_rgb(0, 0, 0); width * height],
+        };
+        spectrum.draw();
+        spectrum
+    }
+
+    pub fn draw(&mut self) {
+        let width = self.width;
+        let height = self.height;
+
+        (0..width).for_each(|x| {
+            (0..height).for_each(|y| {
+                let (mut hue_vector_x, mut hue_vector_y) = (0f32, 0f32);
+                self.sources.iter().for_each(|source| {
+                    let (source_vector_x, source_vector_y) = source.hue_vectors();
+                    hue_vector_x += source_vector_x / ((x - source.x()) as f32).abs();
+                    hue_vector_y += source_vector_y / ((y - source.y()) as f32).abs();
+                });
+                self.data[x * width + height] = Hue::new(
+                    ((hue_vector_y / hue_vector_x).atan() % (2f32 * consts::PI) * RAD_TO_DEG)
+                        as usize,
+                )
+                .unwrap()
+                .to_rgb()
+            })
+        });
+    }
+
+    pub fn data(&self) -> *const RGBA {
+        self.data.as_slice().as_ptr()
+    }
+}
+
+// pub fn draw_spectrum(width: usize, height: usize, num_sources: usize) -> Vec<Vec<RGBA>> {
+//     let sources: Vec<Source> = iter::repeat(())
+//         .map(|()| {
+//             Source::new(
+//                 width,
+//                 height,
+//                 Hue::new(rand::thread_rng().gen_range(0, 360)).unwrap(),
+//             )
+//         })
+//         .take(num_sources)
+//         .collect();
+
+//     (0..width)
+//         .map(|x| {
+//             (0..height)
+//                 .map(|y| {
+//                     let (mut hue_vector_x, mut hue_vector_y) = (0f32, 0f32);
+//                     sources.iter().for_each(|source| {
+//                         let (source_vector_x, source_vector_y) = source.hue_vectors();
+//                         hue_vector_x += source_vector_x / ((x - source.x()) as f32).abs();
+//                         hue_vector_y += source_vector_y / ((y - source.y()) as f32).abs();
+//                     });
+//                     Hue::new(
+//                         ((hue_vector_y / hue_vector_x).atan() % (2f32 * consts::PI) * RAD_TO_DEG)
+//                             as usize,
+//                     )
+//                     .unwrap()
+//                     .to_rgb()
+//                 })
+//                 .collect()
+//         })
+//         .collect()
+// }
 
 // #[wasm_bindgen]
 // #[repr(u8)]
