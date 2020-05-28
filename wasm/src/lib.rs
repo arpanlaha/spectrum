@@ -167,8 +167,10 @@ impl Spectrum {
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
-                    let dist_factor =
-                        ((x - source.x()).pow(2) + (y - source.y()).pow(2)) as f32 + 1f32;
+                    let dist_factor = ((x as isize - source.x() as isize).pow(2)
+                        + (y as isize - source.y() as isize).pow(2))
+                        as f32
+                        + 1f32;
                     hue_vector_cos += source_vector_cos / dist_factor;
                     hue_vector_sin += source_vector_sin / dist_factor;
                 }
@@ -183,19 +185,6 @@ impl Spectrum {
                         hue_val = 0f32;
                     }
                 }
-
-                // let hue = Hue::new(((x * width + y) % 360) as usize).expect(
-                //     // &format!(
-                //     //     "{}, {}, {}, {}",
-                //     //     original, hue_val, hue_vector_cos, hue_vector_sin
-                //     // )[..],
-                //     "hello",
-                // );
-                // let rgba = hue.to_rgba();
-
-                // if hue_val >= 265 && hue_val <= 300 {
-                //     log("here");
-                // }
 
                 self.data[x + y * self.width] = Hue::new(hue_val as usize).unwrap().to_rgba();
             }
