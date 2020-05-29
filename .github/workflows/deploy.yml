@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: CI
 
 on: push
 
@@ -45,7 +45,7 @@ jobs:
           npm install
 
       - name: Build and bundle files
-        run: /
+        run: |
           npm run build
 
       - name: Login via Azure CLI
