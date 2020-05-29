@@ -16,6 +16,7 @@ jobs:
           path: |
             $HOME/.cargo
             node_modules
+            wasm/target/release
           key: ${{ runner.os }}-cache
 
       - name: Install rust toolchain
@@ -27,6 +28,16 @@ jobs:
       - name: Run rustfmt
         working-directory: wasm
         run: cargo fmt -- --check
+
+      - name: Install wasm-pack
+        uses: actions-rs/install@v0.1
+        with:
+          crate: wasm-pack
+          version: latest
+          use-tool-cache: true
+
+      - name: Build WebAssembly
+        run: wasm-pack build wasm
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -52,6 +63,7 @@ jobs:
           path: |
             $HOME/.cargo
             node_modules
+            wasm/target/release
           key: ${{ runner.os }}-cache
 
       - name: Install rust toolchain
@@ -63,6 +75,16 @@ jobs:
       - name: Run clippy
         working-directory: wasm
         run: cargo clippy -- -D warnings
+
+      - name: Install wasm-pack
+        uses: actions-rs/install@v0.1
+        with:
+          crate: wasm-pack
+          version: latest
+          use-tool-cache: true
+
+      - name: Build WebAssembly
+        run: wasm-pack build wasm
 
       - name: Set up Node
         uses: actions/setup-node@v1
