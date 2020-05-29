@@ -8,5 +8,9 @@ module.exports = {
     filename: "bootstrap.js",
   },
   mode: "production",
-  plugins: [new CopyWebpackPlugin(["index.html"])],
+  plugins: [
+    new CopyWebpackPlugin({
+      patterns: [{ from: "index.html", to: "." }],
+    }),
+  ],
 };
