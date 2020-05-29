@@ -4,7 +4,7 @@
   "description": "create randomly-generated art using WebAssembly",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.prod.config.js",
+    "build": "webpack --config webpack.config.js",
     "start": "webpack-dev-server"
   },
   "repository": {

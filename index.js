@@ -6,6 +6,7 @@ const context = canvas.getContext("2d");
 const width = document.body.clientWidth;
 const height = document.body.clientHeight;
 canvas.width = width;
+canvas.height = height;
 const numSources = Math.round(Math.sqrt(Math.sqrt(width * height)));
 const spectrum = Spectrum.new(width, height, numSources);
 const spectrumData = spectrum.data();
