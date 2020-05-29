@@ -26,10 +26,7 @@ jobs:
 
       - name: Run rustfmt
         working-directory: wasm
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: -- --check
+        run: cargo fmt -- --check
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -65,10 +62,7 @@ jobs:
 
       - name: Run clippy
         working-directory: wasm
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
 
       - name: Set up Node
         uses: actions/setup-node@v1
