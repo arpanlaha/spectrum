@@ -20,13 +20,11 @@
     "@hack4impact-uiuc/eslint-plugin": "^2.0.0",
     "copy-webpack-plugin": "^6.0.1",
     "eslint": "^7.1.0",
+    "markdownlint-cli": "^0.23.1",
     "prettier": "^2.0.5",
     "wasm-spectrum": "file:wasm/pkg",
     "webpack": "^4.29.3",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
-  },
-  "dependencies": {
-    "markdownlint-cli": "^0.23.1"
   }
 }
