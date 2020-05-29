@@ -26,6 +26,7 @@ jobs:
 
       - name: Run rustfmt
         uses: actions-rs/cargo@v1
+        working-directory: wasm
         with:
           command: fmt
           args: -- --check
@@ -66,6 +67,7 @@ jobs:
 
       - name: Run clippy
         uses: actions-rs/cargo@v1
+        working-directory: wasm
         with:
           command: clippy
           args: -- -D warnings
