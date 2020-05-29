@@ -1,0 +1,17 @@
+{
+  "short_name": "Spectrum",
+  "name": "Spectrum",
+  "description": "Create randomly-generated art using WebAssembly",
+  "author": "Arpan Laha",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "512x512 192x192 64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "display": "browser"
+}
