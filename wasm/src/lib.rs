@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 
 // mod utils;
 
-extern crate web_sys;
+// extern crate web_sys;
 use js_sys::Math;
 use std::f32::consts;
 use std::iter;
