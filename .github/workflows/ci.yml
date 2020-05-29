@@ -24,12 +24,17 @@ jobs:
           profile: default
           toolchain: stable
 
+      - name: Enter wasm directory
+        run: cd wasm
+
       - name: Run rustfmt
         uses: actions-rs/cargo@v1
-        working-directory: wasm
         with:
           command: fmt
           args: -- --check
+
+      - name: Leave wasm directory
+        run: cd ..
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -37,12 +42,10 @@ jobs:
           node-version: 12
 
       - name: Install NPM dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Run NPM format check
-        run: |
-          npm run format:check
+        run: npm run format:check
 
   lint:
     runs-on: ubuntu-latest
@@ -65,12 +68,17 @@ jobs:
           profile: default
           toolchain: stable
 
+      - name: Enter wasm directory
+        run: cd wasm
+
       - name: Run clippy
         uses: actions-rs/cargo@v1
-        working-directory: wasm
         with:
           command: clippy
           args: -- -D warnings
+
+      - name: Leave wasm directory
+        run: cd ..
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -78,12 +86,10 @@ jobs:
           node-version: 12
 
       - name: Install NPM dependencies
-        run: |
-          npm install
+        run: npm install
 
-      - name: Run lint check
-        run: |
-          npm run lint
+      - name: Run NPM lint check
+        run: npm run lint
 
   deploy:
     runs-on: ubuntu-latest
@@ -115,8 +121,7 @@ jobs:
           use-tool-cache: true
 
       - name: Build WebAssembly
-        run: |
-          wasm-pack build wasm
+        run: wasm-pack build wasm
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -124,12 +129,10 @@ jobs:
           node-version: 12
 
       - name: Install NPM dependencies
-        run: |
-          npm install
+        run: npm install
 
       - name: Build and bundle files
-        run: |
-          npm run build
+        run: npm run build
 
       - name: Login via Azure CLI
         uses: azure/login@v1
@@ -139,5 +142,4 @@ jobs:
       - name: Upload to Azure Storage
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-        run: |
-          az storage blob upload-batch -s dist -d \$web --account-name $AZURE_STORAGE_ACCOUNT
+        run: az storage blob upload-batch -s dist -d \$web --account-name $AZURE_STORAGE_ACCOUNT
