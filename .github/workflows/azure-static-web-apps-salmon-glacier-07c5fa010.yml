@@ -3,18 +3,27 @@ name: Azure Static Web Apps CI/CD
 on: push
 
 jobs:
-  build_and_deploy_job:
+  deploy:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repo
+        uses: actions/checkout@v2
 
-      - uses: actions-rs/toolchain@v1
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: $HOME/.cargo/bin
+          key: ${{ runner.os }}-cache
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           profile: default
           toolchain: stable
 
-      - uses: actions-rs/install@v0.1
+      - name: Install wasm-pack
+        uses: actions-rs/install@v0.1
         with:
           crate: wasm-pack
           version: latest
