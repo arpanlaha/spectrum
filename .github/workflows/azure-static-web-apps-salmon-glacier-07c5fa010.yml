@@ -13,7 +13,7 @@ jobs:
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
-          path: $HOME/.cargo/bin
+          path: $HOME/.cargo
           key: ${{ runner.os }}-cache
 
       - name: Install rust toolchain
