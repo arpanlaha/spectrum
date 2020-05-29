@@ -4,7 +4,7 @@
   "description": "create randomly-generated art using WebAssembly",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "rm -rf dist && webpack --config webpack.config.js",
     "start": "webpack-dev-server"
   },
   "repository": {
@@ -12,7 +12,6 @@
     "url": "git+https://github.com/arpanlaha/spectrum.git"
   },
   "license": "MIT",
-  "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "devDependencies": {
     "copy-webpack-plugin": "^6.0.1",
     "wasm-spectrum": "file:wasm/pkg",

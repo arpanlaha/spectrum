@@ -12,8 +12,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: "index.html", to: "." },
-        { from: "logo.svg", to: "." },
-        { from: "manifest.json", to: "." },
+        { from: "static", to: "static" },
       ],
     }),
   ],

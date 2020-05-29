@@ -2,8 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="shortcut icon" href="/logo.svg" />
-    <link rel="manifest" href="/manifest.json" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="shortcut icon" href="/static/logo.svg" />
+    <link rel="manifest" href="/static/manifest.json" />
+    <link rel="stylesheet" type="text/css" href="/static/style.css" />
+    <meta
+      name="description"
+      content="Create randomly-generated art using WebAssembly"
+    />
+    <meta
+      name="keywords"
+      content="Arpan, Laha, Arpan Laha, Spectrum, WebAssembly, Rust, WASM"
+    />
+    <meta name="author" content="Arpan Laha" />
+    <link as="script" rel="preload" href="/bootstrap.js" />
     <title>Spectrum</title>
     <style>
       body {
@@ -17,16 +33,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-      }
-      /* 
-      canvas {
-        width: 1280px;
-        height: 100%;
-      } */
-
-      #fps {
-        white-space: pre;
-        font-family: monospace;
+        background-color: #000;
       }
     </style>
   </head>

@@ -5,7 +5,7 @@ on: push
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Deploy
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
