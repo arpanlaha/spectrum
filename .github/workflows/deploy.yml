@@ -57,5 +57,5 @@ jobs:
       - name: Upload to Azure Storage
         env:
           AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
-        run: /
+        run: |
           az storage blob upload-batch -s dist -d \$web --account-name $AZURE_STORAGE_ACCOUNT
