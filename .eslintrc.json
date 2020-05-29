@@ -1,0 +1,8 @@
+{
+  "plugins": ["@hack4impact-uiuc"],
+  "extends": ["plugin:@hack4impact-uiuc/base"],
+  "rules": {
+    "import/named": "off",
+    "import/no-unresolved": "off"
+  }
+}

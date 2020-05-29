@@ -3,6 +3,60 @@ name: CI
 on: push
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    name: Format
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-cache
+
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install NPM dependencies
+        run: |
+          npm install
+
+      - name: Run format check
+        run: |
+          npm run format:check
+
+  lint:
+    runs-on: ubuntu-latest
+    name: lint
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v2
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-cache
+
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install NPM dependencies
+        run: |
+          npm install
+
+      - name: Run lint check
+        run: |
+          npm run lint
+
   deploy:
     runs-on: ubuntu-latest
     name: Deploy
