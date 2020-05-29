@@ -16,7 +16,7 @@ jobs:
           path: |
             $HOME/.cargo
             node_modules
-            wasm/target/*/build
+            wasm/target/release
           key: ${{ runner.os }}-cache
 
       - name: Install rust toolchain
