@@ -14,8 +14,21 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
+            $HOME/.cargo
             node_modules
           key: ${{ runner.os }}-cache
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: stable
+
+      - name: Run rustfmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: -- --check
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -26,7 +39,7 @@ jobs:
         run: |
           npm install
 
-      - name: Run format check
+      - name: Run NPM format check
         run: |
           npm run format:check
 
@@ -41,8 +54,21 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
+            $HOME/.cargo
             node_modules
           key: ${{ runner.os }}-cache
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: stable
+
+      - name: Run clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -- -D warnings
 
       - name: Set up Node
         uses: actions/setup-node@v1
