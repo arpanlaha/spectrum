@@ -29,6 +29,7 @@ jobs:
         with:
           crate: wasm-pack
           version: latest
+          use-tool-cache: true
 
       - name: Build WebAssembly
         run: |
