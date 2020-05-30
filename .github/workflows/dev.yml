@@ -51,7 +51,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to development url
-        if: ${{ ${GITHUB_REF##*/} != "master" }}
+        if: ${{ GITHUB_REF##*/ != "master" }}
         uses: amondnet/vercel-action@v19
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -61,7 +61,7 @@ jobs:
           working-directory: dist
 
       - name: Deploy to production url
-        if: ${{ ${GITHUB_REF##*/} == "master" }}
+        if: ${{ GITHUB_REF##*/ == "master" }}
         uses: amondnet/vercel-action@v19
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
