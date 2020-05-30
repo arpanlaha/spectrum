@@ -30,3 +30,5 @@ const spectrumArray = new Uint8ClampedArray(
 const spectrumImageData = new ImageData(spectrumArray, width, height);
 
 context.putImageData(spectrumImageData, 0, 0);
+
+canvas.classList.add("show");
