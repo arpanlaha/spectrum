@@ -3,16 +3,20 @@ import { memory } from "wasm-spectrum/spectrum_bg";
 
 const BYTES_PER_PIXEL = 4;
 
+const PAGE_FRACTION = 3;
+
 const scale = window.devicePixelRatio;
 
 let { clientWidth, clientHeight } = document.body;
 
-clientWidth = Math.round(clientWidth / 3);
-clientHeight = Math.round(clientHeight / 3);
+clientWidth = Math.round(clientWidth / PAGE_FRACTION);
+clientHeight = Math.round(clientHeight / PAGE_FRACTION);
 
 const width = Math.round(clientWidth * scale);
 const height = Math.round(clientHeight * scale);
-const numSources = Math.round(Math.sqrt(Math.sqrt(width * height)) / 3);
+const numSources = Math.round(
+  Math.sqrt(Math.sqrt(width * height)) / PAGE_FRACTION
+);
 
 const canvas = document.getElementById("spectrum-canvas");
 const context = canvas.getContext("2d");
