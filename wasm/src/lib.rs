@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-// mod utils;
+mod utils;
 
 // extern crate web_sys;
 use js_sys::Math;
@@ -88,6 +88,7 @@ impl Hue {
 struct Source {
     x: usize,
     y: usize,
+    hue: Hue,
     hue_vectors: (f32, f32),
 }
 
@@ -106,6 +107,7 @@ impl Source {
         Source {
             x,
             y,
+            hue,
             hue_vectors: (hue_val.cos(), hue_val.sin()),
         }
     }
@@ -124,6 +126,13 @@ impl Source {
 
     pub fn hue_vectors(&self) -> (f32, f32) {
         self.hue_vectors
+    }
+
+    pub fn tick(&mut self) {
+        let hue_val = (self.hue.get() + 5) % 360;
+        self.hue = Hue::new(hue_val).unwrap();
+        let hue_rad = hue_val as f32 * DEG_TO_RAD;
+        self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
     }
 }
 
@@ -154,7 +163,7 @@ impl Spectrum {
     }
 
     pub fn draw(&mut self) {
-        // utils::set_panic_hook();
+        utils::set_panic_hook();
 
         // let width = self.width;
         // let height = self.height;
@@ -188,6 +197,14 @@ impl Spectrum {
 
                 self.data[x + y * self.width] = Hue::new(hue_val as usize).unwrap().to_rgba();
             }
+        }
+    }
+
+    pub fn tick(&mut self) {
+        utils::set_panic_hook();
+
+        for source in &mut self.sources {
+            source.tick();
         }
     }
 
