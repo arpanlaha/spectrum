@@ -4,7 +4,7 @@ import { memory } from "wasm-spectrum/spectrum_bg";
 const BYTES_PER_PIXEL = 4;
 
 const PAGE_FRACTION = 3;
-const SOURCE_FACTOR = 0.33;
+// const SOURCE_FACTOR = 0.33;
 
 const scale = window.devicePixelRatio;
 
@@ -15,9 +15,7 @@ clientHeight = Math.round(clientHeight / PAGE_FRACTION);
 
 const width = Math.round(clientWidth * scale);
 const height = Math.round(clientHeight * scale);
-const numSources = Math.round(
-  Math.sqrt(Math.sqrt(width * height)) * SOURCE_FACTOR
-);
+const numSources = 10;
 
 console.log(numSources);
 
@@ -51,6 +49,8 @@ const spectrum = Spectrum.new(width, height, numSources);
 // }
 // canvas.classList.add("show");
 
+const THOUSAND = 1000;
+
 class FPS {
   constructor() {
     this.fps = document.getElementById("fps");
@@ -64,7 +64,7 @@ class FPS {
     const now = performance.now();
     const delta = now - this.lastFrameTimeStamp;
     this.lastFrameTimeStamp = now;
-    const fps = (1 / delta) * 1000;
+    const fps = (1 / delta) * THOUSAND;
 
     // Save only the latest 100 timings.
     this.frames.push(fps);
@@ -121,9 +121,7 @@ const renderLoop = () => {
 
 // window.requestAnimationFrame(renderLoop);
 
-const isPaused = () => {
-  return animationId === null;
-};
+const isPaused = () => animationId === null;
 
 const playPauseButton = document.getElementById("play-pause");
 
