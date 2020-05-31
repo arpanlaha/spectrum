@@ -17,7 +17,7 @@ use std::iter;
 const RAD_TO_DEG: f32 = 180f32 / consts::PI;
 const DEG_TO_RAD: f32 = consts::PI / 180f32;
 
-// #[wasm_bindgen]
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
 pub struct RGBA(u8, u8, u8, u8);
 
@@ -27,7 +27,7 @@ impl RGBA {
     }
 }
 
-// #[wasm_bindgen]
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
 struct Hue(f32);
 
@@ -63,15 +63,6 @@ impl Hue {
         } else {
             RGBA::from_rgb(primary, 0, secondary)
         }
-
-        // match hue {
-        //     0f32 => RGBA::from_rgb(primary, secondary, 0),
-        //     1f32 => RGBA::from_rgb(secondary, primary, 0),
-        //     2f32 => RGBA::from_rgb(0, primary, secondary),
-        //     3f32 => RGBA::from_rgb(0, secondary, primary),
-        //     4f32 => RGBA::from_rgb(secondary, 0, primary),
-        //     _ => RGBA::from_rgb(primary, 0, secondary),
-        // }
     }
 }
 
@@ -104,6 +95,10 @@ impl Hue {
 struct Source {
     x: f32,
     y: f32,
+    dx: f32,
+    dy: f32,
+    dh: f32,
+
     hue: Hue,
     hue_vectors: (f32, f32),
 }
@@ -112,6 +107,9 @@ impl Source {
     pub fn new(width: usize, height: usize) -> Source {
         let x = Math::random() as f32 * width as f32;
         let y = Math::random() as f32 * height as f32;
+        let dx = Math::random() as f32 * 2f32 - 1f32;
+        let dy = Math::random() as f32 * 2f32 - 1f32;
+        let dh = Math::random() as f32 * 6f32 - 3f32;
         let hue = Hue::new(Math::random() as f32 * 360f32).unwrap();
 
         let hue_val = hue.get() * DEG_TO_RAD;
@@ -123,6 +121,9 @@ impl Source {
         Source {
             x,
             y,
+            dx,
+            dy,
+            dh,
             hue,
             hue_vectors: (hue_val.cos(), hue_val.sin()),
         }
@@ -144,11 +145,30 @@ impl Source {
         self.hue_vectors
     }
 
-    pub fn tick(&mut self) {
-        let hue_val = (self.hue.get() + 5f32) % 360f32;
+    pub fn tick(&mut self, width: f32, height: f32) {
+        let hue_val = (self.hue.get() + self.dh) % 360f32;
         self.hue = Hue::new(hue_val).unwrap();
         let hue_rad = hue_val * DEG_TO_RAD;
         self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
+
+        self.x += self.dx;
+        self.y += self.dy;
+
+        if self.x <= 0f32 {
+            self.x *= -1f32;
+            self.dx *= -1f32;
+        } else if self.x >= width {
+            self.x = width - (self.x - width);
+            self.dx *= -1f32;
+        }
+
+        if self.y <= 0f32 {
+            self.y *= -1f32;
+            self.dy *= -1f32;
+        } else if self.y >= height {
+            self.y = height - (self.y - height);
+            self.dy *= -1f32;
+        }
     }
 }
 
@@ -220,8 +240,11 @@ impl Spectrum {
     pub fn tick(&mut self) {
         // utils::set_panic_hook();
 
+        let width_float = self.width as f32;
+        let height_float = self.height as f32;
+
         for source in &mut self.sources {
-            source.tick();
+            source.tick(width_float, height_float);
         }
     }
 
