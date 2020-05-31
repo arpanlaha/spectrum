@@ -1,10 +1,10 @@
 use wasm_bindgen::prelude::*;
 
-mod utils;
+// mod utils;
 
 // extern crate web_sys;
 use js_sys::Math;
-use std::f64::consts;
+use std::f32::consts;
 use std::iter;
 // use web_sys::console;
 
@@ -14,8 +14,8 @@ use std::iter;
 // #[global_allocator]
 // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-const RAD_TO_DEG: f64 = 180f64 / consts::PI;
-const DEG_TO_RAD: f64 = consts::PI / 180f64;
+const RAD_TO_DEG: f32 = 180f32 / consts::PI;
+const DEG_TO_RAD: f32 = consts::PI / 180f32;
 
 // #[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
@@ -29,47 +29,47 @@ impl RGBA {
 
 // #[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
-struct Hue(f64);
+struct Hue(f32);
 
 impl Hue {
-    fn new(hue: f64) -> Result<Hue, String> {
-        if hue < 360f64 {
+    fn new(hue: f32) -> Result<Hue, String> {
+        if hue < 360f32 {
             Ok(Hue(hue))
         } else {
             Err(format!("provided hue({}) cannot be over 360", hue))
         }
     }
 
-    fn get(self) -> f64 {
+    fn get(self) -> f32 {
         self.0
     }
 
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
         let primary = 255;
-        let secondary = ((1f64 - ((hue / 60f64) % 2f64 - 1f64).abs()) * 255f64) as u8;
-        if hue < 180f64 {
-            if hue < 60f64 {
+        let secondary = ((1f32 - ((hue / 60f32) % 2f32 - 1f32).abs()) * 255f32) as u8;
+        if hue < 180f32 {
+            if hue < 60f32 {
                 RGBA::from_rgb(primary, secondary, 0)
-            } else if hue < 120f64 {
+            } else if hue < 120f32 {
                 RGBA::from_rgb(secondary, primary, 0)
             } else {
                 RGBA::from_rgb(0, primary, secondary)
             }
-        } else if hue < 240f64 {
+        } else if hue < 240f32 {
             RGBA::from_rgb(0, secondary, primary)
-        } else if hue < 300f64 {
+        } else if hue < 300f32 {
             RGBA::from_rgb(secondary, 0, primary)
         } else {
             RGBA::from_rgb(primary, 0, secondary)
         }
 
         // match hue {
-        //     0f64 => RGBA::from_rgb(primary, secondary, 0),
-        //     1f64 => RGBA::from_rgb(secondary, primary, 0),
-        //     2f64 => RGBA::from_rgb(0, primary, secondary),
-        //     3f64 => RGBA::from_rgb(0, secondary, primary),
-        //     4f64 => RGBA::from_rgb(secondary, 0, primary),
+        //     0f32 => RGBA::from_rgb(primary, secondary, 0),
+        //     1f32 => RGBA::from_rgb(secondary, primary, 0),
+        //     2f32 => RGBA::from_rgb(0, primary, secondary),
+        //     3f32 => RGBA::from_rgb(0, secondary, primary),
+        //     4f32 => RGBA::from_rgb(secondary, 0, primary),
         //     _ => RGBA::from_rgb(primary, 0, secondary),
         // }
     }
@@ -102,17 +102,17 @@ impl Hue {
 
 #[wasm_bindgen]
 struct Source {
-    x: f64,
-    y: f64,
+    x: f32,
+    y: f32,
     hue: Hue,
-    hue_vectors: (f64, f64),
+    hue_vectors: (f32, f32),
 }
 
 impl Source {
     pub fn new(width: usize, height: usize) -> Source {
-        let x = Math::random() * width as f64;
-        let y = Math::random() * height as f64;
-        let hue = Hue::new(Math::random() * 360f64).unwrap();
+        let x = Math::random() as f32 * width as f32;
+        let y = Math::random() as f32 * height as f32;
+        let hue = Hue::new(Math::random() as f32 * 360f32).unwrap();
 
         let hue_val = hue.get() * DEG_TO_RAD;
         // log_usize(x);
@@ -128,11 +128,11 @@ impl Source {
         }
     }
 
-    pub fn x(&self) -> f64 {
+    pub fn x(&self) -> f32 {
         self.x
     }
 
-    pub fn y(&self) -> f64 {
+    pub fn y(&self) -> f32 {
         self.y
     }
 
@@ -140,12 +140,12 @@ impl Source {
     //     self.hue
     // }
 
-    pub fn hue_vectors(&self) -> (f64, f64) {
+    pub fn hue_vectors(&self) -> (f32, f32) {
         self.hue_vectors
     }
 
     pub fn tick(&mut self) {
-        let hue_val = (self.hue.get() + 5f64) % 360f64;
+        let hue_val = (self.hue.get() + 5f32) % 360f32;
         self.hue = Hue::new(hue_val).unwrap();
         let hue_rad = hue_val * DEG_TO_RAD;
         self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
@@ -188,27 +188,27 @@ impl Spectrum {
         // log_usize(height);
 
         for x in 0..self.width {
-            let x_float = x as f64;
+            let x_float = x as f32;
             for y in 0..self.height {
-                let y_float = y as f64;
-                let (mut hue_vector_cos, mut hue_vector_sin) = (0f64, 0f64);
+                let y_float = y as f32;
+                let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
-                    let dist_factor = (x_float - source.x()).powf(2f64)
-                        + (y_float - source.y()).powf(2f64)
-                        + 1f64;
+                    let dist_factor = (x_float - source.x()).powf(2f32)
+                        + (y_float - source.y()).powf(2f32)
+                        + 1f32;
                     hue_vector_cos += source_vector_cos / dist_factor;
                     hue_vector_sin += source_vector_sin / dist_factor;
                 }
 
                 let mut hue_val = (hue_vector_sin / hue_vector_cos).atan() * RAD_TO_DEG;
 
-                if hue_vector_cos < 0f64 {
-                    hue_val += 180f64;
-                } else if hue_vector_sin < 0f64 {
-                    hue_val += 360f64;
-                    if hue_val >= 359.5f64 {
-                        hue_val = 0f64;
+                if hue_vector_cos < 0f32 {
+                    hue_val += 180f32;
+                } else if hue_vector_sin < 0f32 {
+                    hue_val += 360f32;
+                    if hue_val >= 359.5f32 {
+                        hue_val = 0f32;
                     }
                 }
 
@@ -218,7 +218,7 @@ impl Spectrum {
     }
 
     pub fn tick(&mut self) {
-        utils::set_panic_hook();
+        // utils::set_panic_hook();
 
         for source in &mut self.sources {
             source.tick();
