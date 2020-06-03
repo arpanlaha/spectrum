@@ -47,21 +47,40 @@ impl Hue {
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
         let primary = 255;
-        let secondary = ((1f32 - ((hue / consts::FRAC_PI_3) % 2f32 - 1f32).abs()) * 255f32) as u8;
         if hue < consts::PI {
             if hue < consts::FRAC_PI_3 {
-                RGBA::from_rgb(primary, secondary, 0)
+                RGBA::from_rgb(primary, (255f32 * hue / consts::FRAC_PI_3) as u8, 0)
             } else if hue < TWO_THIRDS_PI {
-                RGBA::from_rgb(secondary, primary, 0)
+                RGBA::from_rgb(
+                    (255f32 * (2f32 - hue / consts::FRAC_PI_3)) as u8,
+                    primary,
+                    0,
+                )
             } else {
-                RGBA::from_rgb(0, primary, secondary)
+                RGBA::from_rgb(
+                    0,
+                    primary,
+                    (255f32 * (hue / consts::FRAC_PI_3 - 2f32)) as u8,
+                )
             }
         } else if hue < FOUR_THIRDS_PI {
-            RGBA::from_rgb(0, secondary, primary)
+            RGBA::from_rgb(
+                0,
+                (255f32 * (4f32 - hue / consts::FRAC_PI_3)) as u8,
+                primary,
+            )
         } else if hue < FIVE_THIRDS_PI {
-            RGBA::from_rgb(secondary, 0, primary)
+            RGBA::from_rgb(
+                (255f32 * (hue / consts::FRAC_PI_3 - 4f32)) as u8,
+                0,
+                primary,
+            )
         } else {
-            RGBA::from_rgb(primary, 0, secondary)
+            RGBA::from_rgb(
+                primary,
+                0,
+                (255f32 * (6f32 - hue / consts::FRAC_PI_3)) as u8,
+            )
         }
     }
 }
