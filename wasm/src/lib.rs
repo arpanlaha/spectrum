@@ -213,10 +213,10 @@ impl Spectrum {
     pub fn draw(&mut self) {
         // utils::set_panic_hook();
 
-        for x in 0..self.width {
-            let x_float = x as f32;
-            for y in 0..self.height {
-                let y_float = y as f32;
+        for y in 0..self.height {
+            let y_float = y as f32;
+            for x in 0..self.width {
+                let x_float = x as f32;
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
