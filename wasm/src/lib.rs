@@ -5,6 +5,13 @@ use wasm_bindgen::prelude::*;
 use js_sys::Math;
 use std::f32::consts;
 use std::iter;
+
+const TWO_PI: f32 = consts::PI * 2f32;
+const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
+const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
+const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
+const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
+const DH_HALF: f32 = DH_UPPER / 2f32;
 // extern crate web_sys;
 
 // use web_sys::console;
@@ -30,28 +37,28 @@ impl Hue {
 
     fn tick(&mut self, dh: f32) {
         self.0 += dh;
-        if self.0 >= 360f32 {
-            self.0 -= 360f32;
+        if self.0 >= TWO_PI {
+            self.0 -= TWO_PI;
         } else if self.0 <= 0f32 {
-            self.0 += 360f32;
+            self.0 += TWO_PI;
         }
     }
 
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
         let primary = 255;
-        let secondary = ((1f32 - ((hue / 60f32) % 2f32 - 1f32).abs()) * 255f32) as u8;
-        if hue < 180f32 {
-            if hue < 60f32 {
+        let secondary = ((1f32 - ((hue / consts::FRAC_PI_3) % 2f32 - 1f32).abs()) * 255f32) as u8;
+        if hue < consts::PI {
+            if hue < consts::FRAC_PI_3 {
                 RGBA::from_rgb(primary, secondary, 0)
-            } else if hue < 120f32 {
+            } else if hue < TWO_THIRDS_PI {
                 RGBA::from_rgb(secondary, primary, 0)
             } else {
                 RGBA::from_rgb(0, primary, secondary)
             }
-        } else if hue < 240f32 {
+        } else if hue < FOUR_THIRDS_PI {
             RGBA::from_rgb(0, secondary, primary)
-        } else if hue < 300f32 {
+        } else if hue < FIVE_THIRDS_PI {
             RGBA::from_rgb(secondary, 0, primary)
         } else {
             RGBA::from_rgb(primary, 0, secondary)
@@ -102,10 +109,10 @@ impl Source {
         let y = Math::random() as f32 * height;
         let dx = Math::random() as f32 * 2f32 - 1f32;
         let dy = Math::random() as f32 * 2f32 - 1f32;
-        let dh = Math::random() as f32 * 6f32 - 3f32;
-        let hue = Hue(Math::random() as f32 * 360f32);
+        let dh = Math::random() as f32 * DH_UPPER - DH_HALF;
+        let hue = Hue(Math::random() as f32 * TWO_PI);
 
-        let hue_val = hue.get().to_radians();
+        let hue_val = hue.get();
         Source {
             x,
             y,
@@ -131,7 +138,7 @@ impl Source {
 
     pub fn tick(&mut self, width: f32, height: f32) {
         self.hue.tick(self.dh);
-        let hue_rad = self.hue.get().to_radians();
+        let hue_rad = self.hue.get();
         self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
 
         self.x += self.dx;
@@ -213,10 +220,10 @@ impl Spectrum {
     pub fn draw(&mut self) {
         // utils::set_panic_hook();
 
-        for y in 0..self.height {
-            let y_float = y as f32;
-            for x in 0..self.width {
-                let x_float = x as f32;
+        for x in 0..self.width {
+            let x_float = x as f32;
+            for y in 0..self.height {
+                let y_float = y as f32;
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
@@ -227,7 +234,7 @@ impl Spectrum {
                 }
 
                 self.data[x + y * self.width] =
-                    Hue(atan2(hue_vector_cos, hue_vector_sin).to_degrees()).to_rgba();
+                    Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
             }
         }
     }
