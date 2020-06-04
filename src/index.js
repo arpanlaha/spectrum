@@ -9,6 +9,9 @@ const width = 1280;
 const height = 720;
 const numSources = 10;
 
+const setWidth = document.getElementById("set-width");
+console.log(setWidth);
+
 const canvas = document.getElementById("spectrum-canvas");
 const context = canvas.getContext("2d");
 

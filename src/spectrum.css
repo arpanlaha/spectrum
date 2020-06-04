@@ -7,6 +7,12 @@ body {
   color: #fff;
 }
 
+.vertical-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* canvas {
   opacity: 0;
 }

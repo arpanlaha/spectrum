@@ -24,9 +24,18 @@
   </head>
 
   <body>
-    <canvas id="spectrum-canvas"></canvas>
-    <div id="fps"></div>
-    <button id="play-pause"></button>
+    <div class="vertical-center">
+      <canvas id="spectrum-canvas"></canvas>
+      <form>
+        <label for="set-width">Width (px)</label>
+        <input type="range" id="set-width" />
+        <label for="set-height">Height (px)</label>
+        <input type="range" id="set-height" />
+        <input type="submit" value="Submit" />
+      </form>
+      <button id="play-pause" />
+    </div>
+
     <script src="./bootstrap.js"></script>
     <noscript>Please enable JavaScript in order to run Spectrum.</noscript>
   </body>
