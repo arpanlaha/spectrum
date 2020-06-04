@@ -11,6 +11,9 @@ const numSources = 10;
 
 const setWidth = document.getElementById("set-width");
 console.log(setWidth);
+const form = document.getElementById("spectrum-form");
+
+form.addEventListener("submit", (e) => e.preventDefault());
 
 const canvas = document.getElementById("spectrum-canvas");
 const context = canvas.getContext("2d");
