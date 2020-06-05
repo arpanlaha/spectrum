@@ -5,7 +5,7 @@ authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
 edition = "2018"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
 # crate-type = ["rlib"]
 
 # [features]
@@ -34,8 +34,8 @@ js-sys = "0.3.40"
 #   "console"
 # ]
 
-[dev-dependencies]
-wasm-bindgen-test = "0.2"
+# [dev-dependencies]
+# wasm-bindgen-test = "0.2"
 
 [profile.release]
 opt-level = 3
