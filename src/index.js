@@ -1,17 +1,17 @@
 import { Spectrum } from "wasm-spectrum";
-import { memory } from "wasm-spectrum/spectrum_bg";
-
-const BYTES_PER_PIXEL = 4;
+import FPS from "./utils/fps";
 
 const scale = window.devicePixelRatio;
 
 let spectrum = null;
 let animationId = null;
-let width = 1280;
-let height = 720;
-let numSources = 10;
+
+let numSources = 20;
 let maxWidth = document.body.clientWidth * scale;
 let maxHeight = document.body.clientHeight * scale;
+
+let width = Math.round(maxWidth * 0.8);
+let height = Math.round(maxHeight * 0.8);
 
 const canvas = document.getElementById("spectrum-canvas");
 const context = canvas.getContext("webgl");
@@ -21,10 +21,10 @@ const initSpectrum = () => {
   canvas.style.height = `${height / scale}px`;
   canvas.width = width;
   canvas.height = height;
+  context.viewport(0, 0, width, height);
   // context.scale(scale, scale);
 
   spectrum = Spectrum.new(width, height, numSources, context);
-  console.log("hello");
 };
 
 initSpectrum(width, height, numSources);
@@ -72,7 +72,10 @@ setNumSources.addEventListener("input", (e) => {
   restartSpectrum();
 });
 
+const fps = new FPS();
+
 const drawFrame = () => {
+  fps.render();
   // const spectrumData = spectrum.data();
   // const spectrumArray = new Uint8ClampedArray(
   //   memory.buffer,
@@ -90,7 +93,7 @@ const renderLoop = () => {
   drawFrame();
   spectrum.tick();
 
-  // animationId = window.requestAnimationFrame(renderLoop);
+  animationId = window.requestAnimationFrame(renderLoop);
 };
 
 const isPaused = () => animationId === null;

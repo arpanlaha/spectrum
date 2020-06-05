@@ -265,7 +265,11 @@ impl Spectrum {
             &context,
             WebGlRenderingContext::VERTEX_SHADER,
             r#"
-                void main(void) {}
+                attribute vec4 a_position;
+
+                void main(void) {
+                    gl_Position = a_position;
+                }
             "#,
         )
         .unwrap();
@@ -299,7 +303,7 @@ impl Spectrum {
 
                         float hue = atan(sin_sum, cos_sum);
                         if (hue < 0.0) {{
-                            hue += PI;
+                            hue += 2.0 * PI;
                         }}
                         float secondary = 1.0 - abs(mod((hue / PI_3), 2.0) - 1.0);
 
@@ -327,6 +331,44 @@ impl Spectrum {
 
         let program = link_program(&context, &vertex_shader, &fragment_shader).unwrap();
         context.use_program(Some(&program));
+
+        let position_attribute_loc = context.get_attrib_location(&program, "a_position");
+
+        assert!(
+            position_attribute_loc >= 0,
+            "a_position: {}",
+            position_attribute_loc
+        );
+        let position_attribute_loc = position_attribute_loc as u32;
+
+        let vertex_coords = [-1f32, -1f32, 1f32, -1f32, 1f32, 1f32, -1f32, 1f32];
+
+        let buffer = context
+            .create_buffer()
+            .ok_or("failed to create buffer")
+            .unwrap();
+        context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
+
+        unsafe {
+            let vertex_array = js_sys::Float32Array::view(&vertex_coords);
+
+            context.buffer_data_with_array_buffer_view(
+                WebGlRenderingContext::ARRAY_BUFFER,
+                &vertex_array,
+                WebGlRenderingContext::STATIC_DRAW,
+            );
+        }
+
+        context.enable_vertex_attrib_array(position_attribute_loc);
+
+        context.vertex_attrib_pointer_with_i32(
+            position_attribute_loc,
+            2,
+            WebGlRenderingContext::FLOAT,
+            false,
+            0,
+            0,
+        );
 
         let spectrum = Spectrum {
             width,
@@ -389,7 +431,7 @@ impl Spectrum {
         // }
 
         self.context
-            .draw_arrays(WebGlRenderingContext::POINTS, 0, 400);
+            .draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
 
     pub fn tick(&mut self) {
