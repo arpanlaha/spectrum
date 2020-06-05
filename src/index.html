@@ -27,13 +27,14 @@
     <div class="vertical-center">
       <canvas id="spectrum-canvas"></canvas>
       <button id="play-pause"></button>
-      <form id="spectrum-form">
-        <label for="set-width">Width (px)</label>
+      <div class="horizontal-center">
+        <label for="set-width">Width (px): <span id="width"></span></label>
         <input type="range" id="set-width" />
-        <label for="set-height">Height (px)</label>
+        <label for="set-height">Height (px): <span id="height"></span></label>
         <input type="range" id="set-height" />
-        <input type="submit" value="Submit" />
-      </form>
+        <label for="set-num-sources">Sources: </label>
+        <input type="number" id="set-num-sources" />
+      </div>
     </div>
 
     <script src="./bootstrap.js"></script>
