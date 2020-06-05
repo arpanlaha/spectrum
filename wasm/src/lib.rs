@@ -2,22 +2,21 @@ use wasm_bindgen::prelude::*;
 
 // mod utils;
 
-// extern crate web_sys;
 use js_sys::Math;
 use std::f32::consts;
 use std::iter;
+
+const TWO_PI: f32 = consts::PI * 2f32;
+const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
+const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
+const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
+const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
+const DH_HALF: f32 = DH_UPPER / 2f32;
+// extern crate web_sys;
+
 // use web_sys::console;
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-// #[cfg(feature = "wee_alloc")]
-// #[global_allocator]
-// static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
-const RAD_TO_DEG: f32 = 180f32 / consts::PI;
-const DEG_TO_RAD: f32 = consts::PI / 180f32;
-
-// #[wasm_bindgen]
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
 pub struct RGBA(u8, u8, u8, u8);
 
@@ -27,34 +26,61 @@ impl RGBA {
     }
 }
 
-// #[wasm_bindgen]
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
-struct Hue(usize);
+struct Hue(f32);
 
 impl Hue {
-    fn new(hue: usize) -> Result<Hue, String> {
-        if hue < 360 {
-            Ok(Hue(hue))
-        } else {
-            Err(format!("provided hue({}) cannot be over 360", hue))
-        }
+    fn get(self) -> f32 {
+        self.0
     }
 
-    fn get(self) -> usize {
-        self.0
+    fn tick(&mut self, dh: f32) {
+        self.0 += dh;
+        if self.0 >= TWO_PI {
+            self.0 -= TWO_PI;
+        } else if self.0 <= 0f32 {
+            self.0 += TWO_PI;
+        }
     }
 
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
         let primary = 255;
-        let secondary = ((1f32 - ((hue as f32 / 60f32) % 2f32 - 1f32).abs()) * 255f32) as u8;
-        match hue / 60 {
-            0 => RGBA::from_rgb(primary, secondary, 0),
-            1 => RGBA::from_rgb(secondary, primary, 0),
-            2 => RGBA::from_rgb(0, primary, secondary),
-            3 => RGBA::from_rgb(0, secondary, primary),
-            4 => RGBA::from_rgb(secondary, 0, primary),
-            _ => RGBA::from_rgb(primary, 0, secondary),
+        if hue < consts::PI {
+            if hue < consts::FRAC_PI_3 {
+                RGBA::from_rgb(primary, (255f32 * hue / consts::FRAC_PI_3) as u8, 0)
+            } else if hue < TWO_THIRDS_PI {
+                RGBA::from_rgb(
+                    (255f32 * (2f32 - hue / consts::FRAC_PI_3)) as u8,
+                    primary,
+                    0,
+                )
+            } else {
+                RGBA::from_rgb(
+                    0,
+                    primary,
+                    (255f32 * (hue / consts::FRAC_PI_3 - 2f32)) as u8,
+                )
+            }
+        } else if hue < FOUR_THIRDS_PI {
+            RGBA::from_rgb(
+                0,
+                (255f32 * (4f32 - hue / consts::FRAC_PI_3)) as u8,
+                primary,
+            )
+        } else if hue < FIVE_THIRDS_PI {
+            RGBA::from_rgb(
+                (255f32 * (hue / consts::FRAC_PI_3 - 4f32)) as u8,
+                0,
+                primary,
+            )
+        } else {
+            RGBA::from_rgb(
+                primary,
+                0,
+                (255f32 * (6f32 - hue / consts::FRAC_PI_3)) as u8,
+            )
         }
     }
 }
@@ -86,44 +112,72 @@ impl Hue {
 
 #[wasm_bindgen]
 struct Source {
-    x: usize,
-    y: usize,
+    x: f32,
+    y: f32,
+    dx: f32,
+    dy: f32,
+    dh: f32,
+
+    hue: Hue,
     hue_vectors: (f32, f32),
 }
 
 impl Source {
-    pub fn new(width: usize, height: usize) -> Source {
-        let x = (Math::random() * width as f64) as usize;
-        let y = (Math::random() * height as f64) as usize;
-        let hue = Hue::new((Math::random() * 360f64) as usize).unwrap();
+    pub fn new(width: f32, height: f32) -> Source {
+        let x = Math::random() as f32 * width;
+        let y = Math::random() as f32 * height;
+        let dx = Math::random() as f32 * 2f32 - 1f32;
+        let dy = Math::random() as f32 * 2f32 - 1f32;
+        let dh = Math::random() as f32 * DH_UPPER - DH_HALF;
+        let hue = Hue(Math::random() as f32 * TWO_PI);
 
-        let hue_val = hue.get() as f32 * DEG_TO_RAD;
-        // log_usize(x);
-        // log_usize(y);
-        // log_usize(hue.get());
-        // log_usize(0);
-
+        let hue_val = hue.get();
         Source {
             x,
             y,
+            dx,
+            dy,
+            dh,
+            hue,
             hue_vectors: (hue_val.cos(), hue_val.sin()),
         }
     }
 
-    pub fn x(&self) -> usize {
+    pub fn x(&self) -> f32 {
         self.x
     }
 
-    pub fn y(&self) -> usize {
+    pub fn y(&self) -> f32 {
         self.y
     }
 
-    // pub fn hue(&self) -> Hue {
-    //     self.hue
-    // }
-
     pub fn hue_vectors(&self) -> (f32, f32) {
         self.hue_vectors
+    }
+
+    pub fn tick(&mut self, width: f32, height: f32) {
+        self.hue.tick(self.dh);
+        let hue_rad = self.hue.get();
+        self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
+
+        self.x += self.dx;
+        self.y += self.dy;
+
+        if self.x <= 0f32 {
+            self.x *= -1f32;
+            self.dx *= -1f32;
+        } else if self.x >= width {
+            self.x = width - (self.x - width);
+            self.dx *= -1f32;
+        }
+
+        if self.y <= 0f32 {
+            self.y *= -1f32;
+            self.dy *= -1f32;
+        } else if self.y >= height {
+            self.y = height - (self.y - height);
+            self.dy *= -1f32;
+        }
     }
 }
 
@@ -132,15 +186,44 @@ pub struct Spectrum {
     width: usize,
     height: usize,
     sources: Vec<Source>,
-    // canvas: web_sys::HtmlCanvasElement,
     data: Vec<RGBA>,
+}
+
+fn atan(quotient: f32) -> f32 {
+    // const COEFF_A: f32 = 0.972_394_1;
+    // const COEFF_B: f32 = -0.191_947_95;
+    // (COEFF_A + COEFF_B * normalized * normalized) * normalized
+
+    (consts::FRAC_PI_4 + 0.273f32 * (1f32 - quotient.abs())) * quotient
+}
+
+fn atan2(x: f32, y: f32) -> f32 {
+    if x.abs() > y.abs() {
+        let quotient = y / x;
+        if x < 0f32 {
+            atan(quotient) + consts::PI
+        } else if y < 0f32 {
+            atan(quotient) + 2f32 * consts::PI
+        } else {
+            atan(quotient)
+        }
+    } else {
+        let quotient = x / y;
+        if y < 0f32 {
+            -atan(quotient) + 3f32 * consts::FRAC_PI_2
+        } else {
+            -atan(quotient) + consts::FRAC_PI_2
+        }
+    }
 }
 
 #[wasm_bindgen]
 impl Spectrum {
     pub fn new(width: usize, height: usize, num_sources: usize) -> Spectrum {
+        let width_float = width as f32;
+        let height_float = height as f32;
         let sources: Vec<Source> = iter::repeat(())
-            .map(|()| Source::new(width, height))
+            .map(|()| Source::new(width_float, height_float))
             .take(num_sources)
             .collect();
         let mut spectrum = Spectrum {
@@ -156,38 +239,33 @@ impl Spectrum {
     pub fn draw(&mut self) {
         // utils::set_panic_hook();
 
-        // let width = self.width;
-        // let height = self.height;
-
-        // log_usize(width);
-        // log_usize(height);
-
         for x in 0..self.width {
+            let x_float = x as f32;
             for y in 0..self.height {
+                let y_float = y as f32;
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.sources {
                     let (source_vector_cos, source_vector_sin) = source.hue_vectors();
-                    let dist_factor = ((x as isize - source.x() as isize).pow(2)
-                        + (y as isize - source.y() as isize).pow(2))
-                        as f32
-                        + 1f32;
+                    let dist_factor =
+                        (x_float - source.x()).powi(2) + (y_float - source.y()).powi(2) + 1f32;
                     hue_vector_cos += source_vector_cos / dist_factor;
                     hue_vector_sin += source_vector_sin / dist_factor;
                 }
 
-                let mut hue_val = (hue_vector_sin / hue_vector_cos).atan() * RAD_TO_DEG;
-
-                if hue_vector_cos < 0f32 {
-                    hue_val += 180f32;
-                } else if hue_vector_sin < 0f32 {
-                    hue_val += 360f32;
-                    if hue_val >= 359.5f32 {
-                        hue_val = 0f32;
-                    }
-                }
-
-                self.data[x + y * self.width] = Hue::new(hue_val as usize).unwrap().to_rgba();
+                self.data[x + y * self.width] =
+                    Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
             }
+        }
+    }
+
+    pub fn tick(&mut self) {
+        // utils::set_panic_hook();
+
+        let width_float = self.width as f32;
+        let height_float = self.height as f32;
+
+        for source in &mut self.sources {
+            source.tick(width_float, height_float);
         }
     }
 
