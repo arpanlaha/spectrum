@@ -326,6 +326,7 @@ impl Spectrum {
         ).unwrap();
 
         let program = link_program(&context, &vertex_shader, &fragment_shader).unwrap();
+        context.use_program(Some(&program));
 
         let spectrum = Spectrum {
             width,
@@ -386,6 +387,9 @@ impl Spectrum {
         //     WebGlRenderingContext::DYNAMIC_DRAW,
         // );
         // }
+
+        self.context
+            .draw_arrays(WebGlRenderingContext::POINTS, 0, 400);
     }
 
     pub fn tick(&mut self) {
