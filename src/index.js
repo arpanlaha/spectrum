@@ -14,16 +14,17 @@ let maxWidth = document.body.clientWidth * scale;
 let maxHeight = document.body.clientHeight * scale;
 
 const canvas = document.getElementById("spectrum-canvas");
-const context = canvas.getContext("2d");
+const context = canvas.getContext("webgl");
 
 const initSpectrum = () => {
   canvas.style.width = `${width / scale}px`;
   canvas.style.height = `${height / scale}px`;
   canvas.width = width;
   canvas.height = height;
-  context.scale(scale, scale);
+  // context.scale(scale, scale);
 
-  spectrum = Spectrum.new(width, height, numSources);
+  spectrum = Spectrum.new(width, height, numSources, context);
+  console.log("hello");
 };
 
 initSpectrum(width, height, numSources);
@@ -72,15 +73,15 @@ setNumSources.addEventListener("input", (e) => {
 });
 
 const drawFrame = () => {
-  const spectrumData = spectrum.data();
-  const spectrumArray = new Uint8ClampedArray(
-    memory.buffer,
-    spectrumData,
-    width * height * BYTES_PER_PIXEL
-  );
-  const spectrumImageData = new ImageData(spectrumArray, width, height);
+  // const spectrumData = spectrum.data();
+  // const spectrumArray = new Uint8ClampedArray(
+  //   memory.buffer,
+  //   spectrumData,
+  //   width * height * BYTES_PER_PIXEL
+  // );
+  // const spectrumImageData = new ImageData(spectrumArray, width, height);
 
-  context.putImageData(spectrumImageData, 0, 0);
+  // context.putImageData(spectrumImageData, 0, 0);
 
   spectrum.draw();
 };
@@ -89,7 +90,7 @@ const renderLoop = () => {
   drawFrame();
   spectrum.tick();
 
-  animationId = window.requestAnimationFrame(renderLoop);
+  // animationId = window.requestAnimationFrame(renderLoop);
 };
 
 const isPaused = () => animationId === null;
