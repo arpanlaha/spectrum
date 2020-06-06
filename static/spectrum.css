@@ -27,11 +27,10 @@ body {
   justify-content: space-evenly;
 }
 
-/* canvas {
-  opacity: 0;
+canvas {
+  display: none;
 }
 
 .show {
-  opacity: 1;
-  transition: opacity 0.2s;
-} */
+  display: block;
+}

@@ -25,9 +25,12 @@
 
   <body>
     <div class="vertical-center">
-      <canvas id="spectrum-canvas"></canvas>
+      <canvas id="canvas-webgl"></canvas>
+      <canvas id="canvas-wasm" class="show"></canvas>
       <div id="fps"></div>
       <button id="play-pause"></button>
+      <button id="toggle">Toggle</button>
+
       <div class="horizontal-center">
         <label for="set-width">Width (px): <span id="width"></span></label>
         <input type="range" id="set-width" />
