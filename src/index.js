@@ -5,8 +5,14 @@ const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 
+const MODE_LABELS = {
+  wasm: "WebAssembly",
+  webgl: "WebGL",
+};
+
 const canvasWebgl = document.getElementById("canvas-webgl");
 const canvasWasm = document.getElementById("canvas-wasm");
+const modeText = document.getElementById("mode");
 const widthText = document.getElementById("width");
 const setWidth = document.getElementById("set-width");
 const heightText = document.getElementById("height");
@@ -90,6 +96,8 @@ const restartSpectrum = () => {
   }
 };
 
+modeText.textContent = MODE_LABELS[mode];
+
 setWidth.min = 100;
 setWidth.max = MAX_WIDTH;
 setWidth.value = width;
@@ -158,6 +166,7 @@ toggleButton.addEventListener("click", () => {
   } else if (mode === "wasm") {
     mode = "webgl";
   }
+  modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
 });
 
