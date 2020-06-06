@@ -2,32 +2,30 @@ import { Spectrum, SpectrumGL } from "wasm-spectrum";
 import FPS from "./utils/fps";
 
 const DEVICE_SCALE = window.devicePixelRatio;
-
-let MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
-let MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
-
-// // let spectrum = null;
-// // let animationId = null;
-// const canvas = document.getElementById("spectrum-canvas");
-// const context = canvas.getContext("webgl");
-
-let stateInitialized = false;
+const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
+const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 
 const canvasWebgl = document.getElementById("canvas-webgl");
-const contextWebgl = canvasWebgl.getContext("webgl");
-
 const canvasWasm = document.getElementById("canvas-wasm");
+const widthText = document.getElementById("width");
+const setWidth = document.getElementById("set-width");
+const heightText = document.getElementById("height");
+const setHeight = document.getElementById("set-height");
+const setNumSources = document.getElementById("set-num-sources");
+const playPauseButton = document.getElementById("play-pause");
+const toggleButton = document.getElementById("toggle");
+
+const contextWebgl = canvasWebgl.getContext("webgl");
 const contextWasm = canvasWasm.getContext("2d");
 contextWasm.scale(DEVICE_SCALE, DEVICE_SCALE);
 
-const glState = {
-  canvas: canvasWebgl,
-  mode: "webgl",
-  width: Math.round(MAX_WIDTH * 0.8),
-  height: Math.round(MAX_HEIGHT * 0.8),
-  numSources: 20,
-};
-// glState.context.viewport(0, 0, glState.width, glState.height);
+// const glState = {
+//   canvas: canvasWebgl,
+//   mode: "webgl",
+//   width: Math.round(MAX_WIDTH * 0.8),
+//   height: Math.round(MAX_HEIGHT * 0.8),
+//   numSources: 20,
+// };
 
 const wasmState = {
   canvas: canvasWasm,
@@ -36,18 +34,14 @@ const wasmState = {
   height: 720,
   numSources: 10,
 };
-// wasmState.context.scale(DEVICE_SCALE, DEVICE_SCALE);
 
-// const initialGlWidth = Math.round(MAX_WIDTH * 0.8);
-// const initialGlHeight = Math.round(MAX_HEIGHT * 0.8);
-// const initialGlNumSources = 20;
-// const initialGlContext = canvas.getContext("webgl");
-
-// const initialWasmWidth = 1280;
-// const initial
+let { canvas, mode, width, height, numSources } = wasmState;
+let animationId = null;
 
 const setupCanvas = () => {
-  const { width, height, mode, canvas } = stateInitialized ? state : wasmState;
+  widthText.textContent = width;
+  heightText.textContent = height;
+  setNumSources.value = numSources;
 
   canvas.style.width = `${width / DEVICE_SCALE}px`;
   canvas.style.height = `${height / DEVICE_SCALE}px`;
@@ -60,85 +54,66 @@ const setupCanvas = () => {
 };
 
 const getNewSpectrumGl = () => {
-  const { width, height, numSources } = stateInitialized ? state : glState;
   setupCanvas();
   return SpectrumGL.new(width, height, numSources, contextWebgl);
 };
 
 const getNewSpectrum = () => {
-  const { width, height, numSources } = stateInitialized ? state : wasmState;
   setupCanvas();
-
   return Spectrum.new(width, height, numSources, contextWasm);
 };
 
-let state = {
-  ...wasmState,
-  animationId: null,
-  spectrum: getNewSpectrum(),
-};
-
-stateInitialized = true;
+let spectrum = getNewSpectrum();
 
 const restartSpectrum = () => {
-  const { mode } = state;
-  pause();
+  const shouldPlay = !isPaused();
+
+  if (shouldPlay) {
+    pause();
+  }
+
   if (mode === "webgl") {
     canvasWasm.classList.remove("show");
     canvasWebgl.classList.add("show");
-    state = {
-      ...state,
-      ...glState,
-    };
-    state.spectrum = getNewSpectrumGl();
+    canvas = canvasWebgl;
+
+    spectrum = getNewSpectrumGl();
   } else if (mode === "wasm") {
     canvasWebgl.classList.remove("show");
     canvasWasm.classList.add("show");
-    state = {
-      ...state,
-      ...wasmState,
-    };
-    state.spectrum = getNewSpectrum();
+    canvas = canvasWasm;
+    spectrum = getNewSpectrum();
   }
-  drawFrame();
+
+  if (shouldPlay) {
+    play();
+  }
 };
 
-// setupCanvas();
-
-const widthText = document.getElementById("width");
-widthText.textContent = state.width;
-
-const setWidth = document.getElementById("set-width");
 setWidth.min = 100;
 setWidth.max = MAX_WIDTH;
-setWidth.value = state.width;
+setWidth.value = width;
 setWidth.addEventListener("change", (e) => {
   const newWidth = e.target.value;
-  state.width = newWidth;
-  widthText.textContent = state.width;
+  width = newWidth;
+  widthText.textContent = width;
   restartSpectrum();
 });
 
-const heightText = document.getElementById("height");
-heightText.textContent = state.height;
-
-const setHeight = document.getElementById("set-height");
 setHeight.min = 100;
 setHeight.max = MAX_HEIGHT;
-setHeight.value = state.height;
+setHeight.value = height;
 setHeight.addEventListener("change", (e) => {
   const newHeight = e.target.value;
-  state.height = newHeight;
-  heightText.textContent = state.height;
+  height = newHeight;
+  heightText.textContent = height;
   restartSpectrum();
 });
 
-const setNumSources = document.getElementById("set-num-sources");
 setNumSources.min = 2;
-setNumSources.value = state.numSources;
 setNumSources.addEventListener("input", (e) => {
   const newNumSources = e.target.value;
-  state.numSources = newNumSources;
+  numSources = newNumSources;
   restartSpectrum();
 });
 
@@ -146,19 +121,17 @@ const fps = new FPS();
 
 const drawFrame = () => {
   fps.render();
-  state.spectrum.draw();
+  spectrum.draw();
 };
 
 const renderLoop = () => {
   drawFrame();
-  state.spectrum.tick();
+  spectrum.tick();
 
-  state.animationId = window.requestAnimationFrame(renderLoop);
+  animationId = window.requestAnimationFrame(renderLoop);
 };
 
-const isPaused = () => state.animationId === null;
-
-const playPauseButton = document.getElementById("play-pause");
+const isPaused = () => animationId === null;
 
 const play = () => {
   playPauseButton.textContent = "⏸";
@@ -167,8 +140,8 @@ const play = () => {
 
 const pause = () => {
   playPauseButton.textContent = "▶";
-  cancelAnimationFrame(state.animationId);
-  state.animationId = null;
+  cancelAnimationFrame(animationId);
+  animationId = null;
 };
 
 playPauseButton.addEventListener("click", () => {
@@ -179,12 +152,11 @@ playPauseButton.addEventListener("click", () => {
   }
 });
 
-const toggleButton = document.getElementById("toggle");
 toggleButton.addEventListener("click", () => {
-  if (state.mode === "webgl") {
-    state.mode = "wasm";
-  } else if (state.mode === "wasm") {
-    state.mode = "webgl";
+  if (mode === "webgl") {
+    mode = "wasm";
+  } else if (mode === "wasm") {
+    mode = "webgl";
   }
   restartSpectrum();
 });
