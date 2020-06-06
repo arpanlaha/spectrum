@@ -17,6 +17,7 @@ const widthText = document.getElementById("width");
 const setWidth = document.getElementById("set-width");
 const heightText = document.getElementById("height");
 const setHeight = document.getElementById("set-height");
+const numSourcesText = document.getElementById("num-sources");
 const setNumSources = document.getElementById("set-num-sources");
 const playPauseButton = document.getElementById("play-pause");
 const toggleButton = document.getElementById("toggle");
@@ -47,7 +48,7 @@ let animationId = null;
 const setupCanvas = () => {
   widthText.textContent = width;
   heightText.textContent = height;
-  setNumSources.value = numSources;
+  numSourcesText.textContent = numSources;
 
   canvas.style.width = `${width / DEVICE_SCALE}px`;
   canvas.style.height = `${height / DEVICE_SCALE}px`;
@@ -119,9 +120,12 @@ setHeight.addEventListener("change", (e) => {
 });
 
 setNumSources.min = 2;
-setNumSources.addEventListener("input", (e) => {
+setNumSources.max = 100;
+setNumSources.value = numSources;
+setNumSources.addEventListener("change", (e) => {
   const newNumSources = e.target.value;
   numSources = newNumSources;
+  numSourcesText.text = numSources;
   restartSpectrum();
 });
 
