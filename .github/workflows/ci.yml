@@ -107,6 +107,9 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v2
 
+      - name: Echo ref
+        run: echo $GITHUB_REF
+
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
