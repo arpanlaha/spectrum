@@ -18,22 +18,30 @@
     <meta name="author" content="Arpan Laha" />
     <link rel="shortcut icon" href="/static/logo.svg" />
     <link rel="manifest" href="/static/manifest.json" />
-    <link rel="stylesheet" type="text/css" href="/spectrum.css" />
+    <link rel="stylesheet" type="text/css" href="/static/spectrum.css" />
     <link as="script" rel="preload" href="/bootstrap.js" />
     <title>Spectrum</title>
   </head>
 
   <body>
     <div class="vertical-center">
-      <canvas id="spectrum-canvas"></canvas>
+      <canvas id="canvas-webgl"></canvas>
+      <canvas id="canvas-wasm" class="show"></canvas>
+      <div id="fps"></div>
       <button id="play-pause"></button>
+      <div class="horizontal-center">
+        <label for="toggle">Mode: </label><span id="mode"></span
+        ><button id="toggle">Toggle</button>
+      </div>
       <div class="horizontal-center">
         <label for="set-width">Width (px): <span id="width"></span></label>
         <input type="range" id="set-width" />
         <label for="set-height">Height (px): <span id="height"></span></label>
         <input type="range" id="set-height" />
-        <label for="set-num-sources">Sources: </label>
-        <input type="number" id="set-num-sources" />
+        <label for="set-num-sources"
+          >Sources: <span id="num-sources"></span
+        ></label>
+        <input type="range" id="set-num-sources" />
       </div>
     </div>
 

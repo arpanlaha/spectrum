@@ -1,45 +1,106 @@
-import { Spectrum } from "wasm-spectrum";
-import { memory } from "wasm-spectrum/spectrum_bg";
+import { Spectrum, SpectrumGL } from "wasm-spectrum";
+import FPS from "./utils/fps";
 
-const BYTES_PER_PIXEL = 4;
+const DEVICE_SCALE = window.devicePixelRatio;
+const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
+const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 
-const scale = window.devicePixelRatio;
+const MODE_LABELS = {
+  wasm: "WebAssembly",
+  webgl: "WebGL",
+};
 
-let spectrum = null;
+const canvasWebgl = document.getElementById("canvas-webgl");
+const canvasWasm = document.getElementById("canvas-wasm");
+const modeText = document.getElementById("mode");
+const widthText = document.getElementById("width");
+const setWidth = document.getElementById("set-width");
+const heightText = document.getElementById("height");
+const setHeight = document.getElementById("set-height");
+const numSourcesText = document.getElementById("num-sources");
+const setNumSources = document.getElementById("set-num-sources");
+const playPauseButton = document.getElementById("play-pause");
+const toggleButton = document.getElementById("toggle");
+
+const contextWebgl = canvasWebgl.getContext("webgl");
+const contextWasm = canvasWasm.getContext("2d");
+contextWasm.scale(DEVICE_SCALE, DEVICE_SCALE);
+
+// const glState = {
+//   canvas: canvasWebgl,
+//   mode: "webgl",
+//   width: Math.round(MAX_WIDTH * 0.8),
+//   height: Math.round(MAX_HEIGHT * 0.8),
+//   numSources: 20,
+// };
+
+const wasmState = {
+  canvas: canvasWasm,
+  mode: "wasm",
+  width: 1280,
+  height: 720,
+  numSources: 10,
+};
+
+let { canvas, mode, width, height, numSources } = wasmState;
 let animationId = null;
-let width = 1280;
-let height = 720;
-let numSources = 10;
-let maxWidth = document.body.clientWidth * scale;
-let maxHeight = document.body.clientHeight * scale;
 
-const canvas = document.getElementById("spectrum-canvas");
-const context = canvas.getContext("2d");
+const setupCanvas = () => {
+  widthText.textContent = width;
+  heightText.textContent = height;
+  numSourcesText.textContent = numSources;
 
-const initSpectrum = () => {
-  canvas.style.width = `${width / scale}px`;
-  canvas.style.height = `${height / scale}px`;
+  canvas.style.width = `${width / DEVICE_SCALE}px`;
+  canvas.style.height = `${height / DEVICE_SCALE}px`;
   canvas.width = width;
   canvas.height = height;
-  context.scale(scale, scale);
 
-  spectrum = Spectrum.new(width, height, numSources);
+  if (mode === "webgl") {
+    contextWebgl.viewport(0, 0, width, height);
+  }
 };
 
-initSpectrum(width, height, numSources);
+const getNewSpectrumGl = () => {
+  setupCanvas();
+  return SpectrumGL.new(width, height, numSources, contextWebgl);
+};
+
+const getNewSpectrum = () => {
+  setupCanvas();
+  return Spectrum.new(width, height, numSources, contextWasm);
+};
+
+let spectrum = getNewSpectrum();
 
 const restartSpectrum = () => {
-  pause();
-  initSpectrum();
-  drawFrame();
+  const shouldPlay = !isPaused();
+
+  if (shouldPlay) {
+    pause();
+  }
+
+  if (mode === "webgl") {
+    canvasWasm.classList.remove("show");
+    canvasWebgl.classList.add("show");
+    canvas = canvasWebgl;
+
+    spectrum = getNewSpectrumGl();
+  } else if (mode === "wasm") {
+    canvasWebgl.classList.remove("show");
+    canvasWasm.classList.add("show");
+    canvas = canvasWasm;
+    spectrum = getNewSpectrum();
+  }
+
+  if (shouldPlay) {
+    play();
+  }
 };
 
-const widthText = document.getElementById("width");
-widthText.textContent = width;
+modeText.textContent = MODE_LABELS[mode];
 
-const setWidth = document.getElementById("set-width");
 setWidth.min = 100;
-setWidth.max = maxWidth;
+setWidth.max = MAX_WIDTH;
 setWidth.value = width;
 setWidth.addEventListener("change", (e) => {
   const newWidth = e.target.value;
@@ -48,12 +109,8 @@ setWidth.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-const heightText = document.getElementById("height");
-heightText.textContent = height;
-
-const setHeight = document.getElementById("set-height");
 setHeight.min = 100;
-setHeight.max = maxHeight;
+setHeight.max = MAX_HEIGHT;
 setHeight.value = height;
 setHeight.addEventListener("change", (e) => {
   const newHeight = e.target.value;
@@ -62,26 +119,20 @@ setHeight.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-const setNumSources = document.getElementById("set-num-sources");
 setNumSources.min = 2;
+setNumSources.max = 100;
 setNumSources.value = numSources;
-setNumSources.addEventListener("input", (e) => {
+setNumSources.addEventListener("change", (e) => {
   const newNumSources = e.target.value;
   numSources = newNumSources;
+  numSourcesText.text = numSources;
   restartSpectrum();
 });
 
+const fps = new FPS();
+
 const drawFrame = () => {
-  const spectrumData = spectrum.data();
-  const spectrumArray = new Uint8ClampedArray(
-    memory.buffer,
-    spectrumData,
-    width * height * BYTES_PER_PIXEL
-  );
-  const spectrumImageData = new ImageData(spectrumArray, width, height);
-
-  context.putImageData(spectrumImageData, 0, 0);
-
+  fps.render();
   spectrum.draw();
 };
 
@@ -93,8 +144,6 @@ const renderLoop = () => {
 };
 
 const isPaused = () => animationId === null;
-
-const playPauseButton = document.getElementById("play-pause");
 
 const play = () => {
   playPauseButton.textContent = "⏸";
@@ -113,6 +162,16 @@ playPauseButton.addEventListener("click", () => {
   } else {
     pause();
   }
+});
+
+toggleButton.addEventListener("click", () => {
+  if (mode === "webgl") {
+    mode = "wasm";
+  } else if (mode === "wasm") {
+    mode = "webgl";
+  }
+  modeText.textContent = MODE_LABELS[mode];
+  restartSpectrum();
 });
 
 play();

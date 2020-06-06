@@ -21,7 +21,7 @@
   "devDependencies": {
     "@hack4impact-uiuc/eslint-plugin": "^2.0.1",
     "copy-webpack-plugin": "^6.0.2",
-    "eslint": "^7.1.0",
+    "eslint": "^7.2.0",
     "markdownlint-cli": "^0.23.1",
     "prettier": "^2.0.5",
     "webpack": "^4.29.3",

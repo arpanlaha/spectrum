@@ -3,6 +3,7 @@
   "extends": ["plugin:@hack4impact-uiuc/base"],
   "rules": {
     "import/named": "off",
-    "import/no-unresolved": "off"
+    "import/no-unresolved": "off",
+    "no-magic-numbers": "off"
   }
 }

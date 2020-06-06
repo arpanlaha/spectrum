@@ -12,7 +12,6 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         { from: "src/index.html", to: "." },
-        { from: "src/spectrum.css", to: "." },
         { from: "static", to: "static" },
       ],
     }),
