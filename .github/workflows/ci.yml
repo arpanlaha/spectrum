@@ -151,7 +151,7 @@ jobs:
           working-directory: dist
 
       - name: Deploy to production url
-        if: github.ref != 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: amondnet/vercel-action@v19
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
