@@ -89,8 +89,8 @@ struct Source {
     dy: f32,
     dh: f32,
     hue: Hue,
-    hue_sin: f32,
     hue_cos: f32,
+    hue_sin: f32,
 }
 
 impl Source {
@@ -138,7 +138,7 @@ impl Source {
         self.hue.tick(self.dh);
         let hue_rad = self.hue.get();
         self.hue_cos = hue_rad.cos();
-        self.hue_sin = hue_rad.cos();
+        self.hue_sin = hue_rad.sin();
 
         self.x += self.dx;
         self.y += self.dy;

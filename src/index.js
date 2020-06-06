@@ -6,12 +6,14 @@ const scale = window.devicePixelRatio;
 let spectrum = null;
 let animationId = null;
 
-let numSources = 20;
+let numSources = 10;
 let maxWidth = document.body.clientWidth * scale;
 let maxHeight = document.body.clientHeight * scale;
 
-let width = Math.round(maxWidth * 0.8);
-let height = Math.round(maxHeight * 0.8);
+// let width = Math.round(maxWidth * 0.8);
+let width = 1280;
+// let height = Math.round(maxHeight * 0.8);
+let height = 720;
 
 const canvas = document.getElementById("spectrum-canvas");
 const context = canvas.getContext("2d");
