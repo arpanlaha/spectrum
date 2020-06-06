@@ -1,9 +1,6 @@
 name: CI
 
-on:
-  push:
-  pull_request:
-    types: [closed]
+on: push
 
 jobs:
   format:
@@ -107,9 +104,6 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v2
 
-      - name: Echo ref
-        run: echo $GITHUB_REF
-
       - name: Cache dependencies
         uses: actions/cache@v2
         with:
@@ -147,7 +141,7 @@ jobs:
         run: npm run build
 
       - name: Deploy to development url
-        if: github.ref != 'master' && github.event_name != 'pull_request'
+        if: github.ref != 'refs/heads/master'
         uses: amondnet/vercel-action@v19
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -157,7 +151,7 @@ jobs:
           working-directory: dist
 
       - name: Deploy to production url
-        if: github.ref == 'master' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
+        if: github.ref != 'refs/heads/master'
         uses: amondnet/vercel-action@v19
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
