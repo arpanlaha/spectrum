@@ -1,12 +1,10 @@
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::{WebGlProgram, WebGlRenderingContext, WebGlShader};
-
-mod utils;
-
 use js_sys::Math;
 use std::f32::consts;
 use std::iter;
+use wasm_bindgen::prelude::*;
+use web_sys::{
+    CanvasRenderingContext2d, ImageData, WebGlProgram, WebGlRenderingContext, WebGlShader,
+};
 
 const TWO_PI: f32 = consts::PI * 2f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
@@ -14,11 +12,7 @@ const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
 const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
 const DH_HALF: f32 = DH_UPPER / 2f32;
-// extern crate web_sys;
 
-// use web_sys::console;
-
-#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
 pub struct RGBA(u8, u8, u8, u8);
 
@@ -28,7 +22,6 @@ impl RGBA {
     }
 }
 
-#[wasm_bindgen]
 #[derive(Clone, Copy, Debug)]
 struct Hue(f32);
 
@@ -87,43 +80,15 @@ impl Hue {
     }
 }
 
-// #[wasm_bindgen]
-// extern "C" {
-//     // Use `js_namespace` here to bind `console.log(..)` instead of just
-//     // `log(..)`
-//     #[wasm_bindgen(js_namespace = console)]
-//     fn log(s: &str);
-
-//     // The `console.log` is quite polymorphic, so we can bind it with multiple
-//     // signatures. Note that we need to use `js_name` to ensure we always call
-//     // `log` in JS.
-//     #[wasm_bindgen(js_namespace = console, js_name = log)]
-//     fn log_usize(a: usize);
-
-//     #[wasm_bindgen(js_namespace = console, js_name = log)]
-//     fn log_u32(a: u32);
-
-//     // Multiple arguments too!
-//     #[wasm_bindgen(js_namespace = console, js_name = log)]
-//     fn log_f32(a: f32);
-
-//     // Multiple arguments too!
-//     #[wasm_bindgen(js_namespace = console, js_name = log)]
-//     fn log_f32_pair(a: f32, b: f32);
-// }
-
-#[wasm_bindgen]
 struct Source {
     x: f32,
     y: f32,
     dx: f32,
     dy: f32,
     dh: f32,
-
     hue: Hue,
     hue_sin: f32,
     hue_cos: f32,
-    hue_vectors: (f32, f32),
 }
 
 impl Source {
@@ -146,36 +111,32 @@ impl Source {
             dy,
             dh,
             hue,
-            hue_vectors: (hue_cos, hue_sin),
             hue_cos,
             hue_sin,
         }
     }
 
-    pub fn x(&self) -> f32 {
+    fn x(&self) -> f32 {
         self.x
     }
 
-    pub fn y(&self) -> f32 {
+    fn y(&self) -> f32 {
         self.y
     }
 
-    pub fn hue_vectors(&self) -> (f32, f32) {
-        self.hue_vectors
-    }
-
-    pub fn hue_cos(&self) -> f32 {
+    fn hue_cos(&self) -> f32 {
         self.hue_cos
     }
 
-    pub fn hue_sin(&self) -> f32 {
+    fn hue_sin(&self) -> f32 {
         self.hue_sin
     }
 
-    pub fn tick(&mut self, width: f32, height: f32) {
+    fn tick(&mut self, width: f32, height: f32) {
         self.hue.tick(self.dh);
         let hue_rad = self.hue.get();
-        self.hue_vectors = (hue_rad.cos(), hue_rad.sin());
+        self.hue_cos = hue_rad.cos();
+        self.hue_sin = hue_rad.cos();
 
         self.x += self.dx;
         self.y += self.dy;
@@ -198,42 +159,13 @@ impl Source {
     }
 }
 
-fn atan(quotient: f32) -> f32 {
-    // const COEFF_A: f32 = 0.972_394_1;
-    // const COEFF_B: f32 = -0.191_947_95;
-    // (COEFF_A + COEFF_B * normalized * normalized) * normalized
-
-    (consts::FRAC_PI_4 + 0.273f32 * (1f32 - quotient.abs())) * quotient
-}
-
-fn atan2(x: f32, y: f32) -> f32 {
-    if x.abs() > y.abs() {
-        let quotient = y / x;
-        if x < 0f32 {
-            atan(quotient) + consts::PI
-        } else if y < 0f32 {
-            atan(quotient) + 2f32 * consts::PI
-        } else {
-            atan(quotient)
-        }
-    } else {
-        let quotient = x / y;
-        if y < 0f32 {
-            -atan(quotient) + 3f32 * consts::FRAC_PI_2
-        } else {
-            -atan(quotient) + consts::FRAC_PI_2
-        }
-    }
-}
-
 #[wasm_bindgen]
 pub struct Spectrum {
     width: usize,
     height: usize,
     sources: Vec<Source>,
-    data: Vec<RGBA>,
-    context: WebGlRenderingContext,
-    program: WebGlProgram,
+    data: Vec<u8>,
+    context: CanvasRenderingContext2d,
 }
 
 #[wasm_bindgen]
@@ -242,9 +174,8 @@ impl Spectrum {
         width: usize,
         height: usize,
         num_sources: usize,
-        context: WebGlRenderingContext,
+        context: CanvasRenderingContext2d,
     ) -> Spectrum {
-        utils::set_panic_hook();
         let width_float = width as f32;
         let height_float = height as f32;
         let sources: Vec<Source> = iter::repeat(())
@@ -252,14 +183,90 @@ impl Spectrum {
             .take(num_sources)
             .collect();
 
-        // let document = web_sys::window().unwrap().document().unwrap();
-        // let canvas = document.get_element_by_id("spectrum-canvas").unwrap();
-        // let canvas: web_sys::HtmlCanvasElement = canvas.dyn_into::<web_sys::HtmlCanvasElement>()?;
+        let mut spectrum = Spectrum {
+            width,
+            height,
+            sources,
+            data: vec![0u8; width * height * 4],
+            context,
+        };
+        spectrum.draw();
 
-        // let context = canvas
-        //     .get_context("webgl")?
-        //     .unwrap()
-        //     .dyn_into::<WebGlRenderingContext>()?;
+        spectrum
+    }
+
+    pub fn draw(&mut self) {
+        for x in 0..self.width {
+            let x_float = x as f32;
+            for y in 0..self.height {
+                let y_float = y as f32;
+                let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
+                for source in &self.sources {
+                    let source_hue_cos = source.hue_cos();
+                    let source_hue_sin = source.hue_sin();
+                    let dist_factor =
+                        (x_float - source.x()).powi(2) + (y_float - source.y()).powi(2) + 1f32;
+                    hue_vector_cos += source_hue_cos / dist_factor;
+                    hue_vector_sin += source_hue_sin / dist_factor;
+                }
+
+                let RGBA(r, g, b, a) = Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
+
+                let start = (x + y * self.width) * 4;
+
+                self.data[start] = r;
+                self.data[start + 1] = g;
+                self.data[start + 2] = b;
+                self.data[start + 3] = a;
+            }
+        }
+
+        self.context
+            .put_image_data(
+                &ImageData::new_with_u8_clamped_array(
+                    wasm_bindgen::Clamped(self.data.as_mut_slice()),
+                    (self.width * self.height * 4) as u32,
+                )
+                .unwrap(),
+                0f64,
+                0f64,
+            )
+            .unwrap();
+    }
+
+    pub fn tick(&mut self) {
+        let width_float = self.width as f32;
+        let height_float = self.height as f32;
+
+        for source in &mut self.sources {
+            source.tick(width_float, height_float);
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub struct SpectrumGL {
+    width: usize,
+    height: usize,
+    sources: Vec<Source>,
+    context: WebGlRenderingContext,
+    program: WebGlProgram,
+}
+
+#[wasm_bindgen]
+impl SpectrumGL {
+    pub fn new(
+        width: usize,
+        height: usize,
+        num_sources: usize,
+        context: WebGlRenderingContext,
+    ) -> SpectrumGL {
+        let width_float = width as f32;
+        let height_float = height as f32;
+        let sources: Vec<Source> = iter::repeat(())
+            .map(|()| Source::new(width_float, height_float))
+            .take(num_sources)
+            .collect();
 
         let vertex_shader = compile_shader(
             &context,
@@ -334,11 +341,6 @@ impl Spectrum {
 
         let position_attribute_loc = context.get_attrib_location(&program, "a_position");
 
-        assert!(
-            position_attribute_loc >= 0,
-            "a_position: {}",
-            position_attribute_loc
-        );
         let position_attribute_loc = position_attribute_loc as u32;
 
         let vertex_coords = [-1f32, -1f32, 1f32, -1f32, 1f32, 1f32, -1f32, 1f32];
@@ -370,11 +372,10 @@ impl Spectrum {
             0,
         );
 
-        let spectrum = Spectrum {
+        let spectrum = SpectrumGL {
             width,
             height,
             sources,
-            data: vec![RGBA::from_rgb(0, 0, 0); width * height],
             context,
             program,
         };
@@ -384,25 +385,6 @@ impl Spectrum {
     }
 
     pub fn draw(&self) {
-        // utils::set_panic_hook();
-
-        // for x in 0..self.width {
-        //     let x_float = x as f32;
-        //     for y in 0..self.height {
-        //         let y_float = y as f32;
-        //         let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
-        //         for source in &self.sources {
-        //             let (source_vector_cos, source_vector_sin) = source.hue_vectors();
-        //             let dist_factor =
-        //                 (x_float - source.x()).powi(2) + (y_float - source.y()).powi(2) + 1f32;
-        //             hue_vector_cos += source_vector_cos / dist_factor;
-        //             hue_vector_sin += source_vector_sin / dist_factor;
-        //         }
-
-        //         self.data[x + y * self.width] =
-        //             Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
-        //     }
-        // }
         let source_info: Vec<f32> = self
             .sources
             .iter()
@@ -412,31 +394,18 @@ impl Spectrum {
 
         let source_info = source_info.as_slice();
 
-        // unsafe {
-        // let source_info = js_sys::Float32Array::view(source_info);
+        let context = &self.context;
 
-        let source_info_loc = self
-            .context
+        let source_info_loc = context
             .get_uniform_location(&self.program, "sources")
             .unwrap();
 
-        self.context
-            .uniform1fv_with_f32_array(Some(&source_info_loc), source_info);
+        context.uniform1fv_with_f32_array(Some(&source_info_loc), source_info);
 
-        // self.context.buffer_data_with_array_buffer_view(
-        //     WebGlRenderingContext::ARRAY_BUFFER,
-        //     &source_info,
-        //     WebGlRenderingContext::DYNAMIC_DRAW,
-        // );
-        // }
-
-        self.context
-            .draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
+        context.draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
 
     pub fn tick(&mut self) {
-        // utils::set_panic_hook();
-
         let width_float = self.width as f32;
         let height_float = self.height as f32;
 
@@ -444,9 +413,29 @@ impl Spectrum {
             source.tick(width_float, height_float);
         }
     }
+}
 
-    pub fn data(&self) -> *const RGBA {
-        self.data.as_slice().as_ptr()
+fn atan(quotient: f32) -> f32 {
+    (consts::FRAC_PI_4 + 0.273f32 * (1f32 - quotient.abs())) * quotient
+}
+
+fn atan2(x: f32, y: f32) -> f32 {
+    if x.abs() > y.abs() {
+        let quotient = y / x;
+        if x < 0f32 {
+            atan(quotient) + consts::PI
+        } else if y < 0f32 {
+            atan(quotient) + 2f32 * consts::PI
+        } else {
+            atan(quotient)
+        }
+    } else {
+        let quotient = x / y;
+        if y < 0f32 {
+            -atan(quotient) + 3f32 * consts::FRAC_PI_2
+        } else {
+            -atan(quotient) + consts::FRAC_PI_2
+        }
     }
 }
 
