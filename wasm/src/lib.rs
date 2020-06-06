@@ -6,6 +6,8 @@ use web_sys::{
     CanvasRenderingContext2d, ImageData, WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
 
+mod utils;
+
 const TWO_PI: f32 = consts::PI * 2f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
@@ -176,6 +178,8 @@ impl Spectrum {
         num_sources: usize,
         context: CanvasRenderingContext2d,
     ) -> Spectrum {
+        utils::set_panic_hook();
+
         let width_float = width as f32;
         let height_float = height as f32;
         let sources: Vec<Source> = iter::repeat(())
@@ -225,7 +229,7 @@ impl Spectrum {
             .put_image_data(
                 &ImageData::new_with_u8_clamped_array(
                     wasm_bindgen::Clamped(self.data.as_mut_slice()),
-                    (self.width * self.height * 4) as u32,
+                    self.width as u32,
                 )
                 .unwrap(),
                 0f64,

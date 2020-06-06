@@ -14,17 +14,18 @@ let width = Math.round(maxWidth * 0.8);
 let height = Math.round(maxHeight * 0.8);
 
 const canvas = document.getElementById("spectrum-canvas");
-const context = canvas.getContext("webgl");
+const context = canvas.getContext("2d");
 
 const initSpectrum = () => {
   canvas.style.width = `${width / scale}px`;
   canvas.style.height = `${height / scale}px`;
   canvas.width = width;
   canvas.height = height;
-  context.viewport(0, 0, width, height);
-  // context.scale(scale, scale);
-
+  // context.viewport(0, 0, width, height);
+  context.scale(scale, scale);
+  console.log("hello");
   spectrum = Spectrum.new(width, height, numSources, context);
+  console.log("goodbye");
 };
 
 initSpectrum(width, height, numSources);
