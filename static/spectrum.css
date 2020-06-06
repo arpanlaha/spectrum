@@ -3,6 +3,7 @@
   src: url("./NunitoSans-Light.ttf");
   font-display: block;
 }
+
 body {
   position: absolute;
   margin: 0;
@@ -27,10 +28,6 @@ body {
   justify-content: space-evenly;
 }
 
-canvas {
+.hide {
   display: none;
-}
-
-.show {
-  display: block;
 }

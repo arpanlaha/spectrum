@@ -12,6 +12,7 @@ const MODE_LABELS = {
 
 const canvasWebgl = document.getElementById("canvas-webgl");
 const canvasWasm = document.getElementById("canvas-wasm");
+let controls = document.getElementById("controls");
 const modeText = document.getElementById("mode");
 const widthText = document.getElementById("width");
 const setWidth = document.getElementById("set-width");
@@ -26,23 +27,23 @@ const contextWebgl = canvasWebgl.getContext("webgl");
 const contextWasm = canvasWasm.getContext("2d");
 contextWasm.scale(DEVICE_SCALE, DEVICE_SCALE);
 
-// const glState = {
-//   canvas: canvasWebgl,
-//   mode: "webgl",
-//   width: Math.round(MAX_WIDTH * 0.8),
-//   height: Math.round(MAX_HEIGHT * 0.8),
-//   numSources: 20,
-// };
-
-const wasmState = {
-  canvas: canvasWasm,
-  mode: "wasm",
-  width: 1280,
-  height: 720,
-  numSources: 10,
+const glState = {
+  canvas: canvasWebgl,
+  mode: "webgl",
+  width: Math.round(MAX_WIDTH * 0.8),
+  height: Math.round(MAX_HEIGHT * 0.8),
+  numSources: 20,
 };
 
-let { canvas, mode, width, height, numSources } = wasmState;
+// const wasmState = {
+//   canvas: canvasWasm,
+//   mode: "wasm",
+//   width: 1280,
+//   height: 720,
+//   numSources: 10,
+// };
+
+let { canvas, mode, width, height, numSources } = glState;
 let animationId = null;
 
 const setupCanvas = () => {
@@ -70,7 +71,7 @@ const getNewSpectrum = () => {
   return Spectrum.new(width, height, numSources, contextWasm);
 };
 
-let spectrum = getNewSpectrum();
+let spectrum = getNewSpectrumGl();
 
 const restartSpectrum = () => {
   const shouldPlay = !isPaused();
@@ -80,14 +81,14 @@ const restartSpectrum = () => {
   }
 
   if (mode === "webgl") {
-    canvasWasm.classList.remove("show");
-    canvasWebgl.classList.add("show");
+    canvasWasm.classList.add("hide");
+    canvasWebgl.classList.remove("hide");
     canvas = canvasWebgl;
 
     spectrum = getNewSpectrumGl();
   } else if (mode === "wasm") {
-    canvasWebgl.classList.remove("show");
-    canvasWasm.classList.add("show");
+    canvasWebgl.classList.add("hide");
+    canvasWasm.classList.remove("hide");
     canvas = canvasWasm;
     spectrum = getNewSpectrum();
   }
@@ -174,4 +175,5 @@ toggleButton.addEventListener("click", () => {
   restartSpectrum();
 });
 
+controls.classList.remove("hide");
 play();
