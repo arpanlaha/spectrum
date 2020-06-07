@@ -51,8 +51,8 @@ const setupCanvas = () => {
   heightText.textContent = height;
   numSourcesText.textContent = numSources;
 
-  canvas.style.width = `${width / DEVICE_SCALE}px`;
-  canvas.style.height = `${height / DEVICE_SCALE}px`;
+  canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
+  canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
   canvas.width = width;
   canvas.height = height;
 
