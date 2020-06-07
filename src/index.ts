@@ -98,8 +98,6 @@ let mode: Mode = "webgl";
 
 let { canvas, width, height, numSources, spectrum } = getInitialState(mode);
 
-// let { canvas, mode, width, height, numSources } = glState;
-
 let animationId: number | null = null;
 
 const setupCanvas = (): void => {
@@ -141,13 +139,12 @@ const restartSpectrum = (): void => {
   if (mode === "webgl") {
     canvasWasm.classList.add("hide");
     canvasWebgl.classList.remove("hide");
-    canvas = canvasWebgl;
 
     spectrum = getNewSpectrumGl();
   } else if (mode === "wasm") {
     canvasWebgl.classList.add("hide");
     canvasWasm.classList.remove("hide");
-    canvas = canvasWasm;
+
     spectrum = getNewSpectrum();
   }
 
@@ -229,6 +226,13 @@ toggleButton.addEventListener("click", () => {
   } else if (mode === "wasm") {
     mode = "webgl";
   }
+
+  const newState = initialStates[mode];
+  width = newState.width;
+  height = newState.height;
+  canvas = newState.canvas;
+  numSources = newState.numSources;
+
   modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
 });
