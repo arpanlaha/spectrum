@@ -8,3 +8,4 @@ wasm-pack.log
 node_modules
 .vercel
 dist
+ts
