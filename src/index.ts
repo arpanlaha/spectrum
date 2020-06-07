@@ -5,7 +5,7 @@ const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WASM_SCALE = 0.4;
-const GL_SCALE = 0.8;
+const GL_SCALE = 1;
 
 type Mode = "wasm" | "webgl";
 
