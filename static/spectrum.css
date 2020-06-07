@@ -41,6 +41,11 @@ body {
   white-space: nowrap;
 }
 
+.blur {
+  backdrop-filter: blur(10px);
+  background-blend-mode: exclusion;
+}
+
 @media (orientation: landscape) {
   #controls {
     position: fixed;
