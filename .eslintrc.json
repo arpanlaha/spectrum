@@ -1,9 +1,11 @@
 {
   "plugins": ["@hack4impact-uiuc"],
-  "extends": ["plugin:@hack4impact-uiuc/base"],
+  "extends": [
+    "plugin:@hack4impact-uiuc/base",
+    "plugin:@hack4impact-uiuc/typescript"
+  ],
   "rules": {
     "import/named": "off",
-    "import/no-unresolved": "off",
-    "no-magic-numbers": "off"
+    "import/no-unresolved": "off"
   }
 }

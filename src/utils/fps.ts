@@ -1,36 +1,35 @@
 const THOUSAND = 1000;
 
 export default class FPS {
+  node: HTMLElement;
+  frames: number[];
+  lastFrameTimeStamp: number;
+
   constructor() {
-    this.fps = document.getElementById("fps");
+    this.node = document.getElementById("fps") as HTMLElement;
     this.frames = [];
     this.lastFrameTimeStamp = performance.now();
-
-    this.fps.textContent = "FPS: ";
+    this.node.textContent = "FPS: ";
   }
 
-  render() {
+  render(): void {
     // Convert the delta time since the last frame render into a measure
     // of frames per second.
     const now = performance.now();
     const delta = now - this.lastFrameTimeStamp;
     this.lastFrameTimeStamp = now;
-    const fps = (1 / delta) * THOUSAND;
+    const frameLength = (1 / delta) * THOUSAND;
 
     // Save only the latest 100 timings.
-    this.frames.push(fps);
+    this.frames.push(frameLength);
     if (this.frames.length > 100) {
       this.frames.shift();
     }
 
-    // Find the max, min, and mean of our 100 latest timings.
-    let sum = 0;
-    for (let i = 0; i < this.frames.length; i++) {
-      sum += this.frames[i];
-    }
-    let mean = sum / this.frames.length;
+    const fps =
+      this.frames.reduce((sum, frame) => sum + frame) / this.frames.length;
 
     // Render the statistics.
-    this.fps.textContent = `FPS: ${Math.round(mean)}`;
+    this.node.textContent = `FPS: ${Math.round(fps)}`;
   }
 }
