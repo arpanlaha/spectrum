@@ -49,12 +49,12 @@ body {
 @media (orientation: landscape) {
   #controls {
     position: fixed;
+    left: 0%;
     top: 0%;
-    left: 50%;
-    transform: translateX(-50%);
+    /* transform: translateY(-50%); */
 
     padding: 2vh;
-    border-radius: 0 0 1vw 1vw;
+    border-radius: 0 0 1vw 0;
 
     font-size: 1vw;
   }
@@ -68,10 +68,6 @@ body {
   }
 
   .control {
-    margin: 0 1vw;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
   }
 
   .control label {
