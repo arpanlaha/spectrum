@@ -73,12 +73,16 @@ const getNewSpectrum = () => {
 
 let spectrum = getNewSpectrumGl();
 
+let fps = new FPS();
+
 const restartSpectrum = () => {
   const shouldPlay = !isPaused();
 
   if (shouldPlay) {
     pause();
   }
+
+  fps = new FPS();
 
   if (mode === "webgl") {
     canvasWasm.classList.add("hide");
@@ -130,11 +134,9 @@ setNumSources.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-const fps = new FPS();
-
 const drawFrame = () => {
-  fps.render();
   spectrum.draw();
+  fps.render();
 };
 
 const renderLoop = () => {

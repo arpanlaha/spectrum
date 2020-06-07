@@ -13,6 +13,9 @@ body {
   color: #fff;
   font-family: "Nunito Sans Light", sans-serif;
   font-feature-settings: normal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .vertical-center {
@@ -30,4 +33,15 @@ body {
 
 .hide {
   display: none;
+}
+
+#controls {
+  position: fixed;
+  top: 0%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: hsla(0, 0%, 0%, 0.5);
+  white-space: nowrap;
+  padding: 2vh;
+  border-radius: 0 0 1vw 1vw;
 }
