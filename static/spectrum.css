@@ -45,3 +45,7 @@ body {
   padding: 2vh;
   border-radius: 0 0 1vw 1vw;
 }
+
+#fps {
+  width: 10vw;
+}

@@ -292,7 +292,7 @@ impl SpectrumGL {
                     #define PI_4_3 4.1887902047863905
                     #define PI_5_3 5.235987755982989
 
-                    precision mediump float;
+                    precision highp float;
 
                     uniform float sources[{}];
 
