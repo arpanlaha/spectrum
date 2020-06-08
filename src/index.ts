@@ -60,7 +60,7 @@ const initialStates: Record<Mode, InitialState> = {
     canvas: canvasWebgl,
     width: Math.round(MAX_WIDTH * GL_SCALE),
     height: Math.round(MAX_HEIGHT * GL_SCALE),
-    numSources: 20,
+    numSources: 16,
   },
   wasm: {
     canvas: canvasWasm,
@@ -186,7 +186,11 @@ setHeight.addEventListener("change", (e) => {
 });
 
 setNumSources.min = "2";
-setNumSources.max = "100";
+// iOS Safari is dumb and has a limited number of fragment shader uniforms
+setNumSources.max = Math.min(
+  100,
+  contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS)
+).toString();
 setNumSources.value = numSources.toString();
 setNumSources.addEventListener("change", (e) => {
   const newNumSources = (e.target as HTMLInputElement).value;
