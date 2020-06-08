@@ -74,8 +74,13 @@ const getInitialState = (mode: Mode): State => {
   const { canvas, width, height, numSources } = initialStates[mode];
 
   widthText.textContent = width.toString();
+  setWidth.value = width.toString();
+
   heightText.textContent = height.toString();
+  setHeight.value = height.toString();
+
   numSourcesText.textContent = numSources.toString();
+  setNumSources.value = numSources.toString();
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
   canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
@@ -102,8 +107,13 @@ let animationId: number | null = null;
 
 const setupCanvas = (): void => {
   widthText.textContent = width.toString();
+  setWidth.value = width.toString();
+
   heightText.textContent = height.toString();
+  setHeight.value = height.toString();
+
   numSourcesText.textContent = numSources.toString();
+  setNumSources.value = numSources.toString();
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
   canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
