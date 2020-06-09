@@ -8,6 +8,7 @@
     "format:check": "prettier --check \"**/*.{js,,json,md}\"",
     "lint": "eslint src && markdownlint README.md",
     "lint:fix": "eslint src && markdownlint --fix README.md",
+    "serve": "static-server dist",
     "start": "webpack-dev-server"
   },
   "repository": {
@@ -24,6 +25,7 @@
     "eslint": "^7.2.0",
     "markdownlint-cli": "^0.23.1",
     "prettier": "^2.0.5",
+    "static-server": "^2.2.1",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.5",
     "webpack": "^4.29.3",
