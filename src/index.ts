@@ -6,7 +6,7 @@ const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
-const MOVEMENT_SPEED_FACTOR = 0.2;
+const MOVEMENT_SPEED_FACTOR = 0.4;
 const COLOR_SPEED_FACTOR = 0.005;
 
 type Mode = "wasm" | "webgl";
