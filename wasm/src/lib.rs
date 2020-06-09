@@ -159,11 +159,41 @@ impl Source {
     }
 }
 
-#[wasm_bindgen]
-pub struct Spectrum {
+struct BaseSpectrum {
     width: usize,
     height: usize,
     sources: Vec<Source>,
+}
+
+impl BaseSpectrum {
+    pub fn new(width: usize, height: usize, num_sources: usize) -> BaseSpectrum {
+        let width_float = width as f32;
+        let height_float = height as f32;
+        let sources: Vec<Source> = iter::repeat(())
+            .map(|()| Source::new(width_float, height_float))
+            .take(num_sources)
+            .collect();
+
+        BaseSpectrum {
+            width,
+            height,
+            sources,
+        }
+    }
+
+    fn tick(&mut self) {
+        let width_float = self.width as f32;
+        let height_float = self.height as f32;
+
+        for source in &mut self.sources {
+            source.tick(width_float, height_float);
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub struct Spectrum {
+    base: BaseSpectrum,
     data: Vec<u8>,
     context: CanvasRenderingContext2d,
 }
@@ -176,17 +206,10 @@ impl Spectrum {
         num_sources: usize,
         context: CanvasRenderingContext2d,
     ) -> Spectrum {
-        let width_float = width as f32;
-        let height_float = height as f32;
-        let sources: Vec<Source> = iter::repeat(())
-            .map(|()| Source::new(width_float, height_float))
-            .take(num_sources)
-            .collect();
+        let base = BaseSpectrum::new(width, height, num_sources);
 
         let mut spectrum = Spectrum {
-            width,
-            height,
-            sources,
+            base,
             data: vec![0u8; width * height * 4],
             context,
         };
@@ -196,12 +219,12 @@ impl Spectrum {
     }
 
     pub fn draw(&mut self) {
-        for x in 0..self.width {
+        for x in 0..self.base.width {
             let x_float = x as f32;
-            for y in 0..self.height {
+            for y in 0..self.base.height {
                 let y_float = y as f32;
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
-                for source in &self.sources {
+                for source in &self.base.sources {
                     let source_hue_cos = source.hue_cos();
                     let source_hue_sin = source.hue_sin();
                     let dist_factor =
@@ -212,7 +235,7 @@ impl Spectrum {
 
                 let RGBA(r, g, b, a) = Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
 
-                let start = (x + y * self.width) * 4;
+                let start = (x + y * self.base.width) * 4;
 
                 self.data[start] = r;
                 self.data[start + 1] = g;
@@ -225,7 +248,7 @@ impl Spectrum {
             .put_image_data(
                 &ImageData::new_with_u8_clamped_array(
                     wasm_bindgen::Clamped(self.data.as_mut_slice()),
-                    self.width as u32,
+                    self.base.width as u32,
                 )
                 .unwrap(),
                 0f64,
@@ -235,20 +258,13 @@ impl Spectrum {
     }
 
     pub fn tick(&mut self) {
-        let width_float = self.width as f32;
-        let height_float = self.height as f32;
-
-        for source in &mut self.sources {
-            source.tick(width_float, height_float);
-        }
+        self.base.tick();
     }
 }
 
 #[wasm_bindgen]
 pub struct SpectrumGL {
-    width: usize,
-    height: usize,
-    sources: Vec<Source>,
+    base: BaseSpectrum,
     context: WebGlRenderingContext,
     program: WebGlProgram,
 }
@@ -261,12 +277,7 @@ impl SpectrumGL {
         num_sources: usize,
         context: WebGlRenderingContext,
     ) -> SpectrumGL {
-        let width_float = width as f32;
-        let height_float = height as f32;
-        let sources: Vec<Source> = iter::repeat(())
-            .map(|()| Source::new(width_float, height_float))
-            .take(num_sources)
-            .collect();
+        let base = BaseSpectrum::new(width, height, num_sources);
 
         let vertex_shader = compile_shader(
             &context,
@@ -345,10 +356,7 @@ impl SpectrumGL {
 
         let vertex_coords = [-1f32, -1f32, 1f32, -1f32, 1f32, 1f32, -1f32, 1f32];
 
-        let buffer = context
-            .create_buffer()
-            .ok_or("failed to create buffer")
-            .unwrap();
+        let buffer = context.create_buffer().unwrap();
         context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
 
         unsafe {
@@ -373,9 +381,7 @@ impl SpectrumGL {
         );
 
         let spectrum = SpectrumGL {
-            width,
-            height,
-            sources,
+            base,
             context,
             program,
         };
@@ -386,6 +392,7 @@ impl SpectrumGL {
 
     pub fn draw(&self) {
         let source_info: Vec<f32> = self
+            .base
             .sources
             .iter()
             .map(|source| vec![source.x(), source.y(), source.hue_cos(), source.hue_sin()])
@@ -406,12 +413,7 @@ impl SpectrumGL {
     }
 
     pub fn tick(&mut self) {
-        let width_float = self.width as f32;
-        let height_float = self.height as f32;
-
-        for source in &mut self.sources {
-            source.tick(width_float, height_float);
-        }
+        self.base.tick();
     }
 }
 
