@@ -53,8 +53,16 @@ const colorSpeedText = document.getElementById(
 const setColorSpeed = document.getElementById(
   "set-color-speed"
 ) as HTMLInputElement;
+const downloadLink = document.getElementById(
+  "download-link"
+) as HTMLAnchorElement;
+const downloadButton = document.getElementById(
+  "download-button"
+) as HTMLButtonElement;
 
-const contextWebgl = canvasWebgl.getContext("webgl") as WebGLRenderingContext;
+const contextWebgl = canvasWebgl.getContext("webgl", {
+  preserveDrawingBuffer: true,
+}) as WebGLRenderingContext;
 const contextWasm = canvasWasm.getContext("2d") as CanvasRenderingContext2D;
 contextWasm.scale(DEVICE_SCALE, DEVICE_SCALE);
 
@@ -356,6 +364,13 @@ toggleButton.addEventListener("click", () => {
 
   modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
+});
+
+downloadButton.addEventListener("click", () => {
+  downloadLink.setAttribute(
+    "href",
+    canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+  );
 });
 
 controls.classList.remove("hide");

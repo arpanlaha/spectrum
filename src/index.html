@@ -29,10 +29,10 @@
     <div id="controls" class="vertical-center blur hide">
       <h1>Spectrum</h1>
       <div id="fps"></div>
-      <button id="play-pause"></button>
+      <button id="play-pause" type="button"></button>
       <div class="control">
         <label for="toggle">Mode: <span id="mode"></span></label>
-        <button id="toggle">Toggle</button>
+        <button id="toggle" type="button">Toggle</button>
       </div>
       <div class="control">
         <label for="set-width">Width (px): <span id="width"></span></label>
@@ -60,6 +60,9 @@
         </label>
         <input type="range" id="set-color-speed" />
       </div>
+      <a id="download-link" download="spectrum.png">
+        <button id="download-button" type="button">Download</button>
+      </a>
       <a
         href="https://github.com/arpanlaha/spectrum"
         target="_blank"
