@@ -84,3 +84,16 @@ h1 {
     margin-right: 0.5vw;
   }
 }
+
+.github {
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  width: 5vh;
+  height: 5vh;
+}
+
+.github:hover {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
