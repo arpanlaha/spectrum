@@ -4,8 +4,8 @@ import FPS from "./utils/fps";
 const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
+const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
-const GL_SCALE = 1;
 
 type Mode = "wasm" | "webgl";
 
@@ -24,6 +24,10 @@ const canvasWebgl = document.getElementById(
 ) as HTMLCanvasElement;
 const canvasWasm = document.getElementById("canvas-wasm") as HTMLCanvasElement;
 const controls = document.getElementById("controls") as HTMLDivElement;
+const playPauseButton = document.getElementById(
+  "play-pause"
+) as HTMLButtonElement;
+const toggleButton = document.getElementById("toggle") as HTMLButtonElement;
 const modeText = document.getElementById("mode") as HTMLSpanElement;
 const widthText = document.getElementById("width") as HTMLSpanElement;
 const setWidth = document.getElementById("set-width") as HTMLInputElement;
@@ -35,10 +39,18 @@ const numSourcesText = document.getElementById(
 const setNumSources = document.getElementById(
   "set-num-sources"
 ) as HTMLInputElement;
-const playPauseButton = document.getElementById(
-  "play-pause"
-) as HTMLButtonElement;
-const toggleButton = document.getElementById("toggle") as HTMLButtonElement;
+const movementSpeedText = document.getElementById(
+  "movement-speed"
+) as HTMLSpanElement;
+const setMovementSpeed = document.getElementById(
+  "set-movement-speed"
+) as HTMLInputElement;
+const colorSpeedText = document.getElementById(
+  "color-speed"
+) as HTMLSpanElement;
+const setColorSpeed = document.getElementById(
+  "set-color-speed"
+) as HTMLInputElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl") as WebGLRenderingContext;
 const contextWasm = canvasWasm.getContext("2d") as CanvasRenderingContext2D;
@@ -49,6 +61,8 @@ interface InitialState {
   width: number;
   height: number;
   numSources: number;
+  movementSpeed: number;
+  colorSpeed: number;
 }
 
 interface State extends InitialState {
@@ -58,20 +72,31 @@ interface State extends InitialState {
 const initialStates: Record<Mode, InitialState> = {
   webgl: {
     canvas: canvasWebgl,
-    width: Math.round(MAX_WIDTH * GL_SCALE),
-    height: Math.round(MAX_HEIGHT * GL_SCALE),
+    width: Math.round(MAX_WIDTH * WEBGL_SCALE),
+    height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
     numSources: 16,
+    movementSpeed: 1,
+    colorSpeed: 0.2,
   },
   wasm: {
     canvas: canvasWasm,
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
+    movementSpeed: 2,
+    colorSpeed: 0.4,
   },
 };
 
 const getInitialState = (mode: Mode): State => {
-  const { canvas, width, height, numSources } = initialStates[mode];
+  const {
+    canvas,
+    width,
+    height,
+    numSources,
+    movementSpeed,
+    colorSpeed,
+  } = initialStates[mode];
 
   widthText.textContent = width.toString();
   setWidth.value = width.toString();
@@ -81,6 +106,12 @@ const getInitialState = (mode: Mode): State => {
 
   numSourcesText.textContent = numSources.toString();
   setNumSources.value = numSources.toString();
+
+  movementSpeedText.textContent = movementSpeed.toString();
+  setMovementSpeed.value = movementSpeed.toString();
+
+  colorSpeedText.textContent = colorSpeed.toString();
+  setColorSpeed.value = colorSpeed.toString();
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
   canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
@@ -96,12 +127,28 @@ const getInitialState = (mode: Mode): State => {
       ? SpectrumGL.new(width, height, numSources, contextWebgl)
       : Spectrum.new(width, height, numSources, contextWasm);
 
-  return { canvas, width, height, numSources, spectrum };
+  return {
+    canvas,
+    width,
+    height,
+    numSources,
+    spectrum,
+    movementSpeed,
+    colorSpeed,
+  };
 };
 
 let mode: Mode = "webgl";
 
-let { canvas, width, height, numSources, spectrum } = getInitialState(mode);
+let {
+  canvas,
+  width,
+  height,
+  numSources,
+  spectrum,
+  movementSpeed,
+  colorSpeed,
+} = getInitialState(mode);
 
 let animationId: number | null = null;
 
@@ -114,6 +161,12 @@ const setupCanvas = (): void => {
 
   numSourcesText.textContent = numSources.toString();
   setNumSources.value = numSources.toString();
+
+  movementSpeedText.textContent = movementSpeed.toString();
+  setMovementSpeed.value = movementSpeed.toString();
+
+  colorSpeedText.textContent = colorSpeed.toString();
+  setColorSpeed.value = colorSpeed.toString();
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
   canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
@@ -199,6 +252,28 @@ setNumSources.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
+setMovementSpeed.min = "0.1";
+setMovementSpeed.max = "5";
+setMovementSpeed.step = "0.1";
+setMovementSpeed.value = movementSpeed.toString();
+setMovementSpeed.addEventListener("change", (e) => {
+  const newMovementSpeed = (e.target as HTMLInputElement).value;
+  movementSpeed = parseInt(newMovementSpeed);
+  movementSpeedText.textContent = movementSpeed.toString();
+  restartSpectrum();
+});
+
+setColorSpeed.min = "0.01";
+setColorSpeed.max = "1";
+setColorSpeed.step = "0.01";
+setColorSpeed.value = colorSpeed.toString();
+setColorSpeed.addEventListener("change", (e) => {
+  const newColorSpeed = (e.target as HTMLInputElement).value;
+  colorSpeed = parseInt(newColorSpeed);
+  colorSpeedText.textContent = colorSpeed.toString();
+  restartSpectrum();
+});
+
 const drawFrame = (): void => {
   spectrum.draw();
   fps.render();
@@ -246,6 +321,8 @@ toggleButton.addEventListener("click", () => {
   height = newState.height;
   canvas = newState.canvas;
   numSources = newState.numSources;
+  movementSpeed = newState.movementSpeed;
+  colorSpeed = newState.colorSpeed;
 
   modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
