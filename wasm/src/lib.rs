@@ -286,6 +286,11 @@ impl Spectrum {
         spectrum
     }
 
+    /// Draws to the Spectrum canvas, using the Spectrum's context to put the resulting ImageData.
+    ///
+    /// Assigns Hues to each pixel based off of an average inverse square distance weighting across all Sources.
+    ///
+    /// As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
     pub fn draw(&mut self) {
         for x in 0..self.base.width {
             let x_float = x as f32;
@@ -323,6 +328,7 @@ impl Spectrum {
             .unwrap();
     }
 
+    /// Increments all of the Spectrum's sources by one frame.
     pub fn tick(&mut self) {
         self.base.tick();
     }
@@ -337,6 +343,14 @@ pub struct SpectrumGL {
 
 #[wasm_bindgen]
 impl SpectrumGL {
+    /// Creates a new SpectrumGl.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - the SpectrumGL's width.
+    /// * `height` - the SpectrumGL's height.
+    /// * `num_sources` - the number of Sources in the SpectrumGL.
+    /// * `context` - the `webgl` context belonging to the SpectrumGL's canvas.
     pub fn new(
         width: usize,
         height: usize,
@@ -460,6 +474,11 @@ impl SpectrumGL {
         spectrum
     }
 
+    /// Draws to the Spectrum canvas, adjusting the context's shaders to match the current state.
+    ///
+    /// Assigns Hues to each pixel based off of an average inverse square distance weighting across all Sources.
+    ///
+    /// As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
     pub fn draw(&self) {
         let source_info: Vec<f32> = self
             .base
@@ -480,31 +499,54 @@ impl SpectrumGL {
         context.draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
 
+    /// Increments all of the Spectrum's sources by one frame.
     pub fn tick(&mut self) {
         self.base.tick();
     }
 }
 
+/// Calculates the arctangent, given a quotient in the range [-1, 1].
+///
+/// Obtained from [IEEE Signal Processing Magazine](http://www-labs.iro.umontreal.ca/~mignotte/IFT2425/Documents/EfficientApproximationArctgFunction.pdf).
+///
+/// # Parameters
+///
+/// * `quotient` - the minimum of `cos / sin` and `sin / cos`.
 fn atan(quotient: f32) -> f32 {
     (consts::FRAC_PI_4 + 0.273f32 * (1f32 - quotient.abs())) * quotient
 }
 
-fn atan2(x: f32, y: f32) -> f32 {
-    if x.abs() > y.abs() {
-        if x < 0f32 {
-            atan(y / x) + consts::PI
-        } else if y < 0f32 {
-            atan(y / x) + 2f32 * consts::PI
+/// Calculates the arctangent from the cosine and sine.
+///
+/// # Parameters
+///
+/// * `cos` - the cosine/x term.
+/// * `sin` - the sine/y term.
+fn atan2(cos: f32, sin: f32) -> f32 {
+    if cos.abs() > sin.abs() {
+        if cos < 0f32 {
+            atan(sin / cos) + consts::PI
+        } else if sin < 0f32 {
+            atan(sin / cos) + 2f32 * consts::PI
         } else {
-            atan(y / x)
+            atan(sin / cos)
         }
-    } else if y < 0f32 {
-        -atan(x / y) + 3f32 * consts::FRAC_PI_2
+    } else if sin < 0f32 {
+        -atan(cos / sin) + 3f32 * consts::FRAC_PI_2
     } else {
-        -atan(x / y) + consts::FRAC_PI_2
+        -atan(cos / sin) + consts::FRAC_PI_2
     }
 }
 
+/// Compiles a WebGL shader from source.
+///
+/// Obtained from the [`wasm-bindgen` Guide WebGL example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html).
+///
+/// # Parameters
+///
+/// * `context` - the WebGL context.
+/// * `shader_type` - the shader's type - vertex or fragment shader.
+/// * `source` - the GLSL shader source.
 pub fn compile_shader(
     context: &WebGlRenderingContext,
     shader_type: u32,
