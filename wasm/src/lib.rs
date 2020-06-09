@@ -13,16 +13,9 @@ const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
 const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
 const DH_HALF: f32 = DH_UPPER / 2f32;
 
-#[derive(Clone, Copy, Debug)]
 pub struct RGBA(u8, u8, u8, u8);
 
-impl RGBA {
-    fn from_rgb(r: u8, g: u8, b: u8) -> RGBA {
-        RGBA(r, g, b, 255)
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy)]
 struct Hue(f32);
 
 impl Hue {
@@ -41,40 +34,49 @@ impl Hue {
 
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
-        let primary = 255;
         if hue < consts::PI {
             if hue < consts::FRAC_PI_3 {
-                RGBA::from_rgb(primary, (255f32 * hue / consts::FRAC_PI_3) as u8, 0)
-            } else if hue < TWO_THIRDS_PI {
-                RGBA::from_rgb(
-                    (255f32 * (2f32 - hue / consts::FRAC_PI_3)) as u8,
-                    primary,
+                RGBA(
+                    u8::MAX,
+                    (255f32 * hue / consts::FRAC_PI_3) as u8,
                     0,
+                    u8::MAX,
+                )
+            } else if hue < TWO_THIRDS_PI {
+                RGBA(
+                    (255f32 * (2f32 - hue / consts::FRAC_PI_3)) as u8,
+                    u8::MAX,
+                    0,
+                    u8::MAX,
                 )
             } else {
-                RGBA::from_rgb(
+                RGBA(
                     0,
-                    primary,
+                    u8::MAX,
                     (255f32 * (hue / consts::FRAC_PI_3 - 2f32)) as u8,
+                    u8::MAX,
                 )
             }
         } else if hue < FOUR_THIRDS_PI {
-            RGBA::from_rgb(
+            RGBA(
                 0,
                 (255f32 * (4f32 - hue / consts::FRAC_PI_3)) as u8,
-                primary,
+                u8::MAX,
+                u8::MAX,
             )
         } else if hue < FIVE_THIRDS_PI {
-            RGBA::from_rgb(
+            RGBA(
                 (255f32 * (hue / consts::FRAC_PI_3 - 4f32)) as u8,
                 0,
-                primary,
+                u8::MAX,
+                u8::MAX,
             )
         } else {
-            RGBA::from_rgb(
-                primary,
+            RGBA(
+                u8::MAX,
                 0,
                 (255f32 * (6f32 - hue / consts::FRAC_PI_3)) as u8,
+                u8::MAX,
             )
         }
     }
@@ -134,9 +136,9 @@ impl Source {
 
     fn tick(&mut self, width: f32, height: f32) {
         self.hue.tick(self.dh);
-        let hue_rad = self.hue.get();
-        self.hue_cos = hue_rad.cos();
-        self.hue_sin = hue_rad.sin();
+        let hue_val = self.hue.get();
+        self.hue_cos = hue_val.cos();
+        self.hue_sin = hue_val.sin();
 
         self.x += self.dx;
         self.y += self.dy;
@@ -167,17 +169,13 @@ struct BaseSpectrum {
 
 impl BaseSpectrum {
     pub fn new(width: usize, height: usize, num_sources: usize) -> BaseSpectrum {
-        let width_float = width as f32;
-        let height_float = height as f32;
-        let sources: Vec<Source> = iter::repeat(())
-            .map(|()| Source::new(width_float, height_float))
-            .take(num_sources)
-            .collect();
-
         BaseSpectrum {
             width,
             height,
-            sources,
+            sources: iter::repeat(())
+                .map(|()| Source::new(width as f32, height as f32))
+                .take(num_sources)
+                .collect(),
         }
     }
 
@@ -206,10 +204,8 @@ impl Spectrum {
         num_sources: usize,
         context: CanvasRenderingContext2d,
     ) -> Spectrum {
-        let base = BaseSpectrum::new(width, height, num_sources);
-
         let mut spectrum = Spectrum {
-            base,
+            base: BaseSpectrum::new(width, height, num_sources),
             data: vec![0u8; width * height * 4],
             context,
         };
@@ -225,12 +221,10 @@ impl Spectrum {
                 let y_float = y as f32;
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.base.sources {
-                    let source_hue_cos = source.hue_cos();
-                    let source_hue_sin = source.hue_sin();
                     let dist_factor =
                         (x_float - source.x()).powi(2) + (y_float - source.y()).powi(2) + 1f32;
-                    hue_vector_cos += source_hue_cos / dist_factor;
-                    hue_vector_sin += source_hue_sin / dist_factor;
+                    hue_vector_cos += source.hue_cos() / dist_factor;
+                    hue_vector_sin += source.hue_sin() / dist_factor;
                 }
 
                 let RGBA(r, g, b, a) = Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
@@ -277,8 +271,6 @@ impl SpectrumGL {
         num_sources: usize,
         context: WebGlRenderingContext,
     ) -> SpectrumGL {
-        let base = BaseSpectrum::new(width, height, num_sources);
-
         let vertex_shader = compile_shader(
             &context,
             WebGlRenderingContext::VERTEX_SHADER,
@@ -289,8 +281,7 @@ impl SpectrumGL {
                     gl_Position = a_position;
                 }
             "#,
-        )
-        .unwrap();
+        );
 
         let fragment_shader = compile_shader(
             &context,
@@ -345,14 +336,21 @@ impl SpectrumGL {
                 num_sources * 4,
                 num_sources
             )[..],
-        ).unwrap();
+        );
 
-        let program = link_program(&context, &vertex_shader, &fragment_shader).unwrap();
+        let program = context.create_program().unwrap();
+
+        context.attach_shader(&program, &vertex_shader);
+        context.attach_shader(&program, &fragment_shader);
+        context.link_program(&program);
+        context
+            .get_program_parameter(&program, WebGlRenderingContext::LINK_STATUS)
+            .as_bool()
+            .unwrap();
+
         context.use_program(Some(&program));
 
-        let position_attribute_loc = context.get_attrib_location(&program, "a_position");
-
-        let position_attribute_loc = position_attribute_loc as u32;
+        let position_attribute_loc = context.get_attrib_location(&program, "a_position") as u32;
 
         let vertex_coords = [-1f32, -1f32, 1f32, -1f32, 1f32, 1f32, -1f32, 1f32];
 
@@ -381,7 +379,7 @@ impl SpectrumGL {
         );
 
         let spectrum = SpectrumGL {
-            base,
+            base: BaseSpectrum::new(width, height, num_sources),
             context,
             program,
         };
@@ -399,15 +397,13 @@ impl SpectrumGL {
             .flatten()
             .collect();
 
-        let source_info = source_info.as_slice();
-
         let context = &self.context;
 
         let source_info_loc = context
             .get_uniform_location(&self.program, "sources")
             .unwrap();
 
-        context.uniform1fv_with_f32_array(Some(&source_info_loc), source_info);
+        context.uniform1fv_with_f32_array(Some(&source_info_loc), source_info.as_slice());
 
         context.draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
@@ -423,21 +419,17 @@ fn atan(quotient: f32) -> f32 {
 
 fn atan2(x: f32, y: f32) -> f32 {
     if x.abs() > y.abs() {
-        let quotient = y / x;
         if x < 0f32 {
-            atan(quotient) + consts::PI
+            atan(y / x) + consts::PI
         } else if y < 0f32 {
-            atan(quotient) + 2f32 * consts::PI
+            atan(y / x) + 2f32 * consts::PI
         } else {
-            atan(quotient)
+            atan(y / x)
         }
+    } else if y < 0f32 {
+        -atan(x / y) + 3f32 * consts::FRAC_PI_2
     } else {
-        let quotient = x / y;
-        if y < 0f32 {
-            -atan(quotient) + 3f32 * consts::FRAC_PI_2
-        } else {
-            -atan(quotient) + consts::FRAC_PI_2
-        }
+        -atan(x / y) + consts::FRAC_PI_2
     }
 }
 
@@ -445,48 +437,15 @@ pub fn compile_shader(
     context: &WebGlRenderingContext,
     shader_type: u32,
     source: &str,
-) -> Result<WebGlShader, String> {
-    let shader = context
-        .create_shader(shader_type)
-        .ok_or_else(|| String::from("Unable to create shader object"))?;
+) -> WebGlShader {
+    let shader = context.create_shader(shader_type).unwrap();
     context.shader_source(&shader, source);
     context.compile_shader(&shader);
 
-    if context
+    context
         .get_shader_parameter(&shader, WebGlRenderingContext::COMPILE_STATUS)
         .as_bool()
-        .unwrap_or(false)
-    {
-        Ok(shader)
-    } else {
-        Err(context
-            .get_shader_info_log(&shader)
-            .unwrap_or_else(|| String::from("Unknown error creating shader")))
-    }
-}
+        .unwrap();
 
-pub fn link_program(
-    context: &WebGlRenderingContext,
-    vert_shader: &WebGlShader,
-    frag_shader: &WebGlShader,
-) -> Result<WebGlProgram, String> {
-    let program = context
-        .create_program()
-        .ok_or_else(|| String::from("Unable to create shader object"))?;
-
-    context.attach_shader(&program, vert_shader);
-    context.attach_shader(&program, frag_shader);
-    context.link_program(&program);
-
-    if context
-        .get_program_parameter(&program, WebGlRenderingContext::LINK_STATUS)
-        .as_bool()
-        .unwrap_or(false)
-    {
-        Ok(program)
-    } else {
-        Err(context
-            .get_program_info_log(&program)
-            .unwrap_or_else(|| String::from("Unknown error creating program object")))
-    }
+    shader
 }
