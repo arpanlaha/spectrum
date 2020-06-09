@@ -13,16 +13,26 @@ const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
 const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
 const DH_HALF: f32 = DH_UPPER / 2f32;
 
+/// Wrapper of four byte values corresponding to RGBA for a single pixel.
 pub struct RGBA(u8, u8, u8, u8);
 
+/// Value in [0, 2π) corresponding to a hue value (in radians) in the HSL color space.
 #[derive(Clone, Copy)]
 struct Hue(f32);
 
 impl Hue {
+    /// Returns the internal f32 value corresponding to the Hue.
     fn get(self) -> f32 {
         self.0
     }
 
+    /// Increments the internal value by the specificied delta.
+    ///
+    /// If the new value lies outside the valid Hue range, it is adjusted accordingly by one period.
+    ///
+    /// # Arguments
+    ///
+    /// * `dh` - the desired change to the internal value.
     fn tick(&mut self, dh: f32) {
         self.0 += dh;
         if self.0 >= TWO_PI {
@@ -32,6 +42,9 @@ impl Hue {
         }
     }
 
+    /// Converts the Hue to its corresponding RGBA value.
+    ///
+    /// Sets saturation to 100% and lightness to 50% to get the Hue's truest color value.
     fn to_rgba(self) -> RGBA {
         let hue = self.0;
         if hue < consts::PI {
@@ -82,59 +95,93 @@ impl Hue {
     }
 }
 
+/// A Source in the Spectrum canvas which influences the color of neighboring pixels.
 struct Source {
+    /// The x-coordinate of the Source in the Spectrum canvas.
     x: f32,
+
+    /// The y-coordinate of the Source in the Spectrum canvas.
     y: f32,
-    dx: f32,
-    dy: f32,
-    dh: f32,
+
+    /// The internal Hue value of the Source.
     hue: Hue,
+
+    /// The width of the Spectrum canvas.
+    canvas_width: f32,
+
+    /// The height of the spectrum canvas:
+    canvas_height: f32,
+
+    /// The rate of movement in the x direction.
+    dx: f32,
+
+    /// The rate of movement in the y direction.
+    dy: f32,
+
+    /// The rate of change in the Source's Hue.
+    dh: f32,
+
+    /// The cosine of the internal Hue value.
     hue_cos: f32,
+
+    /// The sine of the internal Hue value.
     hue_sin: f32,
 }
 
 impl Source {
-    pub fn new(width: f32, height: f32) -> Source {
-        let x = Math::random() as f32 * width;
-        let y = Math::random() as f32 * height;
-        let dx = Math::random() as f32 * 2f32 - 1f32;
-        let dy = Math::random() as f32 * 2f32 - 1f32;
-        let dh = Math::random() as f32 * DH_UPPER - DH_HALF;
+    /// Constructs a new Source.
+    ///
+    /// Non-specified paramaters are generated at random.
+    ///
+    /// # Arguments
+    ///
+    /// * `canvas_width`: The width of the Spectrum canvas.
+    /// * `canvas_height`: The height of the Spectrum canvas.
+    pub fn new(canvas_width: f32, canvas_height: f32) -> Source {
         let hue = Hue(Math::random() as f32 * TWO_PI);
-
         let hue_val = hue.get();
-
         let hue_cos = hue_val.cos();
         let hue_sin = hue_val.sin();
         Source {
-            x,
-            y,
-            dx,
-            dy,
-            dh,
+            x: Math::random() as f32 * canvas_width,
+            y: Math::random() as f32 * canvas_height,
             hue,
+            canvas_width,
+            canvas_height,
+            dx: Math::random() as f32 * 2f32 - 1f32,
+            dy: Math::random() as f32 * 2f32 - 1f32,
+            dh: Math::random() as f32 * DH_UPPER - DH_HALF,
             hue_cos,
             hue_sin,
         }
     }
 
+    /// Returns the x-coordinate of the Source.
     fn x(&self) -> f32 {
         self.x
     }
 
+    /// Returns the y-coordinate of the Source.
     fn y(&self) -> f32 {
         self.y
     }
 
+    /// Returns the cosine of the Source's hue.
     fn hue_cos(&self) -> f32 {
         self.hue_cos
     }
 
+    /// Returns the sine of the Source's hue.
     fn hue_sin(&self) -> f32 {
         self.hue_sin
     }
 
-    fn tick(&mut self, width: f32, height: f32) {
+    /// Increments the Source by one frame.
+    ///
+    /// The internal hue is incremented by the Source's `dh` value.
+    ///
+    /// The Source's position is incremented by `dx` and `dy`, with border collisions behaving as a bounce.
+    fn tick(&mut self) {
         self.hue.tick(self.dh);
         let hue_val = self.hue.get();
         self.hue_cos = hue_val.cos();
@@ -146,28 +193,41 @@ impl Source {
         if self.x <= 0f32 {
             self.x *= -1f32;
             self.dx *= -1f32;
-        } else if self.x >= width {
-            self.x = width - (self.x - width);
+        } else if self.x >= self.canvas_width {
+            self.x = self.canvas_width - (self.x - self.canvas_width);
             self.dx *= -1f32;
         }
 
         if self.y <= 0f32 {
             self.y *= -1f32;
             self.dy *= -1f32;
-        } else if self.y >= height {
-            self.y = height - (self.y - height);
+        } else if self.y >= self.canvas_height {
+            self.y = self.canvas_height - (self.y - self.canvas_height);
             self.dy *= -1f32;
         }
     }
 }
 
+/// The shared data belonging to both Spectrum implementations.
 struct BaseSpectrum {
+    /// The width of the Spectrum canvas.
     width: usize,
+
+    /// The height of the Spectrum canvas.
     height: usize,
+
+    /// A vector containing the Spectrum's sources.
     sources: Vec<Source>,
 }
 
 impl BaseSpectrum {
+    /// Constructs a new BaseSpectrum.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - the width of the BaseSpectrum.
+    /// * `height` - the height of the BaseSpectrum.
+    /// * `num_sources` - the number of Sources to generate.
     pub fn new(width: usize, height: usize, num_sources: usize) -> BaseSpectrum {
         BaseSpectrum {
             width,
@@ -179,25 +239,37 @@ impl BaseSpectrum {
         }
     }
 
+    /// Increments the BaseSpectrum's sources by one frame.
     fn tick(&mut self) {
-        let width_float = self.width as f32;
-        let height_float = self.height as f32;
-
         for source in &mut self.sources {
-            source.tick(width_float, height_float);
+            source.tick();
         }
     }
 }
 
+/// A WebAssembly-only implementation of Spectrum.
 #[wasm_bindgen]
 pub struct Spectrum {
+    /// The Spectrum's BaseSpectrum.
     base: BaseSpectrum,
+
+    /// The Spectrum's pixel data.
     data: Vec<u8>,
+
+    /// The `2d` context belonging to the Spectrum's canvas.
     context: CanvasRenderingContext2d,
 }
 
 #[wasm_bindgen]
 impl Spectrum {
+    /// Creates a new Spectrum.
+    ///
+    /// # Arguments
+    ///
+    /// * `width` - the Spectrum's width.
+    /// * `height` - the Spectrum's height.
+    /// * `num_sources` - the number of Sources in the Spectrum.
+    /// * `context` - the `2d` context belonging to the Spectrum's canvas.
     pub fn new(
         width: usize,
         height: usize,
