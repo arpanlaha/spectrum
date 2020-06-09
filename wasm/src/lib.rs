@@ -10,8 +10,6 @@ const TWO_PI: f32 = consts::PI * 2f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
-const DH_UPPER: f32 = consts::FRAC_PI_3 / 10f32;
-const DH_HALF: f32 = DH_UPPER / 2f32;
 
 /// Wrapper of four byte values corresponding to RGBA for a single pixel.
 pub struct RGBA(u8, u8, u8, u8);
@@ -135,9 +133,16 @@ impl Source {
     ///
     /// # Arguments
     ///
-    /// * `canvas_width`: The width of the Spectrum canvas.
-    /// * `canvas_height`: The height of the Spectrum canvas.
-    pub fn new(canvas_width: f32, canvas_height: f32) -> Source {
+    /// * `canvas_width` - the width of the Spectrum canvas.
+    /// * `canvas_height` - the height of the Spectrum canvas.
+    /// * `movement_speed` - the range of the Source's movement speed (`dx`, `dy`)
+    /// * `color_speed` - the range of the Source's color speed (`dh`)
+    pub fn new(
+        canvas_width: f32,
+        canvas_height: f32,
+        movement_speed: f32,
+        color_speed: f32,
+    ) -> Source {
         let hue = Hue(Math::random() as f32 * TWO_PI);
         let hue_val = hue.get();
         let hue_cos = hue_val.cos();
@@ -148,9 +153,9 @@ impl Source {
             hue,
             canvas_width,
             canvas_height,
-            dx: Math::random() as f32 * 2f32 - 1f32,
-            dy: Math::random() as f32 * 2f32 - 1f32,
-            dh: Math::random() as f32 * DH_UPPER - DH_HALF,
+            dx: Math::random() as f32 * movement_speed - movement_speed / 2f32,
+            dy: Math::random() as f32 * movement_speed - movement_speed / 2f32,
+            dh: Math::random() as f32 * color_speed - color_speed / 2f32,
             hue_cos,
             hue_sin,
         }
@@ -228,12 +233,20 @@ impl BaseSpectrum {
     /// * `width` - the width of the BaseSpectrum.
     /// * `height` - the height of the BaseSpectrum.
     /// * `num_sources` - the number of Sources to generate.
-    pub fn new(width: usize, height: usize, num_sources: usize) -> BaseSpectrum {
+    /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
+    /// * `color_speed` - the range of each Source's color speed (`dh`)
+    pub fn new(
+        width: usize,
+        height: usize,
+        num_sources: usize,
+        movement_speed: f32,
+        color_speed: f32,
+    ) -> BaseSpectrum {
         BaseSpectrum {
             width,
             height,
             sources: iter::repeat(())
-                .map(|()| Source::new(width as f32, height as f32))
+                .map(|()| Source::new(width as f32, height as f32, movement_speed, color_speed))
                 .take(num_sources)
                 .collect(),
         }
@@ -270,14 +283,18 @@ impl Spectrum {
     /// * `height` - the Spectrum's height.
     /// * `num_sources` - the number of Sources in the Spectrum.
     /// * `context` - the `2d` context belonging to the Spectrum's canvas.
+    /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
+    /// * `color_speed` - the range of each Source's color speed (`dh`)
     pub fn new(
         width: usize,
         height: usize,
         num_sources: usize,
+        movement_speed: f32,
+        color_speed: f32,
         context: CanvasRenderingContext2d,
     ) -> Spectrum {
         let mut spectrum = Spectrum {
-            base: BaseSpectrum::new(width, height, num_sources),
+            base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             data: vec![0u8; width * height * 4],
             context,
         };
@@ -351,10 +368,14 @@ impl SpectrumGL {
     /// * `height` - the SpectrumGL's height.
     /// * `num_sources` - the number of Sources in the SpectrumGL.
     /// * `context` - the `webgl` context belonging to the SpectrumGL's canvas.
+    /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
+    /// * `color_speed` - the range of each Source's color speed (`dh`)
     pub fn new(
         width: usize,
         height: usize,
         num_sources: usize,
+        movement_speed: f32,
+        color_speed: f32,
         context: WebGlRenderingContext,
     ) -> SpectrumGL {
         let vertex_shader = compile_shader(
@@ -465,7 +486,7 @@ impl SpectrumGL {
         );
 
         let spectrum = SpectrumGL {
-            base: BaseSpectrum::new(width, height, num_sources),
+            base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
         };

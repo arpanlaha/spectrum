@@ -6,6 +6,8 @@ const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
+const MOVEMENT_SPEED_FACTOR = 0.2;
+const COLOR_SPEED_FACTOR = 0.005;
 
 type Mode = "wasm" | "webgl";
 
@@ -75,16 +77,16 @@ const initialStates: Record<Mode, InitialState> = {
     width: Math.round(MAX_WIDTH * WEBGL_SCALE),
     height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
     numSources: 16,
-    movementSpeed: 1,
-    colorSpeed: 0.2,
+    movementSpeed: 20,
+    colorSpeed: 20,
   },
   wasm: {
     canvas: canvasWasm,
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
-    movementSpeed: 2,
-    colorSpeed: 0.4,
+    movementSpeed: 40,
+    colorSpeed: 40,
   },
 };
 
@@ -124,8 +126,22 @@ const getInitialState = (mode: Mode): State => {
 
   const spectrum =
     mode === "webgl"
-      ? SpectrumGL.new(width, height, numSources, contextWebgl)
-      : Spectrum.new(width, height, numSources, contextWasm);
+      ? SpectrumGL.new(
+          width,
+          height,
+          numSources,
+          movementSpeed * MOVEMENT_SPEED_FACTOR,
+          colorSpeed * COLOR_SPEED_FACTOR,
+          contextWebgl
+        )
+      : Spectrum.new(
+          width,
+          height,
+          numSources,
+          movementSpeed * MOVEMENT_SPEED_FACTOR,
+          colorSpeed * COLOR_SPEED_FACTOR,
+          contextWasm
+        );
 
   return {
     canvas,
@@ -180,12 +196,26 @@ const setupCanvas = (): void => {
 
 const getNewSpectrumGl = (): SpectrumGL => {
   setupCanvas();
-  return SpectrumGL.new(width, height, numSources, contextWebgl);
+  return SpectrumGL.new(
+    width,
+    height,
+    numSources,
+    movementSpeed * MOVEMENT_SPEED_FACTOR,
+    colorSpeed * COLOR_SPEED_FACTOR,
+    contextWebgl
+  );
 };
 
 const getNewSpectrum = (): Spectrum => {
   setupCanvas();
-  return Spectrum.new(width, height, numSources, contextWasm);
+  return Spectrum.new(
+    width,
+    height,
+    numSources,
+    movementSpeed * MOVEMENT_SPEED_FACTOR,
+    colorSpeed * COLOR_SPEED_FACTOR,
+    contextWasm
+  );
 };
 
 let fps = new FPS();
@@ -252,9 +282,9 @@ setNumSources.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setMovementSpeed.min = "0.1";
-setMovementSpeed.max = "5";
-setMovementSpeed.step = "0.1";
+setMovementSpeed.min = "0";
+setMovementSpeed.max = "100";
+setMovementSpeed.step = "1";
 setMovementSpeed.value = movementSpeed.toString();
 setMovementSpeed.addEventListener("change", (e) => {
   const newMovementSpeed = (e.target as HTMLInputElement).value;
@@ -263,9 +293,9 @@ setMovementSpeed.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setColorSpeed.min = "0.01";
-setColorSpeed.max = "1";
-setColorSpeed.step = "0.01";
+setColorSpeed.min = "0";
+setColorSpeed.max = "100";
+setColorSpeed.step = "1";
 setColorSpeed.value = colorSpeed.toString();
 setColorSpeed.addEventListener("change", (e) => {
   const newColorSpeed = (e.target as HTMLInputElement).value;
