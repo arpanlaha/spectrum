@@ -256,7 +256,6 @@ const restartSpectrum = (): void => {
 
 modeText.textContent = MODE_LABELS[mode];
 
-setWidth.min = "100";
 setWidth.max = MAX_WIDTH.toString();
 setWidth.value = width.toString();
 setWidth.addEventListener("change", (e) => {
@@ -266,7 +265,6 @@ setWidth.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setHeight.min = "100";
 setHeight.max = MAX_HEIGHT.toString();
 setHeight.value = height.toString();
 setHeight.addEventListener("change", (e) => {
@@ -276,7 +274,6 @@ setHeight.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setNumSources.min = "2";
 // iOS Safari is dumb and has a limited number of fragment shader uniforms
 setNumSources.max = Math.min(
   100,
@@ -290,9 +287,6 @@ setNumSources.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setMovementSpeed.min = "0";
-setMovementSpeed.max = "100";
-setMovementSpeed.step = "1";
 setMovementSpeed.value = movementSpeed.toString();
 setMovementSpeed.addEventListener("change", (e) => {
   const newMovementSpeed = (e.target as HTMLInputElement).value;
@@ -301,9 +295,6 @@ setMovementSpeed.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-setColorSpeed.min = "0";
-setColorSpeed.max = "100";
-setColorSpeed.step = "1";
 setColorSpeed.value = colorSpeed.toString();
 setColorSpeed.addEventListener("change", (e) => {
   const newColorSpeed = (e.target as HTMLInputElement).value;

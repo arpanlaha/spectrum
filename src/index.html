@@ -36,29 +36,29 @@
       </div>
       <div class="control">
         <label for="set-width">Width (px): <span id="width"></span></label>
-        <input type="range" id="set-width" />
+        <input type="range" id="set-width" min="100" step="10" />
       </div>
       <div class="control">
         <label for="set-height">Height (px): <span id="height"></span></label>
-        <input type="range" id="set-height" />
+        <input type="range" id="set-height" min="100" step="10" />
       </div>
       <div class="control">
         <label for="set-num-sources">
           Sources: <span id="num-sources"></span>
         </label>
-        <input type="range" id="set-num-sources" />
+        <input type="range" id="set-num-sources" min="2" />
       </div>
       <div class="control">
         <label for="set-movement-speed">
           Movement speed: <span id="movement-speed"></span>
         </label>
-        <input type="range" id="set-movement-speed" />
+        <input type="range" id="set-movement-speed" min="0" max="100" />
       </div>
       <div class="control">
         <label for="set-color-speed">
           Color speed: <span id="color-speed"></span>
         </label>
-        <input type="range" id="set-color-speed" />
+        <input type="range" id="set-color-speed" min="0" max="100" />
       </div>
       <a id="download-link" download="spectrum.png">
         <button id="download-button" type="button">Download</button>
