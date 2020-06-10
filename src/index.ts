@@ -257,6 +257,37 @@ const restartSpectrum = (): void => {
   }
 };
 
+const renderLoop = (): void => {
+  spectrum.draw();
+  fps.render();
+  spectrum.tick();
+
+  animationId = window.requestAnimationFrame(renderLoop);
+};
+
+const isPaused = (): boolean => animationId === null;
+
+const play = (): void => {
+  playPauseButton.textContent = "⏸";
+  renderLoop();
+};
+
+const pause = (): void => {
+  if (animationId !== null) {
+    playPauseButton.textContent = "▶";
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+};
+
+playPauseButton.addEventListener("click", () => {
+  if (isPaused()) {
+    play();
+  } else {
+    pause();
+  }
+});
+
 modeText.textContent = MODE_LABELS[mode];
 
 setWidth.max = MAX_WIDTH.toString();
@@ -304,41 +335,6 @@ setColorSpeed.addEventListener("change", (e) => {
   colorSpeed = parseInt(newColorSpeed);
   colorSpeedText.textContent = colorSpeed.toString();
   restartSpectrum();
-});
-
-const drawFrame = (): void => {
-  spectrum.draw();
-  fps.render();
-};
-
-const renderLoop = (): void => {
-  drawFrame();
-  spectrum.tick();
-
-  animationId = window.requestAnimationFrame(renderLoop);
-};
-
-const isPaused = (): boolean => animationId === null;
-
-const play = (): void => {
-  playPauseButton.textContent = "⏸";
-  renderLoop();
-};
-
-const pause = (): void => {
-  if (animationId !== null) {
-    playPauseButton.textContent = "▶";
-    cancelAnimationFrame(animationId);
-    animationId = null;
-  }
-};
-
-playPauseButton.addEventListener("click", () => {
-  if (isPaused()) {
-    play();
-  } else {
-    pause();
-  }
 });
 
 toggleButton.addEventListener("click", () => {
