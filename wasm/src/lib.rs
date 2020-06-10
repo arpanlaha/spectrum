@@ -6,6 +6,8 @@ use web_sys::{
     CanvasRenderingContext2d, ImageData, WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
 
+mod utils;
+
 const TWO_PI: f32 = consts::PI * 2f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
@@ -321,7 +323,7 @@ impl Spectrum {
                     hue_vector_sin += source.hue_sin() / dist_factor;
                 }
 
-                let RGBA(r, g, b, a) = Hue(atan2(hue_vector_cos, hue_vector_sin)).to_rgba();
+                let RGBA(r, g, b, a) = Hue(atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgba();
 
                 let start = (x + y * self.base.width) * 4;
 
@@ -378,6 +380,8 @@ impl SpectrumGL {
         color_speed: f32,
         context: WebGlRenderingContext,
     ) -> SpectrumGL {
+        utils::set_panic_hook();
+
         let vertex_shader = compile_shader(
             &context,
             WebGlRenderingContext::VERTEX_SHADER,
@@ -396,7 +400,11 @@ impl SpectrumGL {
             &format!(
                 r#"
                     #define PI 3.141592653589793
+                    #define TWO_PI 6.283185307179586
+                    #define PI_4 0.7853981633974483
                     #define PI_3 1.0471975511965976
+                    #define PI_2 1.5707963267948966
+                    #define PI_3_2 4.71238898038469
                     #define PI_2_3 2.0943951023931953
                     #define PI_4_3 4.1887902047863905
                     #define PI_5_3 5.235987755982989
@@ -404,6 +412,26 @@ impl SpectrumGL {
                     precision highp float;
 
                     uniform float sources[{}];
+
+                    float atan_approx(float quotient) {{
+                        return (PI_4 + 0.273 * (1.0 - abs(quotient))) * quotient;
+                    }}
+
+                    float atan2_approx(float x, float y) {{
+                        if (abs(x) > abs(y)) {{
+                            if (x < 0.0) {{
+                                return atan_approx(y / x) + PI;
+                            }} else if (y < 0.0) {{
+                                return atan_approx(y / x) + TWO_PI;
+                            }} else {{
+                                return atan_approx(y / x);
+                            }}
+                        }} else if (y < 0.0) {{
+                            return PI_3_2 - atan_approx(x / y);
+                        }} else {{
+                            return PI_2 - atan_approx(x / y);
+                        }}
+                    }}
 
                     void main() {{
                         float x = gl_FragCoord[0];
@@ -417,10 +445,8 @@ impl SpectrumGL {
                             sin_sum += sources[4 * i + 3] / dist_factor;
                         }}
 
-                        float hue = atan(sin_sum, cos_sum);
-                        if (hue < 0.0) {{
-                            hue += 2.0 * PI;
-                        }}
+                        float hue = atan2_approx(sin_sum, cos_sum);
+                       
                         float secondary = 1.0 - abs(mod((hue / PI_3), 2.0) - 1.0);
 
                         if (hue < PI) {{
@@ -533,7 +559,7 @@ impl SpectrumGL {
 /// # Parameters
 ///
 /// * `quotient` - the minimum of `cos / sin` and `sin / cos`.
-fn atan(quotient: f32) -> f32 {
+fn atan_approx(quotient: f32) -> f32 {
     (consts::FRAC_PI_4 + 0.273f32 * (1f32 - quotient.abs())) * quotient
 }
 
@@ -543,19 +569,19 @@ fn atan(quotient: f32) -> f32 {
 ///
 /// * `cos` - the cosine/x term.
 /// * `sin` - the sine/y term.
-fn atan2(cos: f32, sin: f32) -> f32 {
+fn atan2_approx(cos: f32, sin: f32) -> f32 {
     if cos.abs() > sin.abs() {
         if cos < 0f32 {
-            atan(sin / cos) + consts::PI
+            atan_approx(sin / cos) + consts::PI
         } else if sin < 0f32 {
-            atan(sin / cos) + 2f32 * consts::PI
+            atan_approx(sin / cos) + 2f32 * consts::PI
         } else {
-            atan(sin / cos)
+            atan_approx(sin / cos)
         }
     } else if sin < 0f32 {
-        -atan(cos / sin) + 3f32 * consts::FRAC_PI_2
+        -atan_approx(cos / sin) + 3f32 * consts::FRAC_PI_2
     } else {
-        -atan(cos / sin) + consts::FRAC_PI_2
+        -atan_approx(cos / sin) + consts::FRAC_PI_2
     }
 }
 
