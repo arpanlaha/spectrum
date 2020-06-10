@@ -6,8 +6,6 @@ use web_sys::{
     CanvasRenderingContext2d, ImageData, WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
 
-mod utils;
-
 const TWO_PI: f32 = consts::PI * 2f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
@@ -380,8 +378,6 @@ impl SpectrumGL {
         color_speed: f32,
         context: WebGlRenderingContext,
     ) -> SpectrumGL {
-        utils::set_panic_hook();
-
         let vertex_shader = compile_shader(
             &context,
             WebGlRenderingContext::VERTEX_SHADER,
