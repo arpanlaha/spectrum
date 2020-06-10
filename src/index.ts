@@ -53,6 +53,9 @@ const colorSpeedText = document.getElementById(
 const setColorSpeed = document.getElementById(
   "set-color-speed"
 ) as HTMLInputElement;
+const restartButton = document.getElementById(
+  "restart-button"
+) as HTMLButtonElement;
 const downloadLink = document.getElementById(
   "download-link"
 ) as HTMLAnchorElement;
@@ -355,6 +358,14 @@ toggleButton.addEventListener("click", () => {
 
   modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
+});
+
+restartButton.addEventListener("click", () => {
+  if (mode === "webgl") {
+    spectrum = getNewSpectrumGl();
+  } else {
+    spectrum = getNewSpectrum();
+  }
 });
 
 downloadButton.addEventListener("click", () => {

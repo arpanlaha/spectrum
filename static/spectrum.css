@@ -36,6 +36,10 @@ body {
   display: none;
 }
 
+#fps {
+  text-align: center;
+}
+
 #controls {
   background-color: hsla(0, 0%, 0%, 0.5);
   white-space: nowrap;
@@ -57,10 +61,12 @@ h1 {
     top: 0%;
     /* transform: translateY(-50%); */
 
-    padding: 2vh;
-    border-radius: 0 0 1vw 0;
+    padding: 0 1vw;
+    /* border-radius: 0 0 1vw 0; */
 
     font-size: 1vw;
+    height: 100%;
+    justify-content: space-evenly;
   }
 
   h1 {
@@ -71,10 +77,6 @@ h1 {
 
   #toggle {
     font-size: 1vw;
-  }
-
-  #fps {
-    width: 5vw;
   }
 
   .control {
