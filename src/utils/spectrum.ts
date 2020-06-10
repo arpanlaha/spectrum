@@ -147,7 +147,7 @@ class Source {
   tick(): void {
     this.hue.tick(this.dh);
     this.hueCos = Math.cos(this.hue.hue);
-    this.hueSin = Math.cos(this.hue.hue);
+    this.hueSin = Math.sin(this.hue.hue);
 
     this.x += this.dx;
     this.y += this.dy;
@@ -235,7 +235,7 @@ export default class SpectrumJS {
           hueVectorSin += source.hueSin / distFactor;
         });
 
-        const start = x + y * this.width;
+        const start = (x + y * this.width) * 4;
         const [r, g, b, a] = new Hue(
           atan2Approx(hueVectorCos, hueVectorSin)
         ).toRgba();
@@ -248,7 +248,7 @@ export default class SpectrumJS {
     }
 
     this.context.putImageData(
-      new ImageData(new Uint8ClampedArray(this.data), this.width),
+      new ImageData(this.data, this.width, this.height),
       0,
       0
     );

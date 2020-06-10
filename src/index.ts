@@ -1,5 +1,5 @@
 import { Spectrum, SpectrumGL } from "wasm-spectrum";
-import FPS from "./utils/fps";
+import { FPS, SpectrumJS } from "./utils";
 
 const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
@@ -9,22 +9,18 @@ const WASM_SCALE = 0.4;
 const MOVEMENT_SPEED_FACTOR = 0.4;
 const COLOR_SPEED_FACTOR = 0.005;
 
-type Mode = "wasm" | "webgl";
+type Mode = "webgl" | "wasm" | "js";
 
-interface Modes {
-  wasm: string;
-  webgl: string;
-}
-
-const MODE_LABELS: Modes = {
-  wasm: "WebAssembly",
+const MODE_LABELS: Record<Mode, string> = {
   webgl: "WebGL",
+  wasm: "WebAssembly",
+  js: "JavaScript",
 };
 
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
-const canvasWasm = document.getElementById("canvas-wasm") as HTMLCanvasElement;
+const canvas2d = document.getElementById("canvas-wasm") as HTMLCanvasElement;
 const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseButton = document.getElementById(
   "play-pause"
@@ -66,8 +62,8 @@ const downloadButton = document.getElementById(
 const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
 }) as WebGLRenderingContext;
-const contextWasm = canvasWasm.getContext("2d") as CanvasRenderingContext2D;
-contextWasm.scale(DEVICE_SCALE, DEVICE_SCALE);
+const context2d = canvas2d.getContext("2d") as CanvasRenderingContext2D;
+context2d.scale(DEVICE_SCALE, DEVICE_SCALE);
 
 interface InitialState {
   canvas: HTMLCanvasElement;
@@ -79,7 +75,7 @@ interface InitialState {
 }
 
 interface State extends InitialState {
-  spectrum: Spectrum | SpectrumGL;
+  spectrum: Spectrum | SpectrumGL | SpectrumJS;
 }
 
 const initialStates: Record<Mode, InitialState> = {
@@ -92,7 +88,15 @@ const initialStates: Record<Mode, InitialState> = {
     colorSpeed: 20,
   },
   wasm: {
-    canvas: canvasWasm,
+    canvas: canvas2d,
+    width: Math.round(MAX_WIDTH * WASM_SCALE),
+    height: Math.round(MAX_HEIGHT * WASM_SCALE),
+    numSources: 10,
+    movementSpeed: 40,
+    colorSpeed: 40,
+  },
+  js: {
+    canvas: canvas2d,
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
@@ -135,24 +139,37 @@ const getInitialState = (mode: Mode): State => {
     contextWebgl.viewport(0, 0, width, height);
   }
 
-  const spectrum =
-    mode === "webgl"
-      ? SpectrumGL.new(
-          width,
-          height,
-          numSources,
-          movementSpeed * MOVEMENT_SPEED_FACTOR,
-          colorSpeed * COLOR_SPEED_FACTOR,
-          contextWebgl
-        )
-      : Spectrum.new(
-          width,
-          height,
-          numSources,
-          movementSpeed * MOVEMENT_SPEED_FACTOR,
-          colorSpeed * COLOR_SPEED_FACTOR,
-          contextWasm
-        );
+  const spectrumInitializers = {
+    webgl: () =>
+      SpectrumGL.new(
+        width,
+        height,
+        numSources,
+        movementSpeed * MOVEMENT_SPEED_FACTOR,
+        colorSpeed * COLOR_SPEED_FACTOR,
+        contextWebgl
+      ),
+    wasm: () =>
+      Spectrum.new(
+        width,
+        height,
+        numSources,
+        movementSpeed * MOVEMENT_SPEED_FACTOR,
+        colorSpeed * COLOR_SPEED_FACTOR,
+        context2d
+      ),
+    js: () =>
+      new SpectrumJS(
+        width,
+        height,
+        numSources,
+        movementSpeed * MOVEMENT_SPEED_FACTOR,
+        colorSpeed * COLOR_SPEED_FACTOR,
+        context2d
+      ),
+  };
+
+  const spectrum = spectrumInitializers[mode]();
 
   return {
     canvas,
@@ -205,7 +222,7 @@ const setupCanvas = (): void => {
   }
 };
 
-const getNewSpectrumGl = (): SpectrumGL => {
+const getNewSpectrumGL = (): SpectrumGL => {
   setupCanvas();
   return SpectrumGL.new(
     width,
@@ -225,7 +242,19 @@ const getNewSpectrum = (): Spectrum => {
     numSources,
     movementSpeed * MOVEMENT_SPEED_FACTOR,
     colorSpeed * COLOR_SPEED_FACTOR,
-    contextWasm
+    context2d
+  );
+};
+
+const getNewSpectrumJS = (): SpectrumJS => {
+  setupCanvas();
+  return new SpectrumJS(
+    width,
+    height,
+    numSources,
+    movementSpeed * MOVEMENT_SPEED_FACTOR,
+    colorSpeed * COLOR_SPEED_FACTOR,
+    context2d
   );
 };
 
@@ -241,15 +270,15 @@ const restartSpectrum = (): void => {
   fps = new FPS();
 
   if (mode === "webgl") {
-    canvasWasm.classList.add("hide");
+    canvas2d.classList.add("hide");
     canvasWebgl.classList.remove("hide");
 
-    spectrum = getNewSpectrumGl();
-  } else if (mode === "wasm") {
+    spectrum = getNewSpectrumGL();
+  } else {
     canvasWebgl.classList.add("hide");
-    canvasWasm.classList.remove("hide");
+    canvas2d.classList.remove("hide");
 
-    spectrum = getNewSpectrum();
+    spectrum = mode === "wasm" ? getNewSpectrum() : getNewSpectrumJS();
   }
 
   if (shouldPlay) {
@@ -341,6 +370,8 @@ toggleButton.addEventListener("click", () => {
   if (mode === "webgl") {
     mode = "wasm";
   } else if (mode === "wasm") {
+    mode = "js";
+  } else {
     mode = "webgl";
   }
 
@@ -358,9 +389,11 @@ toggleButton.addEventListener("click", () => {
 
 restartButton.addEventListener("click", () => {
   if (mode === "webgl") {
-    spectrum = getNewSpectrumGl();
-  } else {
+    spectrum = getNewSpectrumGL();
+  } else if (mode === "wasm") {
     spectrum = getNewSpectrum();
+  } else {
+    spectrum = getNewSpectrumJS();
   }
 });
 
