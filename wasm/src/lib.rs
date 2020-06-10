@@ -7,6 +7,7 @@ use web_sys::{
 };
 
 const TWO_PI: f32 = consts::PI * 2f32;
+const THREE_HALVES_PI: f32 = consts::PI * 1.5f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
@@ -313,6 +314,7 @@ impl Spectrum {
             let x_float = x as f32;
             for y in 0..self.base.height {
                 let y_float = y as f32;
+                // TODO: check to see if this can be done in a reduce
                 let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
                 for source in &self.base.sources {
                     let dist_factor =
@@ -570,12 +572,12 @@ fn atan2_approx(cos: f32, sin: f32) -> f32 {
         if cos < 0f32 {
             atan_approx(sin / cos) + consts::PI
         } else if sin < 0f32 {
-            atan_approx(sin / cos) + 2f32 * consts::PI
+            atan_approx(sin / cos) + TWO_PI
         } else {
             atan_approx(sin / cos)
         }
     } else if sin < 0f32 {
-        -atan_approx(cos / sin) + 3f32 * consts::FRAC_PI_2
+        -atan_approx(cos / sin) + THREE_HALVES_PI
     } else {
         -atan_approx(cos / sin) + consts::FRAC_PI_2
     }
