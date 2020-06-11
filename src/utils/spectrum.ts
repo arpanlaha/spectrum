@@ -172,7 +172,7 @@ class Source {
 
 export default class SpectrumJS {
   /**
-   * he width of the Spectrum canvas.
+   * The width of the Spectrum canvas.
    */
   width: number;
 
@@ -202,7 +202,7 @@ export default class SpectrumJS {
     numSources: number,
     movementSpeed: number,
     colorSpeed: number,
-    context: CanvasRenderingContext2D
+    canvas: HTMLCanvasElement
   ) {
     this.width = width;
     this.height = height;
@@ -211,9 +211,36 @@ export default class SpectrumJS {
       () => new Source(width, height, movementSpeed, colorSpeed)
     );
     this.data = new Uint8ClampedArray(4 * width * height);
-    this.context = context;
+    this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
     this.draw();
+  }
+
+  /**
+   * Wraps the SpectrumJS constructor.
+   * @param width the width of the SpectrumJS.
+   * @param height the height of the SpectrumJS
+   * @param numSources the number of Sources.
+   * @param movementSpeed the range of Source movement speed.
+   * @param colorSpeed the range of Source Hue speed.
+   * @param canvas the canvas element to draw to.
+   */
+  static new(
+    width: number,
+    height: number,
+    numSources: number,
+    movementSpeed: number,
+    colorSpeed: number,
+    canvas: HTMLCanvasElement
+  ): SpectrumJS {
+    return new SpectrumJS(
+      width,
+      height,
+      numSources,
+      movementSpeed,
+      colorSpeed,
+      canvas
+    );
   }
 
   /**

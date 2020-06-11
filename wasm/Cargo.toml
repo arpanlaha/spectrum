@@ -24,6 +24,7 @@ js-sys = "0.3.40"
 version = "0.3"
 features = [
   'CanvasRenderingContext2d',
+  'HtmlCanvasElement',
   'ImageData',
   'WebGlBuffer',
   'WebGlRenderingContext',

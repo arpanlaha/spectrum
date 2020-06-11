@@ -2,8 +2,10 @@ use js_sys::Math;
 use std::f32::consts;
 use std::iter;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, ImageData, WebGlProgram, WebGlRenderingContext, WebGlShader,
+    CanvasRenderingContext2d, HtmlCanvasElement, ImageData, WebGlProgram, WebGlRenderingContext,
+    WebGlShader,
 };
 
 const TWO_PI: f32 = consts::PI * 2f32;
@@ -263,7 +265,7 @@ impl BaseSpectrum {
 
 /// A WebAssembly-only implementation of Spectrum.
 #[wasm_bindgen]
-pub struct Spectrum {
+pub struct SpectrumWasm {
     /// The Spectrum's BaseSpectrum.
     base: BaseSpectrum,
 
@@ -275,7 +277,7 @@ pub struct Spectrum {
 }
 
 #[wasm_bindgen]
-impl Spectrum {
+impl SpectrumWasm {
     /// Creates a new Spectrum.
     ///
     /// # Arguments
@@ -292,12 +294,17 @@ impl Spectrum {
         num_sources: usize,
         movement_speed: f32,
         color_speed: f32,
-        context: CanvasRenderingContext2d,
-    ) -> Spectrum {
-        let mut spectrum = Spectrum {
+        canvas: HtmlCanvasElement,
+    ) -> SpectrumWasm {
+        let mut spectrum = SpectrumWasm {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             data: vec![0u8; width * height * 4],
-            context,
+            context: canvas
+                .get_context("2d")
+                .unwrap()
+                .unwrap()
+                .dyn_into::<CanvasRenderingContext2d>()
+                .unwrap(),
         };
         spectrum.draw();
 
@@ -378,8 +385,15 @@ impl SpectrumGL {
         num_sources: usize,
         movement_speed: f32,
         color_speed: f32,
-        context: WebGlRenderingContext,
+        canvas: HtmlCanvasElement,
     ) -> SpectrumGL {
+        let context = canvas
+            .get_context("webgl")
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGlRenderingContext>()
+            .unwrap();
+
         let vertex_shader = compile_shader(
             &context,
             WebGlRenderingContext::VERTEX_SHADER,
