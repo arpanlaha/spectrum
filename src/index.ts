@@ -6,6 +6,7 @@ const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
+const JS_SCALE = 0.25;
 const MOVEMENT_SPEED_FACTOR = 0.4;
 const COLOR_SPEED_FACTOR = 0.005;
 
@@ -92,8 +93,8 @@ const initialStates: Record<Mode, InitialState> = {
   },
   js: {
     canvas: canvas2d,
-    width: Math.round(MAX_WIDTH * WASM_SCALE),
-    height: Math.round(MAX_HEIGHT * WASM_SCALE),
+    width: Math.round(MAX_WIDTH * JS_SCALE),
+    height: Math.round(MAX_HEIGHT * JS_SCALE),
     numSources: 10,
     movementSpeed: 40,
     colorSpeed: 40,
