@@ -30,10 +30,15 @@
       <h1>Spectrum</h1>
       <div id="fps"></div>
       <button id="play-pause" type="button"></button>
-      <div class="control">
-        <label for="toggle">Mode: <span id="mode"></span></label>
-        <button id="toggle" type="button">Toggle</button>
+      <div class="vertical-center">
+        <label for="modes">Rendering source:</label>
+        <div id="modes" class="horizontal-center">
+          <div id="mode-webgl" class="mode current-mode">WebGL</div>
+          <div id="mode-wasm" class="mode">WebAssembly</div>
+          <div id="mode-js" class="mode">JavaScript</div>
+        </div>
       </div>
+
       <div class="control">
         <label for="set-width">Width (px): <span id="width"></span></label>
         <input type="range" id="set-width" min="100" step="10" />

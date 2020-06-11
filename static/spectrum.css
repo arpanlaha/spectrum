@@ -25,6 +25,12 @@ body {
   align-items: center;
 }
 
+.horizontal-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .hide {
   display: none;
 }
@@ -34,7 +40,7 @@ body {
 }
 
 #controls {
-  background-color: hsla(0, 0%, 0%, 0.5);
+  background-color: hsla(0, 0%, 0%, 0.6);
   white-space: nowrap;
 }
 
@@ -84,4 +90,37 @@ h1 {
 .github:hover {
   opacity: 1;
   transition: opacity 0.2s;
+}
+
+#modes {
+  margin-top: 1vmin;
+}
+
+#mode-webgl {
+  border-radius: 1vmin 0 0 1vmin;
+  border-width: 2px 1px 2px 2px;
+}
+
+#mode-wasm {
+  border-width: 2px 1px 2px 1px;
+}
+
+#mode-js {
+  border-radius: 0 1vmin 1vmin 0;
+  border-width: 2px 2px 2px 1px;
+}
+
+.mode {
+  padding: 1vmin;
+  border: solid;
+  border-color: hsl(215, 100%, 50%);
+  cursor: pointer;
+}
+
+.mode:hover:not(.current-mode) {
+  background-color: hsla(215, 50%, 50%, 40%);
+}
+
+.current-mode {
+  background-color: hsl(215, 100%, 50%);
 }

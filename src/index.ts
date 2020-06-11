@@ -11,12 +11,6 @@ const COLOR_SPEED_FACTOR = 0.005;
 
 type Mode = "webgl" | "wasm" | "js";
 
-const MODE_LABELS: Record<Mode, string> = {
-  webgl: "WebGL",
-  wasm: "WebAssembly",
-  js: "JavaScript",
-};
-
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
@@ -25,8 +19,9 @@ const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseButton = document.getElementById(
   "play-pause"
 ) as HTMLButtonElement;
-const toggleButton = document.getElementById("toggle") as HTMLButtonElement;
-const modeText = document.getElementById("mode") as HTMLSpanElement;
+const modeWebgl = document.getElementById("mode-webgl") as HTMLDivElement;
+const modeWasm = document.getElementById("mode-wasm") as HTMLDivElement;
+const modeJs = document.getElementById("mode-js") as HTMLDivElement;
 const widthText = document.getElementById("width") as HTMLSpanElement;
 const setWidth = document.getElementById("set-width") as HTMLInputElement;
 const heightText = document.getElementById("height") as HTMLSpanElement;
@@ -317,7 +312,44 @@ playPauseButton.addEventListener("click", () => {
   }
 });
 
-modeText.textContent = MODE_LABELS[mode];
+const resetState = (): void => {
+  const newState = initialStates[mode];
+  width = newState.width;
+  height = newState.height;
+  canvas = newState.canvas;
+  numSources = newState.numSources;
+  movementSpeed = newState.movementSpeed;
+  colorSpeed = newState.colorSpeed;
+
+  restartSpectrum();
+};
+
+modeWebgl.addEventListener("click", () => {
+  if (mode !== "webgl") {
+    (mode === "wasm" ? modeWasm : modeJs).classList.remove("current-mode");
+    modeWebgl.classList.add("current-mode");
+  }
+  mode = "webgl";
+  resetState();
+});
+
+modeWasm.addEventListener("click", () => {
+  if (mode !== "wasm") {
+    (mode === "webgl" ? modeWebgl : modeJs).classList.remove("current-mode");
+    modeWasm.classList.add("current-mode");
+  }
+  mode = "wasm";
+  resetState();
+});
+
+modeJs.addEventListener("click", () => {
+  if (mode !== "js") {
+    (mode === "webgl" ? modeWebgl : modeWasm).classList.remove("current-mode");
+    modeJs.classList.add("current-mode");
+  }
+  mode = "js";
+  resetState();
+});
 
 setWidth.max = MAX_WIDTH.toString();
 setWidth.value = width.toString();
@@ -363,27 +395,6 @@ setColorSpeed.addEventListener("change", (e) => {
   const newColorSpeed = (e.target as HTMLInputElement).value;
   colorSpeed = parseInt(newColorSpeed);
   colorSpeedText.textContent = colorSpeed.toString();
-  restartSpectrum();
-});
-
-toggleButton.addEventListener("click", () => {
-  if (mode === "webgl") {
-    mode = "wasm";
-  } else if (mode === "wasm") {
-    mode = "js";
-  } else {
-    mode = "webgl";
-  }
-
-  const newState = initialStates[mode];
-  width = newState.width;
-  height = newState.height;
-  canvas = newState.canvas;
-  numSources = newState.numSources;
-  movementSpeed = newState.movementSpeed;
-  colorSpeed = newState.colorSpeed;
-
-  modeText.textContent = MODE_LABELS[mode];
   restartSpectrum();
 });
 
