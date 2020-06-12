@@ -321,14 +321,20 @@ impl SpectrumWasm {
             let x_float = x as f32;
             for y in 0..self.base.height {
                 let y_float = y as f32;
-                // TODO: check to see if this can be done in a reduce
-                let (mut hue_vector_cos, mut hue_vector_sin) = (0f32, 0f32);
-                for source in &self.base.sources {
-                    let dist_factor =
-                        (x_float - source.x()).powi(2) + (y_float - source.y()).powi(2) + 1f32;
-                    hue_vector_cos += source.hue_cos() / dist_factor;
-                    hue_vector_sin += source.hue_sin() / dist_factor;
-                }
+
+                let (hue_vector_cos, hue_vector_sin) =
+                    self.base
+                        .sources
+                        .iter()
+                        .fold((0f32, 0f32), |(sum_cos, sum_sin), source| {
+                            let dist_factor = (x_float - source.x()).powi(2)
+                                + (y_float - source.y()).powi(2)
+                                + 1f32;
+                            (
+                                sum_cos + source.hue_cos() / dist_factor,
+                                sum_sin + source.hue_sin() / dist_factor,
+                            )
+                        });
 
                 let RGBA(r, g, b, a) = Hue(atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgba();
 
