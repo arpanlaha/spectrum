@@ -9,7 +9,6 @@ export default class FPS {
     this.node = document.getElementById("fps") as HTMLElement;
     this.frames = [];
     this.lastFrameTimeStamp = performance.now();
-    this.node.textContent = "FPS: ";
   }
 
   render(): void {
@@ -30,6 +29,6 @@ export default class FPS {
       this.frames.reduce((sum, frame) => sum + frame) / this.frames.length;
 
     // Render the statistics.
-    this.node.textContent = `FPS: ${Math.round(fps)}`;
+    this.node.textContent = `${Math.round(fps)} FPS`;
   }
 }
