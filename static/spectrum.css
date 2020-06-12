@@ -161,4 +161,5 @@ button:hover {
 
 .control-buttons {
   justify-content: space-evenly;
+  width: 80%;
 }
