@@ -21,13 +21,12 @@ const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
 const canvas2d = document.getElementById("canvas-wasm") as HTMLCanvasElement;
-const controls = document.getElementById("controls") as HTMLDivElement;
-const playPauseButton = document.getElementById(
-  "play-pause-button"
-) as HTMLButtonElement;
 const playPauseIcon = document.getElementById(
   "play-pause-icon"
 ) as HTMLImageElement;
+const downloadLink = document.getElementById(
+  "download-link"
+) as HTMLAnchorElement;
 const modeWebgl = document.getElementById("mode-webgl") as HTMLDivElement;
 const modeWasm = document.getElementById("mode-wasm") as HTMLDivElement;
 const modeJs = document.getElementById("mode-js") as HTMLDivElement;
@@ -55,15 +54,6 @@ const colorSpeedText = document.getElementById(
 const setColorSpeed = document.getElementById(
   "set-color-speed"
 ) as HTMLInputElement;
-const restartButton = document.getElementById(
-  "restart-button"
-) as HTMLButtonElement;
-const downloadLink = document.getElementById(
-  "download-link"
-) as HTMLAnchorElement;
-const downloadButton = document.getElementById(
-  "download-button"
-) as HTMLButtonElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
@@ -280,7 +270,7 @@ const pause = (): void => {
   }
 };
 
-playPauseButton.addEventListener("click", () => {
+document.getElementById("play-pause-button")!.addEventListener("click", () => {
   if (isPaused()) {
     play();
   } else {
@@ -393,16 +383,16 @@ setColorSpeed.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-restartButton.addEventListener("click", () => {
+document.getElementById("restart-button")!.addEventListener("click", () => {
   spectrum = getNewSpectrum();
 });
 
-downloadButton.addEventListener("click", () => {
+document.getElementById("download-link")!.addEventListener("click", () => {
   downloadLink.setAttribute(
     "href",
     canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
   );
 });
 
-controls.classList.remove("hide");
+document.getElementById("controls")!.classList.remove("hide");
 play();
