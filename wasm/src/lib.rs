@@ -245,11 +245,14 @@ impl BaseSpectrum {
         movement_speed: f32,
         color_speed: f32,
     ) -> BaseSpectrum {
+        let width_float = width as f32;
+        let height_float = height as f32;
+
         BaseSpectrum {
             width,
             height,
             sources: iter::repeat(())
-                .map(|()| Source::new(width as f32, height as f32, movement_speed, color_speed))
+                .map(|()| Source::new(width_float, height_float, movement_speed, color_speed))
                 .take(num_sources)
                 .collect(),
         }
@@ -320,15 +323,13 @@ impl SpectrumWasm {
         for x in 0..self.base.width {
             let x_float = x as f32;
             for y in 0..self.base.height {
-                let y_float = y as f32;
-
                 let (hue_vector_cos, hue_vector_sin) =
                     self.base
                         .sources
                         .iter()
                         .fold((0f32, 0f32), |(sum_cos, sum_sin), source| {
                             let dist_factor = (x_float - source.x()).powi(2)
-                                + (y_float - source.y()).powi(2)
+                                + (y as f32 - source.y()).powi(2)
                                 + 1f32;
                             (
                                 sum_cos + source.hue_cos() / dist_factor,
