@@ -23,8 +23,11 @@ const canvasWebgl = document.getElementById(
 const canvas2d = document.getElementById("canvas-wasm") as HTMLCanvasElement;
 const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseButton = document.getElementById(
-  "play-pause"
+  "play-pause-button"
 ) as HTMLButtonElement;
+const playPauseIcon = document.getElementById(
+  "play-pause-icon"
+) as HTMLImageElement;
 const modeWebgl = document.getElementById("mode-webgl") as HTMLDivElement;
 const modeWasm = document.getElementById("mode-wasm") as HTMLDivElement;
 const modeJs = document.getElementById("mode-js") as HTMLDivElement;
@@ -255,13 +258,13 @@ const renderLoop = (): void => {
 const isPaused = (): boolean => animationId === null;
 
 const play = (): void => {
-  playPauseButton.textContent = "⏸";
+  playPauseIcon.src = "/static/pause.svg";
   renderLoop();
 };
 
 const pause = (): void => {
   if (animationId !== null) {
-    playPauseButton.textContent = "▶";
+    playPauseIcon.src = "/static/play.svg";
     cancelAnimationFrame(animationId);
     animationId = null;
   }

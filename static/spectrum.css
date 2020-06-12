@@ -11,7 +11,7 @@ body {
   height: 100%;
   background-color: #000;
   color: #fff;
-  font-family: "Nunito Sans Light", sans-serif;
+  font-family: "Nunito Sans Light", sans-serif !important;
   font-feature-settings: normal;
   display: flex;
   justify-content: center;
@@ -29,6 +29,10 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
 }
 
 .hide {
@@ -77,6 +81,10 @@ h1 {
   .control label {
     margin-right: 0.5vw;
   }
+
+  button {
+    font-size: 1vw;
+  }
 }
 
 .github {
@@ -123,4 +131,32 @@ h1 {
 
 .current-mode {
   background-color: hsl(215, 100%, 50%);
+}
+
+#play-pause-button {
+  width: 6vh;
+  height: 6vh;
+  border-radius: 100%;
+
+  padding: 0;
+
+  cursor: pointer;
+}
+
+button {
+  border: none;
+  background-color: hsl(215, 100%, 50%);
+  transition: background-color 0.2s;
+  color: #fff;
+  font-family: "Nunito Sans Light", sans-serif !important;
+}
+
+button:hover {
+  background-color: hsl(215, 100%, 45%);
+  transition: background-color 0.2s;
+  font-weight: normal;
+}
+
+#play-pause-icon {
+  height: 1.2vw;
 }
