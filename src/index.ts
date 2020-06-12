@@ -31,6 +31,8 @@ const playPauseIcon = document.getElementById(
 const modeWebgl = document.getElementById("mode-webgl") as HTMLDivElement;
 const modeWasm = document.getElementById("mode-wasm") as HTMLDivElement;
 const modeJs = document.getElementById("mode-js") as HTMLDivElement;
+const modeLock = document.getElementById("mode-lock") as HTMLDivElement;
+const modeUnlock = document.getElementById("mode-unlock") as HTMLDivElement;
 const widthText = document.getElementById("width") as HTMLSpanElement;
 const setWidth = document.getElementById("set-width") as HTMLInputElement;
 const heightText = document.getElementById("height") as HTMLSpanElement;
@@ -170,6 +172,7 @@ const getInitialState = (mode: Mode): State => {
 };
 
 let mode: Mode = "webgl";
+let lockParameters = false;
 
 let {
   canvas,
@@ -282,12 +285,15 @@ playPauseButton.addEventListener("click", () => {
 
 const resetState = (): void => {
   const newState = initialStates[mode];
-  width = newState.width;
-  height = newState.height;
   canvas = newState.canvas;
-  numSources = newState.numSources;
-  movementSpeed = newState.movementSpeed;
-  colorSpeed = newState.colorSpeed;
+
+  if (!lockParameters) {
+    width = newState.width;
+    height = newState.height;
+    numSources = newState.numSources;
+    movementSpeed = newState.movementSpeed;
+    colorSpeed = newState.colorSpeed;
+  }
 
   restartSpectrum();
 };
@@ -296,27 +302,43 @@ modeWebgl.addEventListener("click", () => {
   if (mode !== "webgl") {
     (mode === "wasm" ? modeWasm : modeJs).classList.remove("current-mode");
     modeWebgl.classList.add("current-mode");
+    mode = "webgl";
+    resetState();
   }
-  mode = "webgl";
-  resetState();
 });
 
 modeWasm.addEventListener("click", () => {
   if (mode !== "wasm") {
     (mode === "webgl" ? modeWebgl : modeJs).classList.remove("current-mode");
     modeWasm.classList.add("current-mode");
+    mode = "wasm";
+    resetState();
   }
-  mode = "wasm";
-  resetState();
 });
 
 modeJs.addEventListener("click", () => {
   if (mode !== "js") {
     (mode === "webgl" ? modeWebgl : modeWasm).classList.remove("current-mode");
     modeJs.classList.add("current-mode");
+    mode = "js";
+    resetState();
   }
-  mode = "js";
-  resetState();
+});
+
+modeUnlock.addEventListener("click", () => {
+  if (lockParameters) {
+    modeLock.classList.remove("current-mode");
+    modeUnlock.classList.add("current-mode");
+    lockParameters = false;
+  }
+});
+
+modeLock.addEventListener("click", () => {
+  if (!lockParameters) {
+    modeUnlock.classList.remove("current-mode");
+    modeLock.classList.add("current-mode");
+    lockParameters = true;
+  }
 });
 
 setWidth.max = MAX_WIDTH.toString();

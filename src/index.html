@@ -44,11 +44,21 @@
       </div>
 
       <div class="vertical-center">
-        <label for="modes">Rendering source:</label>
-        <div id="modes" class="horizontal-center">
-          <div id="mode-webgl" class="mode current-mode">WebGL</div>
-          <div id="mode-wasm" class="mode">WebAssembly</div>
-          <div id="mode-js" class="mode">JavaScript</div>
+        <label for="sources">Rendering source:</label>
+        <div id="sources" class="modes horizontal-center">
+          <div id="mode-webgl" class="mode left-mode current-mode">WebGL</div>
+          <div id="mode-wasm" class="mode middle-mode">WebAssembly</div>
+          <div id="mode-js" class="mode right-mode">JavaScript</div>
+        </div>
+      </div>
+
+      <div class="vertical-center">
+        <label for="lock-unlock">On rendering source change:</label>
+        <div id="lock-unlock" class="modes horizontal-center">
+          <div id="mode-unlock" class="mode left-mode current-mode">
+            Use suggested settings
+          </div>
+          <div id="mode-lock" class="mode right-mode">Keep prior settings</div>
         </div>
       </div>
 

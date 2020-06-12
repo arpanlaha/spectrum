@@ -66,8 +66,7 @@ h1 {
 
   h1 {
     font-size: 2.5vw;
-    margin-top: 0;
-    margin-bottom: 1vw;
+    margin: 0;
   }
 
   #toggle {
@@ -104,22 +103,8 @@ h1 {
   transition: opacity 0.2s;
 }
 
-#modes {
+.modes {
   margin-top: 1vmin;
-}
-
-#mode-webgl {
-  border-radius: 1vmin 0 0 1vmin;
-  border-width: 2px 1px 2px 2px;
-}
-
-#mode-wasm {
-  border-width: 2px 1px 2px 1px;
-}
-
-#mode-js {
-  border-radius: 0 1vmin 1vmin 0;
-  border-width: 2px 2px 2px 1px;
 }
 
 .mode {
@@ -127,10 +112,26 @@ h1 {
   border: solid;
   border-color: hsl(215, 100%, 50%);
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .mode:hover:not(.current-mode) {
   background-color: hsla(215, 50%, 50%, 40%);
+  transition: background-color 0.2s;
+}
+
+.left-mode {
+  border-radius: 1vmin 0 0 1vmin;
+  border-width: 2px 1px 2px 2px;
+}
+
+.middle-mode {
+  border-width: 2px 1px 2px 1px;
+}
+
+.right-mode {
+  border-radius: 0 1vmin 1vmin 0;
+  border-width: 2px 2px 2px 1px;
 }
 
 .current-mode {

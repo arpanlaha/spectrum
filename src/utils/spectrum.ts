@@ -253,7 +253,6 @@ export default class SpectrumJS {
   draw(): void {
     for (let x = 0; x < this.width; x++) {
       for (let y = 0; y < this.height; y++) {
-        // TODO: check to see if this can be done in a reduce
         let [hueVectorCos, hueVectorSin] = [0, 0];
         this.sources.forEach((source) => {
           const distFactor =
