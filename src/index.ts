@@ -259,12 +259,14 @@ const isPaused = (): boolean => animationId === null;
 
 const play = (): void => {
   playPauseIcon.src = "/static/pause.svg";
+  playPauseIcon.alt = "Pause";
   renderLoop();
 };
 
 const pause = (): void => {
   if (animationId !== null) {
     playPauseIcon.src = "/static/play.svg";
+    playPauseIcon.alt = "Play";
     cancelAnimationFrame(animationId);
     animationId = null;
   }
