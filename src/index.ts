@@ -96,7 +96,7 @@ const initialStates: Record<Mode, InitialState> = {
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
-    movementSpeed: 40,
+    movementSpeed: 20,
     colorSpeed: 40,
   },
   js: {
@@ -104,7 +104,7 @@ const initialStates: Record<Mode, InitialState> = {
     width: Math.round(MAX_WIDTH * JS_SCALE),
     height: Math.round(MAX_HEIGHT * JS_SCALE),
     numSources: 10,
-    movementSpeed: 40,
+    movementSpeed: 10,
     colorSpeed: 40,
   },
 };
