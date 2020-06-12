@@ -35,13 +35,35 @@ body {
   display: none;
 }
 
-#fps {
-  text-align: center;
+button {
+  border: none;
+  background-color: hsl(215, 100%, 50%);
+  transition: background-color 0.2s;
+  color: #fff;
+  font-family: "Nunito Sans Light", sans-serif;
+  border-radius: 100%;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  outline: none;
 }
 
-#controls {
-  background-color: hsla(0, 0%, 0%, 0.6);
-  white-space: nowrap;
+button:hover {
+  background-color: hsl(215, 100%, 45%);
+  transition: background-color 0.2s;
+}
+
+button:focus {
+  background-color: hsl(215, 100%, 60%);
+  transition: background-color 0.2s;
+}
+
+button:active {
+  background-color: hsl(215, 100%, 40%);
+  transition: background-color 0.2s;
 }
 
 h1 {
@@ -53,54 +75,18 @@ h1 {
   background-blend-mode: exclusion;
 }
 
-@media (orientation: landscape) {
-  #controls {
-    position: fixed;
-    left: 0%;
-    top: 0%;
-    padding: 0 1vw;
-    font-size: 1vw;
-    height: 100%;
-    justify-content: space-evenly;
-  }
-
-  h1 {
-    font-size: 2.5vw;
-    margin: 0;
-  }
-
-  #toggle {
-    font-size: 1vw;
-  }
-
-  .control label {
-    margin-right: 0.5vw;
-  }
-
-  button {
-    width: 3vw;
-    height: 3vw;
-  }
-
-  button img {
-    height: 1.2vw;
-  }
-
-  .github {
-    width: 3vw;
-    height: 3vw;
-  }
+#controls {
+  background-color: hsla(0, 0%, 0%, 0.6);
+  white-space: nowrap;
 }
 
-.github {
-  margin: 0;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+#fps {
+  text-align: center;
 }
 
-.github:hover {
-  opacity: 1;
-  transition: opacity 0.2s;
+.control-buttons {
+  justify-content: space-evenly;
+  width: 80%;
 }
 
 .modes {
@@ -138,42 +124,48 @@ h1 {
   background-color: hsl(215, 100%, 50%);
 }
 
-button {
-  border: none;
-  background-color: hsl(215, 100%, 50%);
-  transition: background-color 0.2s;
-  color: #fff;
-  font-family: "Nunito Sans Light", sans-serif !important;
-
-  border-radius: 100%;
-
-  padding: 0;
-
-  cursor: pointer;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  outline: none;
+.github {
+  margin: 0;
+  opacity: 0.6;
+  transition: opacity 0.2s;
 }
 
-button:hover {
-  background-color: hsl(215, 100%, 45%);
-  transition: background-color 0.2s;
+.github:hover {
+  opacity: 1;
+  transition: opacity 0.2s;
 }
 
-button:focus {
-  background-color: hsl(215, 100%, 60%);
-  transition: background-color 0.2s;
-}
+@media (orientation: landscape) {
+  #controls {
+    position: fixed;
+    left: 0%;
+    top: 0%;
+    padding: 0 1vw;
+    font-size: 1vw;
+    height: 100%;
+    justify-content: space-evenly;
+  }
 
-button:active {
-  background-color: hsl(215, 100%, 40%);
-  transition: background-color 0.2s;
-}
+  h1 {
+    font-size: 2.5vw;
+    margin: 0;
+  }
 
-.control-buttons {
-  justify-content: space-evenly;
-  width: 80%;
+  button {
+    width: 3vw;
+    height: 3vw;
+  }
+
+  button img {
+    height: 1.2vw;
+  }
+
+  .control label {
+    margin-right: 0.5vw;
+  }
+
+  .github {
+    width: 3vw;
+    height: 3vw;
+  }
 }

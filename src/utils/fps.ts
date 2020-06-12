@@ -9,7 +9,7 @@ export default class FPS {
     this.node = document.getElementById("fps") as HTMLElement;
     this.frames = [];
     this.lastFrameTimeStamp = performance.now();
-    this.node.textContent = "waiting to start...";
+    this.node.textContent = "Waiting to start...";
   }
 
   render(): void {
