@@ -29,13 +29,20 @@
     <div id="controls" class="vertical-center blur hide">
       <h1>Spectrum</h1>
       <div id="fps"></div>
-      <button
-        id="play-pause-button"
-        class="vertical-center justify-center"
-        type="button"
-      >
-        <img id="play-pause-icon" src="/static/pause.svg" alt="pause" />
-      </button>
+      <div class="control-buttons horizontal-center">
+        <button id="play-pause-button" type="button">
+          <img id="play-pause-icon" src="/static/pause.svg" alt="Pause" />
+        </button>
+        <button type="button" id="restart-button">
+          <img src="/static/refresh.svg" alt="Refresh" />
+        </button>
+        <a id="download-link" download="spectrum.png">
+          <button id="download-button" type="button">
+            <img src="/static/download.svg" alt="Download" />
+          </button>
+        </a>
+      </div>
+
       <div class="vertical-center">
         <label for="modes">Rendering source:</label>
         <div id="modes" class="horizontal-center">
@@ -71,10 +78,7 @@
         </label>
         <input type="range" id="set-color-speed" min="0" max="100" />
       </div>
-      <button type="button" id="restart-button">Restart</button>
-      <a id="download-link" download="spectrum.png">
-        <button id="download-button" type="button">Download</button>
-      </a>
+
       <a
         href="https://github.com/arpanlaha/spectrum"
         target="_blank"

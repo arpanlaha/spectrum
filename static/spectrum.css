@@ -31,10 +31,6 @@ body {
   align-items: center;
 }
 
-.justify-center {
-  justify-content: center;
-}
-
 .hide {
   display: none;
 }
@@ -83,7 +79,12 @@ h1 {
   }
 
   button {
-    font-size: 1vw;
+    width: 3vw;
+    height: 3vw;
+  }
+
+  button img {
+    height: 1.2vw;
   }
 }
 
@@ -133,22 +134,23 @@ h1 {
   background-color: hsl(215, 100%, 50%);
 }
 
-#play-pause-button {
-  width: 6vh;
-  height: 6vh;
-  border-radius: 100%;
-
-  padding: 0;
-
-  cursor: pointer;
-}
-
 button {
   border: none;
   background-color: hsl(215, 100%, 50%);
   transition: background-color 0.2s;
   color: #fff;
   font-family: "Nunito Sans Light", sans-serif !important;
+
+  border-radius: 100%;
+
+  padding: 0;
+
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover {
@@ -157,6 +159,6 @@ button:hover {
   font-weight: normal;
 }
 
-#play-pause-icon {
-  height: 1.2vw;
+.control-buttons {
+  justify-content: space-evenly;
 }
