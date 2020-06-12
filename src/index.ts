@@ -7,7 +7,7 @@ const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
 const JS_SCALE = 0.25;
-const MOVEMENT_SPEED_FACTOR = 0.4;
+const MOVEMENT_SPEED_FACTOR = 0.2;
 const COLOR_SPEED_FACTOR = 0.005;
 
 type Mode = "webgl" | "wasm" | "js";
@@ -84,13 +84,17 @@ interface State extends InitialState {
   spectrum: Spectrum;
 }
 
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 const initialStates: Record<Mode, InitialState> = {
   webgl: {
     canvas: canvasWebgl,
     width: Math.round(MAX_WIDTH * WEBGL_SCALE),
     height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
-    numSources: 16,
-    movementSpeed: 20,
+    numSources: Math.min(
+      20,
+      contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS)
+    ),
+    movementSpeed: 40,
     colorSpeed: 20,
   },
   wasm: {
@@ -98,7 +102,7 @@ const initialStates: Record<Mode, InitialState> = {
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
-    movementSpeed: 20,
+    movementSpeed: 40,
     colorSpeed: 40,
   },
   js: {
@@ -106,10 +110,11 @@ const initialStates: Record<Mode, InitialState> = {
     width: Math.round(MAX_WIDTH * JS_SCALE),
     height: Math.round(MAX_HEIGHT * JS_SCALE),
     numSources: 10,
-    movementSpeed: 10,
+    movementSpeed: 20,
     colorSpeed: 40,
   },
 };
+/* eslint-enable @typescript-eslint/no-magic-numbers */
 
 const spectrumInitializers = {
   webgl: SpectrumGL,
