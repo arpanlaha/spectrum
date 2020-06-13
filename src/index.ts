@@ -21,6 +21,7 @@ const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
 const canvas2d = document.getElementById("canvas-wasm") as HTMLCanvasElement;
+const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseIcon = document.getElementById(
   "play-pause-icon"
 ) as HTMLImageElement;
@@ -54,6 +55,8 @@ const colorSpeedText = document.getElementById(
 const setColorSpeed = document.getElementById(
   "set-color-speed"
 ) as HTMLInputElement;
+const collapse = document.getElementById("collapse") as HTMLImageElement;
+const expand = document.getElementById("expand") as HTMLImageElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
@@ -394,5 +397,15 @@ document.getElementById("download-link")!.addEventListener("click", () => {
   );
 });
 
-document.getElementById("controls")!.classList.remove("hide");
+collapse.addEventListener("click", () => {
+  controls.classList.add("hide-controls");
+  setTimeout(() => expand.classList.remove("hide-expand"), 500);
+});
+
+expand.addEventListener("click", () => {
+  expand.classList.add("hide-expand");
+  controls.classList.remove("hide-controls");
+});
+
+controls.classList.remove("hide");
 play();

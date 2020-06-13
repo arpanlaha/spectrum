@@ -135,6 +135,28 @@ h1 {
   transition: opacity 0.2s;
 }
 
+.controls-arrow {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.controls-arrow:hover {
+  opacity: 1;
+  transition: opacity 0.2s;
+}
+
+.hide-expand {
+  opacity: 0 !important;
+  cursor: default;
+  transition: opacity 0.2s;
+}
+
+#expand {
+  opacity: 0.8;
+  filter: drop-shadow(1px, 1px, 1px, rgba(0, 0%, 0%, 1));
+}
+
 @media (orientation: landscape) {
   #controls {
     position: fixed;
@@ -144,6 +166,12 @@ h1 {
     font-size: 1vw;
     height: 100%;
     justify-content: space-evenly;
+    transition: transform 0.5s;
+  }
+
+  .hide-controls {
+    transform: translateX(-100%);
+    transition: transform 0.5s;
   }
 
   h1 {
@@ -167,5 +195,25 @@ h1 {
   .github {
     width: 3vw;
     height: 3vw;
+  }
+
+  #collapse {
+    height: 2vh;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .hide-controls #collapse {
+    cursor: default;
+  }
+
+  #expand {
+    height: 2vh;
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

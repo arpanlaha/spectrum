@@ -56,9 +56,9 @@
         <label for="lock-unlock">On rendering source change:</label>
         <div id="lock-unlock" class="modes horizontal-center">
           <div id="mode-unlock" class="mode left-mode current-mode">
-            Use suggested settings
+            Lock settings
           </div>
-          <div id="mode-lock" class="mode right-mode">Keep prior settings</div>
+          <div id="mode-lock" class="mode right-mode">Unlock settings</div>
         </div>
       </div>
 
@@ -96,7 +96,20 @@
       >
         <img class="github" src="/static/github.svg" alt="GitHub" />
       </a>
+
+      <img
+        id="collapse"
+        class="controls-arrow"
+        src="/static/left-arrow.svg"
+        alt="collapse"
+      />
     </div>
+    <img
+      id="expand"
+      class="controls-arrow hide-expand"
+      src="/static/right-arrow.svg"
+      alt="expand"
+    />
 
     <script src="./bootstrap.js"></script>
     <noscript>Please enable JavaScript in order to run Spectrum.</noscript>
