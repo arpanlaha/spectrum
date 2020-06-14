@@ -148,6 +148,12 @@ h1 {
   transition: opacity 0.2s;
 }
 
+.control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
 .hide-expand {
   opacity: 0 !important;
   cursor: default;
@@ -262,6 +268,13 @@ h1 {
   .github {
     width: 4vh;
     height: 4vh;
+    position: fixed;
+    bottom: 2vh;
+    right: 2vh;
+  }
+
+  h1 {
+    margin-top: 1vh;
   }
 
   #collapse {
