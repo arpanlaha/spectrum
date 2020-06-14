@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
 
-use crate::base::{BaseSpectrum, Hue, RGBA};
+use crate::utils::base::{BaseSpectrum, Hue, RGBA};
 
 const TWO_PI: f32 = consts::PI * 2f32;
 const THREE_HALVES_PI: f32 = consts::PI * 1.5f32;
