@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+
+import { atan2Approx } from "../utils";
+
 const TWO_PI = Math.PI * 2;
-const PI_3_2 = Math.PI * 1.5;
-const PI_4 = Math.PI / 4;
 const PI_3 = Math.PI / 3;
-const PI_2 = Math.PI / 2;
 const PI_2_3 = 2 * PI_3;
 const PI_4_3 = 2 * PI_2_3;
 const PI_5_3 = 5 * PI_3;
@@ -287,22 +287,3 @@ export default class SpectrumJS {
     this.sources.forEach((source) => source.tick());
   }
 }
-
-const atanApprox = (quotient: number): number =>
-  (PI_4 + 0.273 * (1 - Math.abs(quotient))) * quotient;
-
-const atan2Approx = (cos: number, sin: number): number => {
-  if (Math.abs(cos) > Math.abs(sin)) {
-    if (cos < 0) {
-      return atanApprox(sin / cos) + Math.PI;
-    }
-    if (sin < 0) {
-      return atanApprox(sin / cos) + TWO_PI;
-    }
-    return atanApprox(sin / cos);
-  }
-  if (sin < 0) {
-    return PI_3_2 - atanApprox(cos / sin);
-  }
-  return PI_2 - atanApprox(cos / sin);
-};

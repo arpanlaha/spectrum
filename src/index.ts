@@ -1,6 +1,6 @@
 import { SpectrumGL, SpectrumWasm } from "wasm-spectrum";
 import { SpectrumJS } from "./spectrum";
-import FPS from "./utils/fps";
+import { FPS } from "./utils";
 
 const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
