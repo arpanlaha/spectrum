@@ -23,9 +23,12 @@ try {
 
 if (supported) {
   console.log("hello");
-  import("./index").catch((e) =>
-    console.error("Error importing `index.js`:", e)
-  );
+  import("./index").catch((e) => {
+    document.getElementById(
+      "error-message"
+    )!.textContent = `An error was encountered: ${e}`;
+    document.getElementById("no-wasm")!.classList.remove("hide");
+  });
 } else {
   document.getElementById("canvas-webgl")!.classList.add("hide");
   document.getElementById("no-wasm")!.classList.remove("hide");
