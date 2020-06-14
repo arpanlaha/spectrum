@@ -3,7 +3,6 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGlProgram, WebGlRenderingContext, WebGlShader};
 
 use crate::utils::base::BaseSpectrum;
-use crate::utils::panic;
 
 /// A WebGL + WebAssembly implementation of Spectrum.
 #[wasm_bindgen]
@@ -33,7 +32,6 @@ impl SpectrumGL {
         color_speed: f32,
         canvas: HtmlCanvasElement,
     ) -> SpectrumGL {
-        panic::set_panic_hook();
         let context = canvas
             .get_context("webgl")
             .unwrap()
