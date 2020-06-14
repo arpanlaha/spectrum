@@ -78,6 +78,9 @@ h1 {
 #controls {
   background-color: hsla(0, 0%, 0%, 0.6);
   white-space: nowrap;
+  position: fixed;
+  transition: transform 0.5s;
+  justify-content: space-evenly;
 }
 
 #fps {
@@ -86,7 +89,6 @@ h1 {
 
 .control-buttons {
   justify-content: space-evenly;
-  width: 80%;
 }
 
 .modes {
@@ -152,21 +154,31 @@ h1 {
   transition: opacity 0.2s;
 }
 
+#collapse {
+  position: absolute;
+}
+
 #expand {
+  position: fixed;
   opacity: 0.8;
   filter: drop-shadow(1px, 1px, 1px, rgba(0, 0%, 0%, 1));
 }
 
+.hide-controls #collapse {
+  cursor: default;
+}
+
 @media (orientation: landscape) {
   #controls {
-    position: fixed;
     left: 0%;
     top: 0%;
     padding: 0 1vw;
     font-size: 1vw;
     height: 100%;
-    justify-content: space-evenly;
-    transition: transform 0.5s;
+  }
+
+  .control-buttons {
+    width: 15vw;
   }
 
   .hide-controls {
@@ -198,22 +210,71 @@ h1 {
   }
 
   #collapse {
-    height: 2vh;
-    position: absolute;
+    height: 1vw;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
   }
 
-  .hide-controls #collapse {
-    cursor: default;
+  #expand {
+    height: 1vw;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+@media (orientation: portrait) {
+  #controls {
+    bottom: 0;
+    width: 100%;
+    font-size: 1.5vh;
+    height: 50%;
+  }
+
+  .control-buttons {
+    width: 20vh;
+  }
+
+  .hide-controls {
+    transform: translateY(100%);
+    transition: transform 0.5s;
+  }
+
+  h1 {
+    font-size: 4vh;
+    margin: 0;
+  }
+
+  button {
+    width: 4vh;
+    height: 4vh;
+  }
+
+  button img {
+    height: 1.5vh;
+  }
+
+  .control label {
+    margin-right: 0.5vh;
+  }
+
+  .github {
+    width: 4vh;
+    height: 4vh;
+  }
+
+  #collapse {
+    height: 2vh;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
   }
 
   #expand {
     height: 2vh;
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) rotate(-90deg);
   }
 }
