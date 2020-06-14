@@ -25,7 +25,6 @@ jobs:
           toolchain: stable
 
       - name: Run rustfmt
-        working-directory: wasm
         run: cargo fmt -- --check
 
       - name: Install wasm-pack
@@ -71,7 +70,6 @@ jobs:
           toolchain: stable
 
       - name: Run clippy
-        working-directory: wasm
         run: cargo clippy -- -D warnings
 
       - name: Install wasm-pack
