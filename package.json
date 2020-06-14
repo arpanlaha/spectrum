@@ -9,7 +9,8 @@
     "lint": "eslint src && markdownlint README.md",
     "lint:fix": "eslint src && markdownlint --fix README.md",
     "serve": "static-server dist",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "wasm-pack": "wasm-pack build --out-dir wasm-spectrum"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "wasm-spectrum": "file:wasm/pkg"
+    "wasm-spectrum": "file:wasm-spectrum"
   },
   "devDependencies": {
     "@hack4impact-uiuc/eslint-plugin": "^2.0.1",

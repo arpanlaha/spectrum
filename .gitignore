@@ -2,7 +2,7 @@ target/
 **/*.rs.bk
 Cargo.lock
 bin/
-pkg/
+wasm-spectrum/
 wasm-pack.log
 
 node_modules
