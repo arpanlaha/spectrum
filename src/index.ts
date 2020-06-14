@@ -19,6 +19,19 @@ interface Spectrum {
   tick: () => void;
 }
 
+interface InitialState {
+  canvas: HTMLCanvasElement;
+  width: number;
+  height: number;
+  numSources: number;
+  movementSpeed: number;
+  colorSpeed: number;
+}
+
+interface State extends InitialState {
+  spectrum: Spectrum;
+}
+
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
@@ -66,19 +79,6 @@ const contextWebgl = canvasWebgl.getContext("webgl", {
 const context2d = canvas2d.getContext("2d") as CanvasRenderingContext2D;
 context2d.scale(DEVICE_SCALE, DEVICE_SCALE);
 
-interface InitialState {
-  canvas: HTMLCanvasElement;
-  width: number;
-  height: number;
-  numSources: number;
-  movementSpeed: number;
-  colorSpeed: number;
-}
-
-interface State extends InitialState {
-  spectrum: Spectrum;
-}
-
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 const initialStates: Record<Mode, InitialState> = {
   webgl: {
@@ -87,6 +87,7 @@ const initialStates: Record<Mode, InitialState> = {
     height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
     numSources: Math.min(
       20,
+      // iOS is dumb and has a limited number of fragment shader uniforms
       Math.floor(
         contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
           UNIFORMS_PER_SOURCE
@@ -362,7 +363,7 @@ setHeight.addEventListener("change", (e) => {
   restartSpectrum();
 });
 
-// iOS Safari is dumb and has a limited number of fragment shader uniforms
+// See note in initialStates about iOS.
 setNumSources.max = Math.min(
   100,
   Math.floor(
