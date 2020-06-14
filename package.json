@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "wasm-spectrum": "file:./wasm-spectrum"
+    "wasm-spectrum": "file:wasm-spectrum"
   },
   "devDependencies": {
     "@hack4impact-uiuc/eslint-plugin": "^2.0.1",
