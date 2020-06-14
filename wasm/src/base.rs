@@ -15,6 +15,11 @@ pub struct RGBA(pub u8, pub u8, pub u8, pub u8);
 pub struct Hue(f32);
 
 impl Hue {
+    /// Constructs a new Hue.
+    ///
+    /// # Arguments
+    ///
+    /// * `hue` - the new Hue value.
     pub fn new(hue: f32) -> Hue {
         Hue(hue)
     }
@@ -255,14 +260,17 @@ impl BaseSpectrum {
         }
     }
 
+    /// Returns the width of the BaseSpectrum.
     pub fn width(&self) -> usize {
         self.width
     }
 
+    /// Returns the height of the BaseSpectrum.
     pub fn height(&self) -> usize {
         self.height
     }
 
+    /// Returns a reference to the vector containing the BaseSpectrum's Sources.
     pub fn sources(&self) -> &Vec<Source> {
         &self.sources
     }
