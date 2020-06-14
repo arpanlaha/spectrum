@@ -10,6 +10,7 @@ const WASM_SCALE = 0.4;
 const JS_SCALE = 0.25;
 const MOVEMENT_SPEED_FACTOR = 0.2;
 const COLOR_SPEED_FACTOR = 0.005;
+const UNIFORMS_PER_SOURCE = 4;
 
 type Mode = "webgl" | "wasm" | "js";
 
@@ -86,7 +87,10 @@ const initialStates: Record<Mode, InitialState> = {
     height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
     numSources: Math.min(
       20,
-      contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS)
+      Math.floor(
+        contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
+          UNIFORMS_PER_SOURCE
+      )
     ),
     movementSpeed: 40,
     colorSpeed: 20,
@@ -361,7 +365,10 @@ setHeight.addEventListener("change", (e) => {
 // iOS Safari is dumb and has a limited number of fragment shader uniforms
 setNumSources.max = Math.min(
   100,
-  contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS)
+  Math.floor(
+    contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
+      UNIFORMS_PER_SOURCE
+  )
 ).toString();
 setNumSources.value = numSources.toString();
 setNumSources.addEventListener("change", (e) => {
