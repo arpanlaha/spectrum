@@ -36,13 +36,13 @@ jobs:
           version: latest
           use-tool-cache: true
 
-      - name: Build WebAssembly
-        run: wasm-pack build wasm
-
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
           node-version: 12
+
+      - name: Build WebAssembly
+        run: npm run wasm-pack
 
       - name: Install NPM dependencies
         run: npm install
@@ -83,13 +83,13 @@ jobs:
           version: latest
           use-tool-cache: true
 
-      - name: Build WebAssembly
-        run: wasm-pack build wasm
-
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
           node-version: 12
+
+      - name: Build WebAssembly
+        run: npm run wasm-pack
 
       - name: Install NPM dependencies
         run: npm install
@@ -126,13 +126,13 @@ jobs:
           version: latest
           use-tool-cache: true
 
-      - name: Build WebAssembly
-        run: wasm-pack build wasm
-
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
           node-version: 12
+
+      - name: Build WebAssembly
+        run: npm run wasm-pack
 
       - name: Install NPM dependencies
         run: npm install
