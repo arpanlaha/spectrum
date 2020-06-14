@@ -25,7 +25,7 @@
   </head>
 
   <body>
-    <canvas id="canvas-webgl"></canvas>
+    <canvas id="canvas-webgl" class="hide"></canvas>
     <canvas id="canvas-wasm" class="hide"></canvas>
     <div id="controls" class="vertical-center blur hide">
       <h1>Spectrum</h1>
@@ -113,7 +113,21 @@
     />
 
     <div id="no-wasm" class="hide">
-      <p id="error-message">Your device does not support WebAssembly.</p>
+      <p>
+        WebAssembly support not detected. To use Spectrum, please use a
+        <a href="https://caniuse.com/#feat=wasm"
+          >browser that supports WebAssembly</a
+        >
+      </p>
+    </div>
+
+    <div id="no-dynamic-import" class="hide">
+      <p>
+        Dynamic import support not detected. To use Spectrum, please use a
+        <a href="https://caniuse.com/#feat=es6-module-dynamic-import"
+          >browser that supports dynamic imports</a
+        >.
+      </p>
     </div>
 
     <script src="./bootstrap.js"></script>

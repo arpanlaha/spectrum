@@ -416,5 +416,6 @@ expand.addEventListener("click", () => {
   controls.classList.remove("hide-controls");
 });
 
+canvasWebgl.classList.remove("hide");
 controls.classList.remove("hide");
 play();
