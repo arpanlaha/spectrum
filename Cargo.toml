@@ -1,8 +1,11 @@
 [package]
 name = "spectrum"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
 edition = "2018"
+description="Create randomly-generated art using Rust + WebAssembly"
+repository="https://github.com/arpanlaha/spectrum"
+license="MIT"
 
 [lib]
 crate-type = ["cdylib"]
@@ -12,7 +15,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "0.2"
-js-sys = "0.3.40"
+js-sys = "0.3"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
