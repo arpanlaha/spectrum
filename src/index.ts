@@ -9,7 +9,7 @@ const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
 const JS_SCALE = 0.25;
 const MOVEMENT_SPEED_FACTOR = 0.2;
-const COLOR_SPEED_FACTOR = 0.005;
+const COLOR_SPEED_FACTOR = 0.002;
 const UNIFORMS_PER_SOURCE = 4;
 
 type Mode = "webgl" | "wasm" | "js";
@@ -93,24 +93,24 @@ const initialStates: Record<Mode, InitialState> = {
           UNIFORMS_PER_SOURCE
       )
     ),
-    movementSpeed: 40,
-    colorSpeed: 20,
+    movementSpeed: 10,
+    colorSpeed: 10,
   },
   wasm: {
     canvas: canvas2d,
     width: Math.round(MAX_WIDTH * WASM_SCALE),
     height: Math.round(MAX_HEIGHT * WASM_SCALE),
     numSources: 10,
-    movementSpeed: 40,
-    colorSpeed: 40,
+    movementSpeed: 10,
+    colorSpeed: 20,
   },
   js: {
     canvas: canvas2d,
     width: Math.round(MAX_WIDTH * JS_SCALE),
     height: Math.round(MAX_HEIGHT * JS_SCALE),
     numSources: 10,
-    movementSpeed: 20,
-    colorSpeed: 40,
+    movementSpeed: 10,
+    colorSpeed: 20,
   },
 };
 /* eslint-enable @typescript-eslint/no-magic-numbers */
