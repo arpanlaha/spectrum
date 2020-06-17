@@ -306,6 +306,8 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 2vmin;
   width: 2vmin;
+  border: none;
+
   border-radius: 100%;
   background-color: hsl(215, 100%, 50%);
   cursor: pointer;
@@ -314,12 +316,13 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="range"]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background-color: #ffffff;
+  height: 2vmin;
+  width: 2vmin;
+  border-radius: 100%;
+  border: none;
+  background-color: hsl(215, 100%, 50%);
   cursor: pointer;
+  box-shadow: 1px 1px 4px hsl(0, 0%, 0%, 0.4);
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
