@@ -42,6 +42,8 @@ features = [
   'HtmlInputElement',
   'Node',
   'Window',
+  'Storage',
+  'Event'
 ]
 
 # [dev-dependencies]

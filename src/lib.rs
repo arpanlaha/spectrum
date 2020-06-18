@@ -5,8 +5,8 @@ use js_sys::{Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, HtmlAnchorElement, HtmlCanvasElement, HtmlImageElement,
-    HtmlInputElement, WebGlRenderingContext,
+    CanvasRenderingContext2d, Event, HtmlAnchorElement, HtmlCanvasElement, HtmlImageElement,
+    HtmlInputElement, WebGlRenderingContext, Window,
 };
 
 use spectrum::wasm::SpectrumWasm;
@@ -136,4 +136,29 @@ pub fn start() {
     context_2d
         .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
         .unwrap();
+
+    set_width.set_onchange(Some(
+        Closure::wrap(Box::new(|| {
+            web_sys::window()
+                .unwrap()
+                .local_storage()
+                .unwrap()
+                .unwrap()
+                .set_item(
+                    "width",
+                    &web_sys::window()
+                        .unwrap()
+                        .document()
+                        .unwrap()
+                        .get_element_by_id("set-width")
+                        .unwrap()
+                        .dyn_into::<HtmlInputElement>()
+                        .unwrap()
+                        .value(),
+                )
+                .unwrap();
+        }) as Box<dyn Fn()>)
+        .as_ref()
+        .unchecked_ref(),
+    ));
 }
