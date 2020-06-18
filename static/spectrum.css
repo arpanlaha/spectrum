@@ -307,7 +307,6 @@ input[type="range"]::-webkit-slider-thumb {
   height: 2vmin;
   width: 2vmin;
   border: none;
-
   border-radius: 100%;
   background-color: hsl(215, 100%, 50%);
   cursor: pointer;
