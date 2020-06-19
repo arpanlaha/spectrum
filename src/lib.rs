@@ -1,6 +1,9 @@
 mod spectrum;
 mod utils;
 
+use std::cmp;
+use std::fmt::Display;
+
 use js_sys::{Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -21,7 +24,6 @@ const UNIFORMS_PER_SOURCE: usize = 4;
 const MIN_DIMENSION: &str = "100";
 
 struct State {
-    pub canvas: HtmlCanvasElement,
     pub width: usize,
     pub height: usize,
     pub num_sources: usize,
@@ -29,58 +31,110 @@ struct State {
     pub color_speed: f32,
 }
 
-fn get_initial_value(local_storage: &Storage, key: &str, default: &str) -> String {
+fn max_width() -> f64 {
+    let window = web_sys::window().unwrap();
+    (window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap()).round()
+}
+
+fn max_height() -> f64 {
+    let window = web_sys::window().unwrap();
+    (window.device_pixel_ratio() * window.inner_height().unwrap().as_f64().unwrap()).round()
+}
+
+fn get_local_storage() -> Storage {
+    web_sys::window().unwrap().local_storage().unwrap().unwrap()
+}
+
+fn get_mode() -> String {
+    get_local_storage().get_item("mode").unwrap().unwrap()
+}
+
+fn get_canvas() -> HtmlCanvasElement {
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .get_element_by_id(if get_mode() == "webgl" {
+            "canvas-webgl"
+        } else {
+            "canvas-wasm"
+        })
+        .unwrap()
+        .dyn_into::<HtmlCanvasElement>()
+        .unwrap()
+}
+
+fn get_default_params() -> State {
+    if get_mode() == "webgl" {
+        let context_webgl_options = Object::new();
+        Reflect::set(
+            &context_webgl_options,
+            &"preserveDrawingBuffer".into(),
+            &wasm_bindgen::JsValue::TRUE,
+        )
+        .unwrap();
+
+        let context_webgl = get_canvas()
+            .get_context_with_context_options("webgl", &context_webgl_options)
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGlRenderingContext>()
+            .unwrap();
+
+        State {
+            width: max_width() as usize,
+            height: max_height() as usize,
+            num_sources: cmp::min(
+                20,
+                context_webgl
+                    .get_parameter(WebGlRenderingContext::MAX_FRAGMENT_UNIFORM_VECTORS)
+                    .unwrap()
+                    .as_f64()
+                    .unwrap() as usize,
+            ),
+            movement_speed: 10f32,
+            color_speed: 10f32,
+        }
+    } else {
+        State {
+            width: max_width() as usize,
+            height: max_height() as usize,
+            num_sources: 10,
+            movement_speed: 10f32,
+            color_speed: 20f32,
+        }
+    }
+}
+
+fn get_initial_value<T: Display>(key: &str, default: T) -> String {
+    let local_storage = get_local_storage();
+    let default_str = default.to_string();
+
     match local_storage.get_item(key).unwrap() {
         Some(value) => value,
         None => {
-            local_storage.set_item(key, default).unwrap();
-            String::from(default)
+            local_storage.set_item(key, &default_str[..]).unwrap();
+            default_str
         }
     }
 }
 
 fn resize_canvas() {
-    let window = web_sys::window().unwrap();
-    let local_storage = window.local_storage().unwrap().unwrap();
-    let canvas = window
-        .document()
-        .unwrap()
-        .get_element_by_id(
-            if local_storage.get_item("mode").unwrap().unwrap() == "webgl" {
-                "canvas-webgl"
-            } else {
-                "canvas-wasm"
-            },
-        )
-        .unwrap()
-        .dyn_into::<HtmlCanvasElement>()
+    let canvas = get_canvas();
+
+    let width = get_initial_value("width", &max_width().to_string()[..])
+        .parse::<u32>()
         .unwrap();
 
-    let width = get_initial_value(
-        &local_storage,
-        "width",
-        &(window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
-            .round()
-            .to_string()[..],
-    )
-    .parse::<u32>()
-    .unwrap();
-
-    let height = get_initial_value(
-        &local_storage,
-        "height",
-        &(window.device_pixel_ratio() * window.inner_height().unwrap().as_f64().unwrap())
-            .round()
-            .to_string()[..],
-    )
-    .parse::<u32>()
-    .unwrap();
+    let height = get_initial_value("height", &max_height().to_string()[..])
+        .parse::<u32>()
+        .unwrap();
 
     canvas.set_width(width);
     canvas.set_height(height);
 
     let style = canvas.style();
-    let device_scale = window.device_pixel_ratio();
+    let device_scale = web_sys::window().unwrap().device_pixel_ratio();
     style
         .set_property("width", &((width as f64) / device_scale).to_string()[..])
         .unwrap();
@@ -115,13 +169,7 @@ fn init_input(param: &str, min: &str, max: &str, step: &str) {
             .value()[..];
 
         text.set_text_content(Some(value));
-        web_sys::window()
-            .unwrap()
-            .local_storage()
-            .unwrap()
-            .unwrap()
-            .set_item("param", value)
-            .unwrap();
+        get_local_storage().set_item("param", value).unwrap();
     }) as Box<dyn Fn()>);
 
     setter.set_onchange(Some(onchange.as_ref().unchecked_ref()));
@@ -133,26 +181,49 @@ fn init_listeners() {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
 
-    let max_width = (window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
-        .round()
-        .to_string();
+    let max_width_str = max_width().to_string();
 
-    let max_height = (window.device_pixel_ratio()
-        * window.inner_height().unwrap().as_f64().unwrap())
-    .round()
-    .to_string();
+    let max_height_str = max_height().to_string();
 
-    let local_storage = window.local_storage().unwrap().unwrap();
+    let mode = get_initial_value("mode", "webgl");
+    let lock = get_initial_value("lock", "false").parse::<bool>().unwrap();
 
-    let mode = get_initial_value(&local_storage, "mode", "webgl");
-    let lock = get_initial_value(&local_storage, "lock", "false")
-        .parse::<bool>()
+    let State {
+        width,
+        height,
+        num_sources,
+        movement_speed,
+        color_speed,
+    } = get_default_params();
+
+    let width = get_initial_value("width", width);
+    let height = get_initial_value("height", height);
+    let num_sources = get_initial_value("num-sources", num_sources);
+    let movement_speed = get_initial_value("movement-speed", movement_speed);
+    let color_speed = get_initial_value("color-speed", color_speed);
+
+    if mode == "webgl" {
+        let context_webgl_options = Object::new();
+        Reflect::set(
+            &context_webgl_options,
+            &"preserveDrawingBuffer".into(),
+            &wasm_bindgen::JsValue::TRUE,
+        )
         .unwrap();
-    let width = get_initial_value(&local_storage, "width", &max_width[..]);
-    let height = get_initial_value(&local_storage, "height", &max_height[..]);
-    let num_sources = get_initial_value(&local_storage, "num-sources", "20");
-    let movement_speed = get_initial_value(&local_storage, "movement-speed", "10");
-    let color_speed = get_initial_value(&local_storage, "color-speed", "10");
+
+        get_canvas()
+            .get_context_with_context_options("webgl", &context_webgl_options)
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGlRenderingContext>()
+            .unwrap()
+            .viewport(
+                0,
+                0,
+                width.parse::<i32>().unwrap(),
+                height.parse::<i32>().unwrap(),
+            );
+    }
 
     resize_canvas();
 
@@ -188,9 +259,9 @@ fn init_listeners() {
     let mode_lock = document.get_element_by_id("mode-lock").unwrap();
     let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
 
-    init_input("width", MIN_DIMENSION, &max_width[..], "10");
+    init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
 
-    init_input("height", MIN_DIMENSION, &max_height[..], "10");
+    init_input("height", MIN_DIMENSION, &max_height_str[..], "10");
 
     init_input("num-sources", "2", "100", "1");
     init_input("movement-speed", "1", "100", "1");
