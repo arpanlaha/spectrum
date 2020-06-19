@@ -9,8 +9,8 @@ use web_sys::{
     HtmlInputElement, WebGlRenderingContext, Window,
 };
 
-use spectrum::wasm::SpectrumWasm;
-use spectrum::webgl::SpectrumGL;
+// use spectrum::wasm::SpectrumWasm;
+// use spectrum::webgl::SpectrumGL;
 
 const WEBGL_SCALE: f32 = 1f32;
 const WASM_SCALE: f32 = 0.4f32;
@@ -18,6 +18,7 @@ const JS_SCALE: f32 = 0.25f32;
 const MOVEMENT_SPEED_FACTOR: f32 = 0.2f32;
 const COLOR_SPEED_FACTOR: f32 = 0.002f32;
 const UNIFORMS_PER_SOURCE: usize = 4;
+const MIN_DIMENSION: &str = "100";
 
 struct State {
     pub canvas: HtmlCanvasElement,
@@ -26,6 +27,48 @@ struct State {
     pub num_sources: usize,
     pub movement_speed: f32,
     pub color_speed: f32,
+}
+
+fn init_input(param: &str, min: &str, max: &str, step: &str) {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let setter_id = format!("set-{}", param);
+    let text = document.get_element_by_id(param).unwrap();
+    let setter = document
+        .get_element_by_id(&setter_id[..])
+        .unwrap()
+        .dyn_into::<HtmlInputElement>()
+        .unwrap();
+
+    setter.set_min(min);
+    setter.set_max(max);
+    setter.set_step(step);
+
+    let onchange = Closure::wrap(Box::new(move || {
+        let value = &web_sys::window()
+            .unwrap()
+            .document()
+            .unwrap()
+            .get_element_by_id(&setter_id[..])
+            .unwrap()
+            .dyn_into::<HtmlInputElement>()
+            .unwrap()
+            .value()[..];
+
+        text.set_text_content(Some(value));
+        web_sys::window()
+            .unwrap()
+            .local_storage()
+            .unwrap()
+            .unwrap()
+            .set_item("param", value)
+            .unwrap();
+    }) as Box<dyn Fn()>);
+
+    setter.set_onchange(Some(onchange.as_ref().unchecked_ref()));
+
+    onchange.forget();
+
+    // setter.set_onchang
 }
 
 #[wasm_bindgen(start)]
@@ -65,40 +108,25 @@ pub fn start() {
     let mode_lock = document.get_element_by_id("mode-lock").unwrap();
     let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
 
-    let width_text = document.get_element_by_id("width").unwrap();
-    let set_width = document
-        .get_element_by_id("set-width")
-        .unwrap()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap();
+    init_input(
+        "width",
+        MIN_DIMENSION,
+        &(window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
+            .to_string()[..],
+        "10",
+    );
 
-    let height_text = document.get_element_by_id("height").unwrap();
-    let set_height = document
-        .get_element_by_id("set-height")
-        .unwrap()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap();
+    init_input(
+        "height",
+        MIN_DIMENSION,
+        &(window.device_pixel_ratio() * window.inner_height().unwrap().as_f64().unwrap())
+            .to_string()[..],
+        "10",
+    );
 
-    let num_sources_text = document.get_element_by_id("num-sources").unwrap();
-    let set_num_sources = document
-        .get_element_by_id("set-num_sources")
-        .unwrap()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap();
-
-    let movement_speed_text = document.get_element_by_id("movement-speed").unwrap();
-    let set_movement_speed = document
-        .get_element_by_id("set-movement_speed")
-        .unwrap()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap();
-
-    let color_speed_text = document.get_element_by_id("color-speed").unwrap();
-    let set_color_speed = document
-        .get_element_by_id("set-color")
-        .unwrap()
-        .dyn_into::<HtmlInputElement>()
-        .unwrap();
+    init_input("num-sources", "2", "100", "1");
+    init_input("movement-speed", "1", "100", "1");
+    init_input("color-speed", "1", "100", "1");
 
     let collapse = document
         .get_element_by_id("collapse")
@@ -137,28 +165,28 @@ pub fn start() {
         .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
         .unwrap();
 
-    set_width.set_onchange(Some(
-        Closure::wrap(Box::new(|| {
-            web_sys::window()
-                .unwrap()
-                .local_storage()
-                .unwrap()
-                .unwrap()
-                .set_item(
-                    "width",
-                    &web_sys::window()
-                        .unwrap()
-                        .document()
-                        .unwrap()
-                        .get_element_by_id("set-width")
-                        .unwrap()
-                        .dyn_into::<HtmlInputElement>()
-                        .unwrap()
-                        .value(),
-                )
-                .unwrap();
-        }) as Box<dyn Fn()>)
-        .as_ref()
-        .unchecked_ref(),
-    ));
+    // set_width.set_onchange(Some(
+    //     Closure::wrap(Box::new(|| {
+    //         web_sys::window()
+    //             .unwrap()
+    //             .local_storage()
+    //             .unwrap()
+    //             .unwrap()
+    //             .set_item(
+    //                 "width",
+    //                 &web_sys::window()
+    //                     .unwrap()
+    //                     .document()
+    //                     .unwrap()
+    //                     .get_element_by_id("set-width")
+    //                     .unwrap()
+    //                     .dyn_into::<HtmlInputElement>()
+    //                     .unwrap()
+    //                     .value(),
+    //             )
+    //             .unwrap();
+    //     }) as Box<dyn Fn()>)
+    //     .as_ref()
+    //     .unchecked_ref(),
+    // ));
 }
