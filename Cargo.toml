@@ -43,7 +43,8 @@ features = [
   'Node',
   'Window',
   'Storage',
-  'Event'
+  'Event',
+  'CssStyleDeclaration'
 ]
 
 # [dev-dependencies]

@@ -5,8 +5,8 @@ use js_sys::{Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, Event, HtmlAnchorElement, HtmlCanvasElement, HtmlImageElement,
-    HtmlInputElement, WebGlRenderingContext, Window,
+    CanvasRenderingContext2d, CssStyleDeclaration, Event, HtmlAnchorElement, HtmlCanvasElement,
+    HtmlImageElement, HtmlInputElement, Storage, WebGlRenderingContext, Window,
 };
 
 // use spectrum::wasm::SpectrumWasm;
@@ -27,6 +27,66 @@ struct State {
     pub num_sources: usize,
     pub movement_speed: f32,
     pub color_speed: f32,
+}
+
+fn get_initial_value(local_storage: &Storage, key: &str, default: &str) -> String {
+    match local_storage.get_item(key).unwrap() {
+        Some(value) => value,
+        None => {
+            local_storage.set_item(key, default).unwrap();
+            String::from(default)
+        }
+    }
+}
+
+fn resize_canvas() {
+    let window = web_sys::window().unwrap();
+    let local_storage = window.local_storage().unwrap().unwrap();
+    let canvas = window
+        .document()
+        .unwrap()
+        .get_element_by_id(
+            if local_storage.get_item("mode").unwrap().unwrap() == "webgl" {
+                "canvas-webgl"
+            } else {
+                "canvas-wasm"
+            },
+        )
+        .unwrap()
+        .dyn_into::<HtmlCanvasElement>()
+        .unwrap();
+
+    let width = get_initial_value(
+        &local_storage,
+        "width",
+        &(window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
+            .round()
+            .to_string()[..],
+    )
+    .parse::<u32>()
+    .unwrap();
+
+    let height = get_initial_value(
+        &local_storage,
+        "height",
+        &(window.device_pixel_ratio() * window.inner_height().unwrap().as_f64().unwrap())
+            .round()
+            .to_string()[..],
+    )
+    .parse::<u32>()
+    .unwrap();
+
+    canvas.set_width(width);
+    canvas.set_height(height);
+
+    let style = canvas.style();
+    let device_scale = window.device_pixel_ratio();
+    style
+        .set_property("width", &((width as f64) / device_scale).to_string()[..])
+        .unwrap();
+    style
+        .set_property("height", &((height as f64) / device_scale).to_string()[..])
+        .unwrap();
 }
 
 fn init_input(param: &str, min: &str, max: &str, step: &str) {
@@ -67,14 +127,34 @@ fn init_input(param: &str, min: &str, max: &str, step: &str) {
     setter.set_onchange(Some(onchange.as_ref().unchecked_ref()));
 
     onchange.forget();
-
-    // setter.set_onchang
 }
 
-#[wasm_bindgen(start)]
-pub fn start() {
+fn init_listeners() {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
+
+    let max_width = (window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
+        .round()
+        .to_string();
+
+    let max_height = (window.device_pixel_ratio()
+        * window.inner_height().unwrap().as_f64().unwrap())
+    .round()
+    .to_string();
+
+    let local_storage = window.local_storage().unwrap().unwrap();
+
+    let mode = get_initial_value(&local_storage, "mode", "webgl");
+    let lock = get_initial_value(&local_storage, "lock", "false")
+        .parse::<bool>()
+        .unwrap();
+    let width = get_initial_value(&local_storage, "width", &max_width[..]);
+    let height = get_initial_value(&local_storage, "height", &max_height[..]);
+    let num_sources = get_initial_value(&local_storage, "num-sources", "20");
+    let movement_speed = get_initial_value(&local_storage, "movement-speed", "10");
+    let color_speed = get_initial_value(&local_storage, "color-speed", "10");
+
+    resize_canvas();
 
     let canvas_webgl = document
         .get_element_by_id("canvas-webgl")
@@ -108,21 +188,9 @@ pub fn start() {
     let mode_lock = document.get_element_by_id("mode-lock").unwrap();
     let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
 
-    init_input(
-        "width",
-        MIN_DIMENSION,
-        &(window.device_pixel_ratio() * window.inner_width().unwrap().as_f64().unwrap())
-            .to_string()[..],
-        "10",
-    );
+    init_input("width", MIN_DIMENSION, &max_width[..], "10");
 
-    init_input(
-        "height",
-        MIN_DIMENSION,
-        &(window.device_pixel_ratio() * window.inner_height().unwrap().as_f64().unwrap())
-            .to_string()[..],
-        "10",
-    );
+    init_input("height", MIN_DIMENSION, &max_height[..], "10");
 
     init_input("num-sources", "2", "100", "1");
     init_input("movement-speed", "1", "100", "1");
@@ -164,29 +232,9 @@ pub fn start() {
     context_2d
         .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
         .unwrap();
+}
 
-    // set_width.set_onchange(Some(
-    //     Closure::wrap(Box::new(|| {
-    //         web_sys::window()
-    //             .unwrap()
-    //             .local_storage()
-    //             .unwrap()
-    //             .unwrap()
-    //             .set_item(
-    //                 "width",
-    //                 &web_sys::window()
-    //                     .unwrap()
-    //                     .document()
-    //                     .unwrap()
-    //                     .get_element_by_id("set-width")
-    //                     .unwrap()
-    //                     .dyn_into::<HtmlInputElement>()
-    //                     .unwrap()
-    //                     .value(),
-    //             )
-    //             .unwrap();
-    //     }) as Box<dyn Fn()>)
-    //     .as_ref()
-    //     .unchecked_ref(),
-    // ));
+#[wasm_bindgen(start)]
+pub fn start() {
+    init_listeners();
 }
