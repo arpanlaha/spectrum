@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGlProgram, WebGlRenderingContext, WebGlShader};
 
-use crate::utils::base::BaseSpectrum;
+use crate::utils::base::{BaseSpectrum, Spectrum};
 
 /// A WebGL + WebAssembly implementation of Spectrum.
 #[wasm_bindgen]
@@ -12,9 +12,8 @@ pub struct SpectrumGL {
     program: WebGlProgram,
 }
 
-#[wasm_bindgen]
 impl SpectrumGL {
-    /// Creates a new SpectrumGl.
+    /// Creates a new SpectrumGL.
     ///
     /// # Arguments
     ///
@@ -31,7 +30,7 @@ impl SpectrumGL {
         movement_speed: f32,
         color_speed: f32,
         canvas: HtmlCanvasElement,
-    ) -> SpectrumGL {
+    ) -> Self {
         let context = canvas
             .get_context("webgl")
             .unwrap()
@@ -168,7 +167,7 @@ impl SpectrumGL {
             0,
         );
 
-        let spectrum = SpectrumGL {
+        let mut spectrum = SpectrumGL {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
@@ -177,13 +176,15 @@ impl SpectrumGL {
 
         spectrum
     }
+}
 
+impl Spectrum for SpectrumGL {
     /// Draws to the Spectrum canvas, adjusting the context's shaders to match the current state.
     ///
     /// Assigns Hues to each pixel based off of an average inverse square distance weighting across all Sources.
     ///
     /// As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
-    pub fn draw(&self) {
+    fn draw(&mut self) {
         let source_info: Vec<f32> = self
             .base
             .sources()
@@ -204,7 +205,7 @@ impl SpectrumGL {
     }
 
     /// Increments all of the Spectrum's sources by one frame.
-    pub fn tick(&mut self) {
+    fn tick(&mut self) {
         self.base.tick();
     }
 }

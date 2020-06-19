@@ -7,6 +7,11 @@ const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5f32;
 
+pub trait Spectrum {
+    fn draw(&mut self);
+    fn tick(&mut self);
+}
+
 /// Wrapper of four byte values corresponding to RGBA for a single pixel.
 pub struct RGBA(pub u8, pub u8, pub u8, pub u8);
 

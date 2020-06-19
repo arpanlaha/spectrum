@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
 
-use crate::utils::base::{BaseSpectrum, Hue, RGBA};
+use crate::utils::base::{BaseSpectrum, Hue, Spectrum, RGBA};
 use crate::utils::math;
 
 /// A WebAssembly-only implementation of Spectrum.
@@ -18,7 +18,6 @@ pub struct SpectrumWasm {
     context: CanvasRenderingContext2d,
 }
 
-#[wasm_bindgen]
 impl SpectrumWasm {
     /// Creates a new Spectrum.
     ///
@@ -37,7 +36,7 @@ impl SpectrumWasm {
         movement_speed: f32,
         color_speed: f32,
         canvas: HtmlCanvasElement,
-    ) -> SpectrumWasm {
+    ) -> Self {
         let mut spectrum = SpectrumWasm {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             data: vec![0u8; width * height * 4],
@@ -52,13 +51,15 @@ impl SpectrumWasm {
 
         spectrum
     }
+}
 
+impl Spectrum for SpectrumWasm {
     /// Draws to the Spectrum canvas, using the Spectrum's context to put the resulting ImageData.
     ///
     /// Assigns Hues to each pixel based off of an average inverse square distance weighting across all Sources.
     ///
     /// As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
-    pub fn draw(&mut self) {
+    fn draw(&mut self) {
         let width = self.base.width();
         for x in 0..width {
             let x_float = x as f32;
@@ -103,7 +104,7 @@ impl SpectrumWasm {
     }
 
     /// Increments all of the Spectrum's sources by one frame.
-    pub fn tick(&mut self) {
+    fn tick(&mut self) {
         self.base.tick();
     }
 }

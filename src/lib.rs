@@ -8,20 +8,29 @@ use js_sys::{Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, CssStyleDeclaration, Event, HtmlAnchorElement, HtmlCanvasElement,
-    HtmlImageElement, HtmlInputElement, Storage, WebGlRenderingContext, Window,
+    CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, HtmlInputElement, Storage,
+    WebGlRenderingContext,
 };
 
-// use spectrum::wasm::SpectrumWasm;
-// use spectrum::webgl::SpectrumGL;
+use spectrum::wasm::SpectrumWasm;
+use spectrum::webgl::SpectrumGL;
+use utils::base::Spectrum;
 
-const WEBGL_SCALE: f32 = 1f32;
-const WASM_SCALE: f32 = 0.4f32;
-const JS_SCALE: f32 = 0.25f32;
-const MOVEMENT_SPEED_FACTOR: f32 = 0.2f32;
-const COLOR_SPEED_FACTOR: f32 = 0.002f32;
-const UNIFORMS_PER_SOURCE: usize = 4;
+// const WEBGL_SCALE: f32 = 1f32;
+// const WASM_SCALE: f32 = 0.4f32;
+// const JS_SCALE: f32 = 0.25f32;
+// const MOVEMENT_SPEED_FACTOR: f32 = 0.2f32;
+// const COLOR_SPEED_FACTOR: f32 = 0.002f32;
+// const UNIFORMS_PER_SOURCE: usize = 4;
 const MIN_DIMENSION: &str = "100";
+
+// enum Spectrum {
+//     WebGL(SpectrumGL),
+//     Wasm(SpectrumWasm),
+// }
+
+static mut SPECTRUM: Option<Box<dyn Spectrum>> = None;
+static mut FRAME: Option<i32> = None;
 
 struct State {
     pub width: usize,
@@ -45,16 +54,20 @@ fn get_local_storage() -> Storage {
     web_sys::window().unwrap().local_storage().unwrap().unwrap()
 }
 
-fn get_mode() -> String {
-    get_local_storage().get_item("mode").unwrap().unwrap()
+fn get_local_storage_item(key: &str) -> String {
+    get_local_storage().get_item(key).unwrap().unwrap()
 }
+
+// fn get_mode() -> String {
+//     get_local_storage().get_item("mode").unwrap().unwrap()
+// }
 
 fn get_canvas() -> HtmlCanvasElement {
     web_sys::window()
         .unwrap()
         .document()
         .unwrap()
-        .get_element_by_id(if get_mode() == "webgl" {
+        .get_element_by_id(if get_local_storage_item("mode") == "webgl" {
             "canvas-webgl"
         } else {
             "canvas-wasm"
@@ -65,7 +78,7 @@ fn get_canvas() -> HtmlCanvasElement {
 }
 
 fn get_default_params() -> State {
-    if get_mode() == "webgl" {
+    if get_local_storage_item("mode") == "webgl" {
         let context_webgl_options = Object::new();
         Reflect::set(
             &context_webgl_options,
@@ -227,11 +240,11 @@ fn init_listeners() {
 
     resize_canvas();
 
-    let canvas_webgl = document
-        .get_element_by_id("canvas-webgl")
-        .unwrap()
-        .dyn_into::<HtmlCanvasElement>()
-        .unwrap();
+    // let canvas_webgl = document
+    //     .get_element_by_id("canvas-webgl")
+    //     .unwrap()
+    //     .dyn_into::<HtmlCanvasElement>()
+    //     .unwrap();
 
     let canvas_2d = document
         .get_element_by_id("canvas-wasm")
@@ -239,25 +252,25 @@ fn init_listeners() {
         .dyn_into::<HtmlCanvasElement>()
         .unwrap();
 
-    let controls = document.get_element_by_id("controls").unwrap();
+    // let controls = document.get_element_by_id("controls").unwrap();
 
-    let play_pause_icon = document
-        .get_element_by_id("play-pause-icon")
-        .unwrap()
-        .dyn_into::<HtmlImageElement>()
-        .unwrap();
+    // let play_pause_icon = document
+    // .get_element_by_id("play-pause-icon")
+    // .unwrap()
+    // .dyn_into::<HtmlImageElement>()
+    // .unwrap();
 
-    let download_link = document
-        .get_element_by_id("download-link")
-        .unwrap()
-        .dyn_into::<HtmlAnchorElement>()
-        .unwrap();
+    // let download_link = document
+    //     .get_element_by_id("download-link")
+    //     .unwrap()
+    //     .dyn_into::<HtmlAnchorElement>()
+    //     .unwrap();
 
-    let mode_webgl = document.get_element_by_id("mode-webgl").unwrap();
-    let mode_wasm = document.get_element_by_id("mode-wasm").unwrap();
-    let mode_js = document.get_element_by_id("mode-js").unwrap();
-    let mode_lock = document.get_element_by_id("mode-lock").unwrap();
-    let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
+    // let mode_webgl = document.get_element_by_id("mode-webgl").unwrap();
+    // let mode_wasm = document.get_element_by_id("mode-wasm").unwrap();
+    // let mode_js = document.get_element_by_id("mode-js").unwrap();
+    // let mode_lock = document.get_element_by_id("mode-lock").unwrap();
+    // let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
 
     init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
 
@@ -267,31 +280,31 @@ fn init_listeners() {
     init_input("movement-speed", "1", "100", "1");
     init_input("color-speed", "1", "100", "1");
 
-    let collapse = document
-        .get_element_by_id("collapse")
-        .unwrap()
-        .dyn_into::<HtmlImageElement>()
-        .unwrap();
-    let expand = document
-        .get_element_by_id("expand")
-        .unwrap()
-        .dyn_into::<HtmlImageElement>()
-        .unwrap();
+    // let collapse = document
+    //     .get_element_by_id("collapse")
+    //     .unwrap()
+    //     .dyn_into::<HtmlImageElement>()
+    //     .unwrap();
+    // let expand = document
+    //     .get_element_by_id("expand")
+    //     .unwrap()
+    //     .dyn_into::<HtmlImageElement>()
+    //     .unwrap();
 
-    let context_webgl_options = Object::new();
-    Reflect::set(
-        &context_webgl_options,
-        &"preserveDrawingBuffer".into(),
-        &wasm_bindgen::JsValue::TRUE,
-    )
-    .unwrap();
+    // let context_webgl_options = Object::new();
+    // Reflect::set(
+    //     &context_webgl_options,
+    //     &"preserveDrawingBuffer".into(),
+    //     &wasm_bindgen::JsValue::TRUE,
+    // )
+    // .unwrap();
 
-    let context_webgl = canvas_webgl
-        .get_context_with_context_options("webgl", &context_webgl_options)
-        .unwrap()
-        .unwrap()
-        .dyn_into::<WebGlRenderingContext>()
-        .unwrap();
+    // let context_webgl = canvas_webgl
+    //     .get_context_with_context_options("webgl", &context_webgl_options)
+    //     .unwrap()
+    //     .unwrap()
+    //     .dyn_into::<WebGlRenderingContext>()
+    //     .unwrap();
 
     let context_2d = canvas_2d
         .get_context("2d")
@@ -303,6 +316,103 @@ fn init_listeners() {
     context_2d
         .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
         .unwrap();
+}
+
+fn get_new_spectrum() {
+    let width = get_local_storage_item("width").parse::<usize>().unwrap();
+    let height = get_local_storage_item("height").parse::<usize>().unwrap();
+    let num_sources = get_local_storage_item("num-sources")
+        .parse::<usize>()
+        .unwrap();
+    let movement_speed = get_local_storage_item("movement-speed")
+        .parse::<f32>()
+        .unwrap();
+    let color_speed = get_local_storage_item("color-speed")
+        .parse::<f32>()
+        .unwrap();
+
+    match &get_local_storage_item("mode")[..] {
+        "webgl" => unsafe {
+            SPECTRUM = Some(Box::new(SpectrumGL::new(
+                width,
+                height,
+                num_sources,
+                movement_speed,
+                color_speed,
+                get_canvas(),
+            )));
+        },
+        _ => unsafe {
+            SPECTRUM = Some(Box::new(SpectrumWasm::new(
+                width,
+                height,
+                num_sources,
+                movement_speed,
+                color_speed,
+                get_canvas(),
+            )));
+        },
+    };
+}
+
+fn is_paused() -> bool {
+    unsafe { FRAME != None }
+}
+
+fn pause() {
+    if let Some(frame) = unsafe { FRAME } {
+        let window = web_sys::window().unwrap();
+        let play_pause_icon = window
+            .document()
+            .unwrap()
+            .get_element_by_id("play-pause-icon")
+            .unwrap()
+            .dyn_into::<HtmlImageElement>()
+            .unwrap();
+        play_pause_icon.set_src("/static/play.svg");
+        play_pause_icon.set_alt("Play");
+        window.cancel_animation_frame(frame).unwrap();
+
+        unsafe { FRAME = None };
+    }
+}
+
+fn play() {
+    if unsafe { FRAME } == None {
+        let play_pause_icon = web_sys::window()
+            .unwrap()
+            .document()
+            .unwrap()
+            .get_element_by_id("play-pause-icon")
+            .unwrap()
+            .dyn_into::<HtmlImageElement>()
+            .unwrap();
+        play_pause_icon.set_src("/static/pause.svg");
+        play_pause_icon.set_alt("Pause");
+    }
+}
+
+fn restart_spectrum() {
+    let should_pause = is_paused();
+}
+
+fn draw_frame() {
+    unsafe {
+        if let Some(spectrum) = &mut SPECTRUM {
+            spectrum.draw();
+            spectrum.tick();
+            FRAME = Some(
+                web_sys::window()
+                    .unwrap()
+                    .request_animation_frame(
+                        Closure::wrap(Box::new(draw_frame) as Box<dyn Fn()>)
+                            .as_ref()
+                            .unchecked_ref(),
+                    )
+                    .unwrap(),
+            );
+        }
+    }
 }
 
 #[wasm_bindgen(start)]
