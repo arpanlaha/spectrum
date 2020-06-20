@@ -23,14 +23,14 @@
   "devDependencies": {
     "@hack4impact-uiuc/eslint-plugin": "^2.0.1",
     "copy-webpack-plugin": "^6.0.2",
-    "eslint": "^7.2.0",
+    "eslint": "^7.3.0",
     "markdownlint-cli": "^0.23.1",
     "prettier": "^2.0.5",
     "static-server": "^2.2.1",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.5",
     "webpack": "^4.29.3",
-    "webpack-cli": "^3.1.0",
+    "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.1.5"
   }
 }
