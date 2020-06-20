@@ -25,8 +25,8 @@ try {
 
 // run app logic if support detected
 if (supportsWasm && supportsDynamicImport) {
-  import("./index").catch((e) =>
-    console.error("Error importing `index.js`:", e)
+  import("wasm-spectrum").catch((e) =>
+    console.error("Error importing `wasm-spectrum`:", e)
   );
 } else {
   // otherwise display error messages with missing browser support information
