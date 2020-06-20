@@ -4,12 +4,12 @@ mod utils;
 use std::cmp;
 use std::fmt::Display;
 
-use js_sys::{Object, Reflect};
+use js_sys::{Array, Object, Reflect};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, HtmlCanvasElement, HtmlImageElement, HtmlInputElement, Storage,
-    WebGlRenderingContext,
+    CanvasRenderingContext2d, HtmlAnchorElement, HtmlCanvasElement, HtmlElement, HtmlImageElement,
+    HtmlInputElement, Storage, WebGlRenderingContext,
 };
 
 use spectrum::wasm::SpectrumWasm;
@@ -183,139 +183,12 @@ fn init_input(param: &str, min: &str, max: &str, step: &str) {
 
         text.set_text_content(Some(value));
         get_local_storage().set_item("param", value).unwrap();
+        restart_spectrum();
     }) as Box<dyn Fn()>);
 
     setter.set_onchange(Some(onchange.as_ref().unchecked_ref()));
 
     onchange.forget();
-}
-
-fn init_listeners() {
-    let window = web_sys::window().unwrap();
-    let document = window.document().unwrap();
-
-    let max_width_str = max_width().to_string();
-
-    let max_height_str = max_height().to_string();
-
-    let mode = get_initial_value("mode", "webgl");
-    let lock = get_initial_value("lock", "false").parse::<bool>().unwrap();
-
-    let State {
-        width,
-        height,
-        num_sources,
-        movement_speed,
-        color_speed,
-    } = get_default_params();
-
-    let width = get_initial_value("width", width);
-    let height = get_initial_value("height", height);
-    let num_sources = get_initial_value("num-sources", num_sources);
-    let movement_speed = get_initial_value("movement-speed", movement_speed);
-    let color_speed = get_initial_value("color-speed", color_speed);
-
-    if mode == "webgl" {
-        let context_webgl_options = Object::new();
-        Reflect::set(
-            &context_webgl_options,
-            &"preserveDrawingBuffer".into(),
-            &wasm_bindgen::JsValue::TRUE,
-        )
-        .unwrap();
-
-        get_canvas()
-            .get_context_with_context_options("webgl", &context_webgl_options)
-            .unwrap()
-            .unwrap()
-            .dyn_into::<WebGlRenderingContext>()
-            .unwrap()
-            .viewport(
-                0,
-                0,
-                width.parse::<i32>().unwrap(),
-                height.parse::<i32>().unwrap(),
-            );
-    }
-
-    resize_canvas();
-
-    // let canvas_webgl = document
-    //     .get_element_by_id("canvas-webgl")
-    //     .unwrap()
-    //     .dyn_into::<HtmlCanvasElement>()
-    //     .unwrap();
-
-    let canvas_2d = document
-        .get_element_by_id("canvas-wasm")
-        .unwrap()
-        .dyn_into::<HtmlCanvasElement>()
-        .unwrap();
-
-    // let controls = document.get_element_by_id("controls").unwrap();
-
-    // let play_pause_icon = document
-    // .get_element_by_id("play-pause-icon")
-    // .unwrap()
-    // .dyn_into::<HtmlImageElement>()
-    // .unwrap();
-
-    // let download_link = document
-    //     .get_element_by_id("download-link")
-    //     .unwrap()
-    //     .dyn_into::<HtmlAnchorElement>()
-    //     .unwrap();
-
-    // let mode_webgl = document.get_element_by_id("mode-webgl").unwrap();
-    // let mode_wasm = document.get_element_by_id("mode-wasm").unwrap();
-    // let mode_js = document.get_element_by_id("mode-js").unwrap();
-    // let mode_lock = document.get_element_by_id("mode-lock").unwrap();
-    // let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
-
-    init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
-
-    init_input("height", MIN_DIMENSION, &max_height_str[..], "10");
-
-    init_input("num-sources", "2", "100", "1");
-    init_input("movement-speed", "1", "100", "1");
-    init_input("color-speed", "1", "100", "1");
-
-    // let collapse = document
-    //     .get_element_by_id("collapse")
-    //     .unwrap()
-    //     .dyn_into::<HtmlImageElement>()
-    //     .unwrap();
-    // let expand = document
-    //     .get_element_by_id("expand")
-    //     .unwrap()
-    //     .dyn_into::<HtmlImageElement>()
-    //     .unwrap();
-
-    // let context_webgl_options = Object::new();
-    // Reflect::set(
-    //     &context_webgl_options,
-    //     &"preserveDrawingBuffer".into(),
-    //     &wasm_bindgen::JsValue::TRUE,
-    // )
-    // .unwrap();
-
-    // let context_webgl = canvas_webgl
-    //     .get_context_with_context_options("webgl", &context_webgl_options)
-    //     .unwrap()
-    //     .unwrap()
-    //     .dyn_into::<WebGlRenderingContext>()
-    //     .unwrap();
-
-    let context_2d = canvas_2d
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<CanvasRenderingContext2d>()
-        .unwrap();
-
-    context_2d
-        .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
-        .unwrap();
 }
 
 fn get_new_spectrum() {
@@ -415,7 +288,263 @@ fn draw_frame() {
     }
 }
 
+fn init_listeners() {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    let max_width_str = max_width().to_string();
+
+    let max_height_str = max_height().to_string();
+
+    let mode = get_initial_value("mode", "webgl");
+    let lock = get_initial_value("lock", "false").parse::<bool>().unwrap();
+
+    let State {
+        width,
+        height,
+        num_sources,
+        movement_speed,
+        color_speed,
+    } = get_default_params();
+
+    let width = get_initial_value("width", width);
+    let height = get_initial_value("height", height);
+    let num_sources = get_initial_value("num-sources", num_sources);
+    let movement_speed = get_initial_value("movement-speed", movement_speed);
+    let color_speed = get_initial_value("color-speed", color_speed);
+
+    if mode == "webgl" {
+        let context_webgl_options = Object::new();
+        Reflect::set(
+            &context_webgl_options,
+            &"preserveDrawingBuffer".into(),
+            &wasm_bindgen::JsValue::TRUE,
+        )
+        .unwrap();
+
+        get_canvas()
+            .get_context_with_context_options("webgl", &context_webgl_options)
+            .unwrap()
+            .unwrap()
+            .dyn_into::<WebGlRenderingContext>()
+            .unwrap()
+            .viewport(
+                0,
+                0,
+                width.parse::<i32>().unwrap(),
+                height.parse::<i32>().unwrap(),
+            );
+    }
+
+    resize_canvas();
+
+    // let canvas_webgl = document
+    //     .get_element_by_id("canvas-webgl")
+    //     .unwrap()
+    //     .dyn_into::<HtmlCanvasElement>()
+    //     .unwrap();
+
+    let canvas_2d = document
+        .get_element_by_id("canvas-wasm")
+        .unwrap()
+        .dyn_into::<HtmlCanvasElement>()
+        .unwrap();
+
+    let context_2d = canvas_2d
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap();
+
+    context_2d
+        .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
+        .unwrap();
+
+    // let controls = document.get_element_by_id("controls").unwrap();
+
+    // let play_pause_icon = document
+    // .get_element_by_id("play-pause-icon")
+    // .unwrap()
+    // .dyn_into::<HtmlImageElement>()
+    // .unwrap();
+
+    // let mode_webgl = document.get_element_by_id("mode-webgl").unwrap();
+    // let mode_wasm = document.get_element_by_id("mode-wasm").unwrap();
+    // let mode_js = document.get_element_by_id("mode-js").unwrap();
+    // let mode_lock = document.get_element_by_id("mode-lock").unwrap();
+    // let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
+
+    init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
+
+    init_input("height", MIN_DIMENSION, &max_height_str[..], "10");
+
+    init_input("num-sources", "2", "100", "1");
+    init_input("movement-speed", "1", "100", "1");
+    init_input("color-speed", "1", "100", "1");
+
+    let restart_onclick = Closure::wrap(Box::new(|| {
+        get_new_spectrum();
+    }) as Box<dyn Fn()>);
+    document
+        .get_element_by_id("restart-button")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .set_onclick(Some(restart_onclick.as_ref().unchecked_ref()));
+    restart_onclick.forget();
+
+    let download_onclick = Closure::wrap(Box::new(|| {
+        web_sys::window()
+            .unwrap()
+            .document()
+            .unwrap()
+            .get_element_by_id("download-link")
+            .unwrap()
+            .dyn_into::<HtmlAnchorElement>()
+            .unwrap()
+            .set_href(
+                &str::replace(
+                    &get_canvas().to_data_url_with_type("image/png").unwrap()[..],
+                    "image/png",
+                    "image/octet-stream",
+                )[..],
+            );
+    }) as Box<dyn Fn()>);
+
+    document
+        .get_element_by_id("download-link")
+        .unwrap()
+        .dyn_into::<HtmlAnchorElement>()
+        .unwrap()
+        .set_onclick(Some(download_onclick.as_ref().unchecked_ref()));
+
+    download_onclick.forget();
+
+    let collapse_onclick = Closure::wrap(Box::new(|| {
+        let window = web_sys::window().unwrap();
+        let document = web_sys::window().unwrap().document().unwrap();
+
+        document
+            .get_element_by_id("controls")
+            .unwrap()
+            .dyn_into::<HtmlElement>()
+            .unwrap()
+            .class_list()
+            .add_1("hide-controls")
+            .unwrap();
+
+        window
+            .set_timeout_with_callback_and_timeout_and_arguments(
+                Closure::wrap(Box::new(|| {
+                    web_sys::window()
+                        .unwrap()
+                        .document()
+                        .unwrap()
+                        .get_element_by_id("expand")
+                        .unwrap()
+                        .dyn_into::<HtmlElement>()
+                        .unwrap()
+                        .class_list()
+                        .remove_1("hide-expand")
+                        .unwrap();
+                }) as Box<dyn Fn()>)
+                .as_ref()
+                .unchecked_ref(),
+                500,
+                &Array::new(),
+            )
+            .unwrap();
+    }) as Box<dyn Fn()>);
+
+    document
+        .get_element_by_id("collapse")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .set_onclick(Some(collapse_onclick.as_ref().unchecked_ref()));
+
+    collapse_onclick.forget();
+
+    let expand_onclick = Closure::wrap(Box::new(|| {
+        let document = web_sys::window().unwrap().document().unwrap();
+        document
+            .get_element_by_id("expand")
+            .unwrap()
+            .dyn_into::<HtmlElement>()
+            .unwrap()
+            .class_list()
+            .add_1("hide-expand")
+            .unwrap();
+
+        document
+            .get_element_by_id("controls")
+            .unwrap()
+            .dyn_into::<HtmlElement>()
+            .unwrap()
+            .class_list()
+            .remove_1("hide-controls")
+            .unwrap();
+    }) as Box<dyn Fn()>);
+
+    document
+        .get_element_by_id("expand")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .set_onclick(Some(expand_onclick.as_ref().unchecked_ref()));
+
+    expand_onclick.forget();
+    // let collapse = document
+    //     .get_element_by_id("collapse")
+    //     .unwrap()
+    //     .dyn_into::<HtmlImageElement>()
+    //     .unwrap();
+    // let expand = document
+    //     .get_element_by_id("expand")
+    //     .unwrap()
+    //     .dyn_into::<HtmlImageElement>()
+    //     .unwrap();
+
+    // let context_webgl_options = Object::new();
+    // Reflect::set(
+    //     &context_webgl_options,
+    //     &"preserveDrawingBuffer".into(),
+    //     &wasm_bindgen::JsValue::TRUE,
+    // )
+    // .unwrap();
+
+    // let context_webgl = canvas_webgl
+    //     .get_context_with_context_options("webgl", &context_webgl_options)
+    //     .unwrap()
+    //     .unwrap()
+    //     .dyn_into::<WebGlRenderingContext>()
+    //     .unwrap();
+}
+
 #[wasm_bindgen(start)]
 pub fn start() {
     init_listeners();
+
+    let document = web_sys::window().unwrap().document().unwrap();
+
+    document
+        .get_element_by_id("canvas-webgl")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .class_list()
+        .remove_1("hide")
+        .unwrap();
+
+    document
+        .get_element_by_id("controls")
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .class_list()
+        .remove_1("hide")
+        .unwrap();
+
+    play();
 }

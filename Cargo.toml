@@ -44,7 +44,8 @@ features = [
   'Window',
   'Storage',
   'Event',
-  'CssStyleDeclaration'
+  'CssStyleDeclaration',
+  'DomTokenList'
 ]
 
 # [dev-dependencies]
