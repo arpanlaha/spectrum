@@ -267,6 +267,43 @@ fn play() {
 
 fn restart_spectrum() {
     let should_pause = is_paused();
+    if should_pause {
+        pause();
+    }
+
+    let document = web_sys::window().unwrap().document().unwrap();
+    let mode = get_local_storage_item("mode");
+    document
+        .get_element_by_id(if mode == "webgl" {
+            "canvas-wasm"
+        } else {
+            "canvas-webgl"
+        })
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .class_list()
+        .add_1("hide")
+        .unwrap();
+
+    document
+        .get_element_by_id(if mode == "webgl" {
+            "canvas-webgl"
+        } else {
+            "canvas-wasm"
+        })
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .class_list()
+        .remove_1("hide")
+        .unwrap();
+
+    get_new_spectrum();
+
+    if should_pause {
+        play();
+    }
 }
 
 fn draw_frame() {
