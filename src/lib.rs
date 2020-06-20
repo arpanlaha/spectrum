@@ -16,12 +16,12 @@ use spectrum::wasm::SpectrumWasm;
 use spectrum::webgl::SpectrumGL;
 use utils::base::Spectrum;
 
-// const WEBGL_SCALE: f32 = 1f32;
-// const WASM_SCALE: f32 = 0.4f32;
-// const JS_SCALE: f32 = 0.25f32;
-// const MOVEMENT_SPEED_FACTOR: f32 = 0.2f32;
-// const COLOR_SPEED_FACTOR: f32 = 0.002f32;
-// const UNIFORMS_PER_SOURCE: usize = 4;
+const WEBGL_SCALE: f64 = 1f64;
+const WASM_SCALE: f64 = 0.4f64;
+// const JS_SCALE: f64 = 0.25f64;
+const MOVEMENT_SPEED_FACTOR: f32 = 0.2f32;
+const COLOR_SPEED_FACTOR: f32 = 0.002f32;
+const UNIFORMS_PER_SOURCE: usize = 4;
 const MIN_DIMENSION: &str = "100";
 
 // enum Spectrum {
@@ -56,6 +56,10 @@ fn get_local_storage() -> Storage {
 
 fn get_local_storage_item(key: &str) -> String {
     get_local_storage().get_item(key).unwrap().unwrap()
+}
+
+fn set_local_storage_item(key: &str, value: &str) {
+    get_local_storage().set_item(key, value).unwrap();
 }
 
 // fn get_mode() -> String {
@@ -95,12 +99,12 @@ fn get_default_params() -> State {
             .unwrap();
 
         State {
-            width: max_width() as usize,
-            height: max_height() as usize,
+            width: (max_width() * WEBGL_SCALE) as usize,
+            height: (max_height() * WEBGL_SCALE) as usize,
             num_sources: cmp::min(
                 20,
                 context_webgl
-                    .get_parameter(WebGlRenderingContext::MAX_FRAGMENT_UNIFORM_VECTORS)
+                    .get_parameter(WebGlRenderingContext::MAX_FRAGMENT_UNIFORM_VECTORS / 4)
                     .unwrap()
                     .as_f64()
                     .unwrap() as usize,
@@ -110,8 +114,8 @@ fn get_default_params() -> State {
         }
     } else {
         State {
-            width: max_width() as usize,
-            height: max_height() as usize,
+            width: (max_width() * WASM_SCALE) as usize,
+            height: (max_height() * WASM_SCALE) as usize,
             num_sources: 10,
             movement_speed: 10f32,
             color_speed: 20f32,
@@ -156,7 +160,7 @@ fn resize_canvas() {
         .unwrap();
 }
 
-fn init_input(param: &str, min: &str, max: &str, step: &str) {
+fn init_input(param: &'static str, min: &str, max: &str, step: &str) {
     let document = web_sys::window().unwrap().document().unwrap();
     let setter_id = format!("set-{}", param);
     let text = document.get_element_by_id(param).unwrap();
@@ -167,7 +171,30 @@ fn init_input(param: &str, min: &str, max: &str, step: &str) {
         .unwrap();
 
     setter.set_min(min);
-    setter.set_max(max);
+    if param == "webgl" {
+        setter.set_max(
+            &cmp::min(
+                max.parse::<usize>().unwrap(),
+                document
+                    .get_element_by_id("canvas-webgl")
+                    .unwrap()
+                    .dyn_into::<HtmlCanvasElement>()
+                    .unwrap()
+                    .get_context("webgl")
+                    .unwrap()
+                    .unwrap()
+                    .dyn_into::<WebGlRenderingContext>()
+                    .unwrap()
+                    .get_parameter(WebGlRenderingContext::MAX_FRAGMENT_UNIFORM_VECTORS / 4)
+                    .unwrap()
+                    .as_f64()
+                    .unwrap() as usize,
+            )
+            .to_string()[..],
+        );
+    } else {
+        setter.set_max(max);
+    }
     setter.set_step(step);
 
     let onchange = Closure::wrap(Box::new(move || {
@@ -182,7 +209,7 @@ fn init_input(param: &str, min: &str, max: &str, step: &str) {
             .value()[..];
 
         text.set_text_content(Some(value));
-        get_local_storage().set_item("param", value).unwrap();
+        set_local_storage_item(param, value);
         restart_spectrum();
     }) as Box<dyn Fn()>);
 
@@ -210,8 +237,8 @@ fn get_new_spectrum() {
                 width,
                 height,
                 num_sources,
-                movement_speed,
-                color_speed,
+                movement_speed * MOVEMENT_SPEED_FACTOR,
+                color_speed * COLOR_SPEED_FACTOR,
                 get_canvas(),
             )));
         },
@@ -325,6 +352,60 @@ fn draw_frame() {
     }
 }
 
+fn init_rendering_mode(setter_mode: &'static str) {
+    let onclick = Closure::wrap(Box::new(move || {
+        let current_mode = get_local_storage_item("mode");
+        if current_mode != setter_mode {
+            let document = web_sys::window().unwrap().document().unwrap();
+            document
+                .get_element_by_id(&format!("mode-{}", current_mode)[..])
+                .unwrap()
+                .dyn_into::<HtmlElement>()
+                .unwrap()
+                .class_list()
+                .remove_1("current-mode")
+                .unwrap();
+
+            document
+                .get_element_by_id(&format!("mode-{}", setter_mode)[..])
+                .unwrap()
+                .dyn_into::<HtmlElement>()
+                .unwrap()
+                .class_list()
+                .remove_1("current-mode")
+                .unwrap();
+        }
+    }) as Box<dyn Fn()>);
+
+    web_sys::window()
+        .unwrap()
+        .document()
+        .unwrap()
+        .get_element_by_id(&format!("mode-{}", setter_mode)[..])
+        .unwrap()
+        .dyn_into::<HtmlElement>()
+        .unwrap()
+        .set_onclick(Some(onclick.as_ref().unchecked_ref()));
+
+    set_local_storage_item("mode", setter_mode);
+
+    if !get_local_storage_item("lock").parse::<bool>().unwrap() {
+        let State {
+            width,
+            height,
+            num_sources,
+            movement_speed,
+            color_speed,
+        } = get_default_params();
+        set_local_storage_item("width", &width.to_string()[..]);
+        set_local_storage_item("height", &height.to_string()[..]);
+        set_local_storage_item("num-sources", &num_sources.to_string()[..]);
+        set_local_storage_item("movement-speed", &movement_speed.to_string()[..]);
+        set_local_storage_item("color-speed", &color_speed.to_string()[..]);
+    }
+    restart_spectrum();
+}
+
 fn init_listeners() {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
@@ -398,28 +479,6 @@ fn init_listeners() {
         .scale(window.device_pixel_ratio(), window.device_pixel_ratio())
         .unwrap();
 
-    // let controls = document.get_element_by_id("controls").unwrap();
-
-    // let play_pause_icon = document
-    // .get_element_by_id("play-pause-icon")
-    // .unwrap()
-    // .dyn_into::<HtmlImageElement>()
-    // .unwrap();
-
-    // let mode_webgl = document.get_element_by_id("mode-webgl").unwrap();
-    // let mode_wasm = document.get_element_by_id("mode-wasm").unwrap();
-    // let mode_js = document.get_element_by_id("mode-js").unwrap();
-    // let mode_lock = document.get_element_by_id("mode-lock").unwrap();
-    // let mode_unlock = document.get_element_by_id("mode-unlock").unwrap();
-
-    init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
-
-    init_input("height", MIN_DIMENSION, &max_height_str[..], "10");
-
-    init_input("num-sources", "2", "100", "1");
-    init_input("movement-speed", "1", "100", "1");
-    init_input("color-speed", "1", "100", "1");
-
     let restart_onclick = Closure::wrap(Box::new(|| {
         get_new_spectrum();
     }) as Box<dyn Fn()>);
@@ -457,6 +516,16 @@ fn init_listeners() {
         .set_onclick(Some(download_onclick.as_ref().unchecked_ref()));
 
     download_onclick.forget();
+
+    init_rendering_mode("webgl");
+    init_rendering_mode("wasm");
+    init_rendering_mode("js");
+
+    init_input("width", MIN_DIMENSION, &max_width_str[..], "10");
+    init_input("height", MIN_DIMENSION, &max_height_str[..], "10");
+    init_input("num-sources", "2", "100", "1");
+    init_input("movement-speed", "1", "100", "1");
+    init_input("color-speed", "1", "100", "1");
 
     let collapse_onclick = Closure::wrap(Box::new(|| {
         let window = web_sys::window().unwrap();
@@ -532,31 +601,6 @@ fn init_listeners() {
         .set_onclick(Some(expand_onclick.as_ref().unchecked_ref()));
 
     expand_onclick.forget();
-    // let collapse = document
-    //     .get_element_by_id("collapse")
-    //     .unwrap()
-    //     .dyn_into::<HtmlImageElement>()
-    //     .unwrap();
-    // let expand = document
-    //     .get_element_by_id("expand")
-    //     .unwrap()
-    //     .dyn_into::<HtmlImageElement>()
-    //     .unwrap();
-
-    // let context_webgl_options = Object::new();
-    // Reflect::set(
-    //     &context_webgl_options,
-    //     &"preserveDrawingBuffer".into(),
-    //     &wasm_bindgen::JsValue::TRUE,
-    // )
-    // .unwrap();
-
-    // let context_webgl = canvas_webgl
-    //     .get_context_with_context_options("webgl", &context_webgl_options)
-    //     .unwrap()
-    //     .unwrap()
-    //     .dyn_into::<WebGlRenderingContext>()
-    //     .unwrap();
 }
 
 #[wasm_bindgen(start)]
