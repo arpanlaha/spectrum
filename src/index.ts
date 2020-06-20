@@ -267,7 +267,7 @@ const isPaused = (): boolean => animationId === null;
 const play = (): void => {
   playPauseIcon.src = "/static/pause.svg";
   playPauseIcon.alt = "Pause";
-  renderLoop();
+  animationId = window.requestAnimationFrame(renderLoop);
 };
 
 const pause = (): void => {
