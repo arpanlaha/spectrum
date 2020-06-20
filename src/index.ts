@@ -35,7 +35,7 @@ interface State extends InitialState {
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
-const canvas2d = document.getElementById("canvas-wasm") as HTMLCanvasElement;
+const canvas2d = document.getElementById("canvas-2d") as HTMLCanvasElement;
 const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseIcon = document.getElementById(
   "play-pause-icon"
