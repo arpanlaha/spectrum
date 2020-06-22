@@ -4,8 +4,8 @@
   "description": "Create randomly-generated art using Rust + WebAssembly",
   "scripts": {
     "build": "rm -rf dist && webpack --config webpack.config.js",
-    "format": "prettier --write \"**/*.{js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{js,,json,md}\"",
+    "format": "prettier --write \"**/*.{js,json,md,css}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,css}\"",
     "lint": "eslint src && markdownlint README.md",
     "lint:fix": "eslint src && markdownlint --fix README.md",
     "serve": "static-server dist",
