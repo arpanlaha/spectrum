@@ -2,6 +2,7 @@ import { SpectrumWebGL, SpectrumWasm } from "wasm-spectrum";
 import { SpectrumJS } from "./spectrum";
 import { FPS } from "./utils";
 
+// Constants
 const DEVICE_SCALE = window.devicePixelRatio;
 const MAX_WIDTH = document.body.clientWidth * DEVICE_SCALE;
 const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
@@ -11,6 +12,8 @@ const JS_SCALE = 0.25;
 const MOVEMENT_SPEED_FACTOR = 0.2;
 const COLOR_SPEED_FACTOR = 0.002;
 const UNIFORMS_PER_SOURCE = 4;
+
+// Types
 
 type Mode = "webgl" | "wasm" | "js";
 
@@ -44,6 +47,9 @@ const params: Param[] = [
   "colorSpeed",
 ];
 
+/**
+ * Converts parameters from camelCase (for use in scripts) to kebab-case (for use in HTML/CSS).
+ */
 const kebabParams = {
   width: "width",
   height: "height",
@@ -52,6 +58,7 @@ const kebabParams = {
   colorSpeed: "color-speed",
 };
 
+// Reused html elements
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
@@ -68,16 +75,25 @@ const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
 }) as WebGLRenderingContext;
 
+// Scale canvas to account for device pixel ratio.
 (canvas2d.getContext("2d") as CanvasRenderingContext2D).scale(
   DEVICE_SCALE,
   DEVICE_SCALE
 );
 
+/**
+ * Max hardware-supported number of Sources for WebGL.
+ *
+ * iOS is dumb and has a limited number of fragment shader uniforms.
+ */
 const WEBGL_NUM_SOURCES_UPPER_BOUND = Math.floor(
   contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
     UNIFORMS_PER_SOURCE
 );
 
+/**
+ * Hardware-enforced upper limits to parameters.
+ */
 const UPPER_BOUNDS = {
   height: MAX_HEIGHT,
   width: MAX_WIDTH,
@@ -85,16 +101,15 @@ const UPPER_BOUNDS = {
 };
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/**
+ * Default parameters for different modes.
+ */
 const modeStates: Record<Mode, InitialState> = {
   webgl: {
     canvas: canvasWebgl,
     width: Math.round(MAX_WIDTH * WEBGL_SCALE),
     height: Math.round(MAX_HEIGHT * WEBGL_SCALE),
-    numSources: Math.min(
-      20,
-      // iOS is dumb and has a limited number of fragment shader uniforms
-      WEBGL_NUM_SOURCES_UPPER_BOUND
-    ),
+    numSources: Math.min(20, WEBGL_NUM_SOURCES_UPPER_BOUND),
     movementSpeed: 10,
     colorSpeed: 10,
   },
@@ -117,12 +132,19 @@ const modeStates: Record<Mode, InitialState> = {
 };
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
+/**
+ * Contains each mode's associated implementation.
+ */
 const spectrumInitializers = {
   webgl: SpectrumWebGL,
   wasm: SpectrumWasm,
   js: SpectrumJS,
 };
 
+/**
+ * Resets parameters and associated inputs, as well as resizing the current canvas.
+ * @param state the State passed in to reset parameters to.
+ */
 const resetParams = (state: InitialState): void => {
   const { canvas, width, height } = state;
 
@@ -145,6 +167,10 @@ const resetParams = (state: InitialState): void => {
   }
 };
 
+/**
+ * Constructs the initial State.
+ * @param mode the initial mode.
+ */
 const getInitialState = (mode: Mode): State => {
   const { width, height, numSources, movementSpeed, colorSpeed } = modeStates[
     mode
@@ -167,11 +193,29 @@ const getInitialState = (mode: Mode): State => {
   };
 };
 
+/**
+ * The rendering mode.
+ */
 let mode: Mode = "webgl";
+
+/**
+ * Whether to lock parameters or use defaults on a mode change.
+ */
 let lockParameters = false;
+
+/**
+ * The current application state.
+ */
 let state = getInitialState(mode);
+
+/**
+ * The current requested animation frame id if playing, or null if not.
+ */
 let animationId: number | null = null;
 
+/**
+ * Fetches a new Spectrum based on current state.
+ */
 const getNewSpectrum = (): Spectrum => {
   const { width, height, numSources, movementSpeed, colorSpeed } = state;
   resetParams(state);
@@ -185,8 +229,14 @@ const getNewSpectrum = (): Spectrum => {
   );
 };
 
+/**
+ * The current FPS object rendering to the corresponding HTML element.
+ */
 let fps = new FPS();
 
+/**
+ * Restarts the Spectrum.
+ */
 const restartSpectrum = (): void => {
   const shouldPlay = animationId !== null;
 
@@ -206,6 +256,9 @@ const restartSpectrum = (): void => {
   }
 };
 
+/**
+ * Called on each frame, drawing the Spectrum, updating FPS, and updating Spectrum state.
+ */
 const renderLoop = (): void => {
   const { spectrum } = state;
   spectrum.draw();
@@ -215,12 +268,18 @@ const renderLoop = (): void => {
   animationId = window.requestAnimationFrame(renderLoop);
 };
 
+/**
+ * Plays the Spectrum.
+ */
 const play = (): void => {
   playPauseIcon.src = "/static/pause.svg";
   playPauseIcon.alt = "Pause";
   animationId = window.requestAnimationFrame(renderLoop);
 };
 
+/**
+ * Pauses the Spectrum.
+ */
 const pause = (): void => {
   if (animationId !== null) {
     playPauseIcon.src = "/static/play.svg";
@@ -230,6 +289,7 @@ const pause = (): void => {
   }
 };
 
+// Play or pause depending on application state.
 document.getElementById("play-pause-button")!.addEventListener("click", () => {
   if (animationId === null) {
     play();
@@ -238,6 +298,21 @@ document.getElementById("play-pause-button")!.addEventListener("click", () => {
   }
 });
 
+// Set up restart button event listener.
+document
+  .getElementById("restart-button")!
+  .addEventListener("click", () => (state.spectrum = getNewSpectrum()));
+
+// Set up download button event listener.
+(document.getElementById(
+  "download-link"
+) as HTMLAnchorElement).addEventListener("click", function () {
+  this.href = state.canvas
+    .toDataURL("image/png")
+    .replace("image/png", "image/octet-stream");
+});
+
+// Set up event listeners for each mode button.
 modes.forEach((modeName) => {
   const modeButton = document.getElementById(
     `mode-${modeName}`
@@ -257,6 +332,7 @@ modes.forEach((modeName) => {
   });
 });
 
+// Set up unlock event listeners.
 modeUnlock.addEventListener("click", () => {
   if (lockParameters) {
     modeLock.classList.remove("current-mode");
@@ -265,6 +341,7 @@ modeUnlock.addEventListener("click", () => {
   }
 });
 
+// Set up lock event listeners.
 modeLock.addEventListener("click", () => {
   if (!lockParameters) {
     modeUnlock.classList.remove("current-mode");
@@ -273,6 +350,7 @@ modeLock.addEventListener("click", () => {
   }
 });
 
+// Set up parameter input event listeners.
 params.forEach((param) => {
   const setter = document.getElementById(
     `set-${kebabParams[param]}`
@@ -293,28 +371,21 @@ params.forEach((param) => {
   });
 });
 
-document
-  .getElementById("restart-button")!
-  .addEventListener("click", () => (state.spectrum = getNewSpectrum()));
-
-(document.getElementById(
-  "download-link"
-) as HTMLAnchorElement).addEventListener("click", function () {
-  this.href = state.canvas
-    .toDataURL("image/png")
-    .replace("image/png", "image/octet-stream");
-});
-
+// Set up controls collapse event listener.
 document.getElementById("collapse")!.addEventListener("click", () => {
   controls.classList.add("hide-controls");
   setTimeout(() => expand.classList.remove("hide-expand"), 500);
 });
 
+// Set up controls expand event listener.
 expand.addEventListener("click", () => {
   expand.classList.add("hide-expand");
   controls.classList.remove("hide-controls");
 });
 
+// Show hidden objects after setup is complete.
 state.canvas.classList.remove("hide");
 controls.classList.remove("hide");
+
+// Start the Spectrum.
 play();
