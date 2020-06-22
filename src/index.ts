@@ -1,4 +1,4 @@
-import { SpectrumGL, SpectrumWasm } from "wasm-spectrum";
+import { SpectrumWebGL, SpectrumWasm } from "wasm-spectrum";
 import { SpectrumJS } from "./spectrum";
 import { FPS } from "./utils";
 
@@ -118,7 +118,7 @@ const modeStates: Record<Mode, InitialState> = {
 /* eslint-enable @typescript-eslint/no-magic-numbers */
 
 const spectrumInitializers = {
-  webgl: SpectrumGL,
+  webgl: SpectrumWebGL,
   wasm: SpectrumWasm,
   js: SpectrumJS,
 };

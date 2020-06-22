@@ -11,7 +11,7 @@ try {
       Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00)
     )) instanceof WebAssembly.Module &&
     new WebAssembly.Instance(module) instanceof WebAssembly.Instance;
-} catch (e) {
+} catch {
   supportsWasm = false;
 }
 

@@ -6,22 +6,22 @@ use crate::utils::base::BaseSpectrum;
 
 /// A WebGL + WebAssembly implementation of Spectrum.
 #[wasm_bindgen]
-pub struct SpectrumGL {
+pub struct SpectrumWebGL {
     base: BaseSpectrum,
     context: WebGlRenderingContext,
     program: WebGlProgram,
 }
 
 #[wasm_bindgen]
-impl SpectrumGL {
-    /// Creates a new SpectrumGl.
+impl SpectrumWebGL {
+    /// Creates a new SpectrumWebGL.
     ///
     /// # Arguments
     ///
-    /// * `width` - the SpectrumGL's width.
-    /// * `height` - the SpectrumGL's height.
-    /// * `num_sources` - the number of Sources in the SpectrumGL.
-    /// * `context` - the `webgl` context belonging to the SpectrumGL's canvas.
+    /// * `width` - the SpectrumWebGL's width.
+    /// * `height` - the SpectrumWebGL's height.
+    /// * `num_sources` - the number of Sources in the SpectrumWebGL.
+    /// * `context` - the `webgl` context belonging to the SpectrumWebGL's canvas.
     /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
     /// * `color_speed` - the range of each Source's color speed (`dh`)
     pub fn new(
@@ -31,7 +31,7 @@ impl SpectrumGL {
         movement_speed: f32,
         color_speed: f32,
         canvas: HtmlCanvasElement,
-    ) -> SpectrumGL {
+    ) -> SpectrumWebGL {
         let context = canvas
             .get_context("webgl")
             .unwrap()
@@ -168,7 +168,7 @@ impl SpectrumGL {
             0,
         );
 
-        let spectrum = SpectrumGL {
+        let spectrum = SpectrumWebGL {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
