@@ -1,6 +1,8 @@
 # Spectrum
 
-Randomly-generated art using Rust + WebAssembly
+Randomly-generated art using Rust + WebAssembly.
+
+![Spectrum](https://user-images.githubusercontent.com/32147742/85253776-8451d800-b424-11ea-818d-a596c460c307.png)
 
 ## Background
 
