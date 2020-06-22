@@ -17,3 +17,12 @@ This originated as a way for me to test out Rust with WebAssembly, but after see
 For a given canvas, a number of "sources" is assigned. Each source is assigned a random position (x/y) that falls within the canvas, and a random hue value in the HSL color space. Every pixel in the canvas is colored according to a weighted average of distance from each source, using the inverse squared distance from each source as the weighting factor (with a small constant added value to avoid dividing by zero).
 
 However, as hue is a periodic/circular metric, weighting by mean will yield incorrect results. For example (in degrees), the mean of hues 10 and 350 will be 180, while the actual average hue will be 0. To account for this, each source's hue is broken in to sine and cosine components which are summed to reach a total. The arctangent is then applied to the total to calculate the resulting hue.
+
+## References
+
+Spectrum draws heavily from the following examples:
+
+- [The Rust and WebAssembly Game of Life Tutorial](https://rustwasm.github.io/book/game-of-life/introduction.html)
+- [The `web-sys` WebGL Example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html)
+
+A formula from the [IEEE Signal Processing Magazine](http://www-labs.iro.umontreal.ca/~mignotte/IFT2425/Documents/EfficientApproximationArctgFunction.pdf) is also used as a faster alternative to Rust's standard library arctangent function.
