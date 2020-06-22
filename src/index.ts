@@ -130,9 +130,9 @@ const resetParams = (state: InitialState): void => {
     document.getElementById(kebabParams[param])!.textContent = state[
       param
     ].toString();
-    document.getElementById(`set-${kebabParams[param]}`)!.textContent = state[
-      param
-    ].toString();
+    (document.getElementById(
+      `set-${kebabParams[param]}`
+    ) as HTMLInputElement).value = state[param].toString();
   });
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
