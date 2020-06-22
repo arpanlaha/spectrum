@@ -279,13 +279,13 @@ const pause = (): void => {
   }
 };
 
-document.getElementById("play-pause-button")!.onclick = () => {
+document.getElementById("play-pause-button")!.addEventListener("click", () => {
   if (isPaused()) {
     play();
   } else {
     pause();
   }
-};
+});
 
 const resetState = (): void => {
   const newState = initialStates[mode];
@@ -302,66 +302,66 @@ const resetState = (): void => {
   restartSpectrum();
 };
 
-modeWebgl.onclick = () => {
+modeWebgl.addEventListener("click", () => {
   if (mode !== "webgl") {
     (mode === "wasm" ? modeWasm : modeJs).classList.remove("current-mode");
     modeWebgl.classList.add("current-mode");
     mode = "webgl";
     resetState();
   }
-};
+});
 
-modeWasm.onclick = () => {
+modeWasm.addEventListener("click", () => {
   if (mode !== "wasm") {
     (mode === "webgl" ? modeWebgl : modeJs).classList.remove("current-mode");
     modeWasm.classList.add("current-mode");
     mode = "wasm";
     resetState();
   }
-};
+});
 
-modeJs.onclick = () => {
+modeJs.addEventListener("click", () => {
   if (mode !== "js") {
     (mode === "webgl" ? modeWebgl : modeWasm).classList.remove("current-mode");
     modeJs.classList.add("current-mode");
     mode = "js";
     resetState();
   }
-};
+});
 
-modeUnlock.onclick = () => {
+modeUnlock.addEventListener("click", () => {
   if (lockParameters) {
     modeLock.classList.remove("current-mode");
     modeUnlock.classList.add("current-mode");
     lockParameters = false;
   }
-};
+});
 
-modeLock.onclick = () => {
+modeLock.addEventListener("click", () => {
   if (!lockParameters) {
     modeUnlock.classList.remove("current-mode");
     modeLock.classList.add("current-mode");
     lockParameters = true;
   }
-};
+});
 
 setWidth.max = MAX_WIDTH.toString();
 setWidth.value = width.toString();
-setWidth.onchange = (e) => {
+setWidth.addEventListener("change", (e) => {
   const newWidth = (e.target as HTMLInputElement).value;
   width = parseInt(newWidth);
   widthText.textContent = width.toString();
   restartSpectrum();
-};
+});
 
 setHeight.max = MAX_HEIGHT.toString();
 setHeight.value = height.toString();
-setHeight.onchange = (e) => {
+setHeight.addEventListener("change", (e) => {
   const newHeight = (e.target as HTMLInputElement).value;
   height = parseInt(newHeight);
   heightText.textContent = height.toString();
   restartSpectrum();
-};
+});
 
 // See note in initialStates about iOS.
 setNumSources.max = Math.min(
@@ -372,47 +372,49 @@ setNumSources.max = Math.min(
   )
 ).toString();
 setNumSources.value = numSources.toString();
-setNumSources.onchange = (e) => {
+setNumSources.addEventListener("change", (e) => {
   const newNumSources = (e.target as HTMLInputElement).value;
   numSources = parseInt(newNumSources);
   numSourcesText.textContent = numSources.toString();
   restartSpectrum();
-};
+});
 
 setMovementSpeed.value = movementSpeed.toString();
-setMovementSpeed.onchange = (e) => {
+setMovementSpeed.addEventListener("change", (e) => {
   const newMovementSpeed = (e.target as HTMLInputElement).value;
   movementSpeed = parseInt(newMovementSpeed);
   movementSpeedText.textContent = movementSpeed.toString();
   restartSpectrum();
-};
+});
 
 setColorSpeed.value = colorSpeed.toString();
-setColorSpeed.onchange = (e) => {
+setColorSpeed.addEventListener("change", (e) => {
   const newColorSpeed = (e.target as HTMLInputElement).value;
   colorSpeed = parseInt(newColorSpeed);
   colorSpeedText.textContent = colorSpeed.toString();
   restartSpectrum();
-};
+});
 
-document.getElementById("restart-button")!.onclick = () => {
+document.getElementById("restart-button")!.addEventListener("click", () => {
   spectrum = getNewSpectrum();
-};
+});
 
-document.getElementById("download-link")!.onclick = () =>
-  (downloadLink.href = canvas
-    .toDataURL("image/png")
-    .replace("image/png", "image/octet-stream"));
+document.getElementById("download-link")!.addEventListener("click", () => {
+  downloadLink.setAttribute(
+    "href",
+    canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+  );
+});
 
-collapse.onclick = () => {
+collapse.addEventListener("click", () => {
   controls.classList.add("hide-controls");
   setTimeout(() => expand.classList.remove("hide-expand"), 500);
-};
+});
 
-expand.onclick = () => {
+expand.addEventListener("click", () => {
   expand.classList.add("hide-expand");
   controls.classList.remove("hide-controls");
-};
+});
 
 canvasWebgl.classList.remove("hide");
 controls.classList.remove("hide");
