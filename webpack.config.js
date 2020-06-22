@@ -4,7 +4,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-  entry: "./src/bootstrap.ts",
+  entry: "./src/startup.ts",
   module: {
     rules: [
       {
@@ -19,7 +19,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "bootstrap.js",
+    filename: "startup.js",
   },
   mode: "production",
   plugins: [
