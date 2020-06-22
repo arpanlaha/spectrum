@@ -14,6 +14,8 @@ const UNIFORMS_PER_SOURCE = 4;
 
 type Mode = "webgl" | "wasm" | "js";
 
+type Param = "width" | "height" | "numSources" | "movementSpeed" | "colorSpeed";
+
 interface Spectrum {
   draw: () => void;
   tick: () => void;
@@ -32,6 +34,24 @@ interface State extends InitialState {
   spectrum: Spectrum;
 }
 
+const modes: Mode[] = ["webgl", "wasm", "js"];
+
+const params: Param[] = [
+  "width",
+  "height",
+  "numSources",
+  "movementSpeed",
+  "colorSpeed",
+];
+
+const kebabParams = {
+  width: "width",
+  height: "height",
+  numSources: "num-sources",
+  movementSpeed: "movement-speed",
+  colorSpeed: "color-speed",
+};
+
 const canvasWebgl = document.getElementById(
   "canvas-webgl"
 ) as HTMLCanvasElement;
@@ -40,47 +60,32 @@ const controls = document.getElementById("controls") as HTMLDivElement;
 const playPauseIcon = document.getElementById(
   "play-pause-icon"
 ) as HTMLImageElement;
-const downloadLink = document.getElementById(
-  "download-link"
-) as HTMLAnchorElement;
-const modeWebgl = document.getElementById("mode-webgl") as HTMLDivElement;
-const modeWasm = document.getElementById("mode-wasm") as HTMLDivElement;
-const modeJs = document.getElementById("mode-js") as HTMLDivElement;
 const modeLock = document.getElementById("mode-lock") as HTMLDivElement;
 const modeUnlock = document.getElementById("mode-unlock") as HTMLDivElement;
-const widthText = document.getElementById("width") as HTMLSpanElement;
-const setWidth = document.getElementById("set-width") as HTMLInputElement;
-const heightText = document.getElementById("height") as HTMLSpanElement;
-const setHeight = document.getElementById("set-height") as HTMLInputElement;
-const numSourcesText = document.getElementById(
-  "num-sources"
-) as HTMLSpanElement;
-const setNumSources = document.getElementById(
-  "set-num-sources"
-) as HTMLInputElement;
-const movementSpeedText = document.getElementById(
-  "movement-speed"
-) as HTMLSpanElement;
-const setMovementSpeed = document.getElementById(
-  "set-movement-speed"
-) as HTMLInputElement;
-const colorSpeedText = document.getElementById(
-  "color-speed"
-) as HTMLSpanElement;
-const setColorSpeed = document.getElementById(
-  "set-color-speed"
-) as HTMLInputElement;
-const collapse = document.getElementById("collapse") as HTMLImageElement;
 const expand = document.getElementById("expand") as HTMLImageElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
 }) as WebGLRenderingContext;
-const context2d = canvas2d.getContext("2d") as CanvasRenderingContext2D;
-context2d.scale(DEVICE_SCALE, DEVICE_SCALE);
+
+(canvas2d.getContext("2d") as CanvasRenderingContext2D).scale(
+  DEVICE_SCALE,
+  DEVICE_SCALE
+);
+
+const WEBGL_NUM_SOURCES_UPPER_BOUND = Math.floor(
+  contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
+    UNIFORMS_PER_SOURCE
+);
+
+const UPPER_BOUNDS = {
+  height: MAX_HEIGHT,
+  width: MAX_WIDTH,
+  numSources: WEBGL_NUM_SOURCES_UPPER_BOUND,
+};
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-const initialStates: Record<Mode, InitialState> = {
+const modeStates: Record<Mode, InitialState> = {
   webgl: {
     canvas: canvasWebgl,
     width: Math.round(MAX_WIDTH * WEBGL_SCALE),
@@ -88,10 +93,7 @@ const initialStates: Record<Mode, InitialState> = {
     numSources: Math.min(
       20,
       // iOS is dumb and has a limited number of fragment shader uniforms
-      Math.floor(
-        contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
-          UNIFORMS_PER_SOURCE
-      )
+      WEBGL_NUM_SOURCES_UPPER_BOUND
     ),
     movementSpeed: 10,
     colorSpeed: 10,
@@ -121,30 +123,17 @@ const spectrumInitializers = {
   js: SpectrumJS,
 };
 
-const getInitialState = (mode: Mode): State => {
-  const {
-    canvas,
-    width,
-    height,
-    numSources,
-    movementSpeed,
-    colorSpeed,
-  } = initialStates[mode];
+const resetParams = (state: InitialState): void => {
+  const { canvas, width, height } = state;
 
-  widthText.textContent = width.toString();
-  setWidth.value = width.toString();
-
-  heightText.textContent = height.toString();
-  setHeight.value = height.toString();
-
-  numSourcesText.textContent = numSources.toString();
-  setNumSources.value = numSources.toString();
-
-  movementSpeedText.textContent = movementSpeed.toString();
-  setMovementSpeed.value = movementSpeed.toString();
-
-  colorSpeedText.textContent = colorSpeed.toString();
-  setColorSpeed.value = colorSpeed.toString();
+  params.forEach((param) => {
+    document.getElementById(kebabParams[param])!.textContent = state[
+      param
+    ].toString();
+    document.getElementById(`set-${kebabParams[param]}`)!.textContent = state[
+      param
+    ].toString();
+  });
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
   canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
@@ -154,6 +143,14 @@ const getInitialState = (mode: Mode): State => {
   if (mode === "webgl") {
     contextWebgl.viewport(0, 0, width, height);
   }
+};
+
+const getInitialState = (mode: Mode): State => {
+  const { width, height, numSources, movementSpeed, colorSpeed } = modeStates[
+    mode
+  ];
+
+  resetParams(modeStates[mode]);
 
   const spectrum = spectrumInitializers[mode].new(
     width,
@@ -165,59 +162,19 @@ const getInitialState = (mode: Mode): State => {
   );
 
   return {
-    canvas,
-    width,
-    height,
-    numSources,
     spectrum,
-    movementSpeed,
-    colorSpeed,
+    ...modeStates[mode],
   };
 };
 
 let mode: Mode = "webgl";
 let lockParameters = false;
-
-let {
-  canvas,
-  width,
-  height,
-  numSources,
-  spectrum,
-  movementSpeed,
-  colorSpeed,
-} = getInitialState(mode);
-
+let state = getInitialState(mode);
 let animationId: number | null = null;
 
-const setupCanvas = (): void => {
-  widthText.textContent = width.toString();
-  setWidth.value = width.toString();
-
-  heightText.textContent = height.toString();
-  setHeight.value = height.toString();
-
-  numSourcesText.textContent = numSources.toString();
-  setNumSources.value = numSources.toString();
-
-  movementSpeedText.textContent = movementSpeed.toString();
-  setMovementSpeed.value = movementSpeed.toString();
-
-  colorSpeedText.textContent = colorSpeed.toString();
-  setColorSpeed.value = colorSpeed.toString();
-
-  canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
-  canvas.style.height = `${Math.round(height / DEVICE_SCALE)}px`;
-  canvas.width = width;
-  canvas.height = height;
-
-  if (mode === "webgl") {
-    contextWebgl.viewport(0, 0, width, height);
-  }
-};
-
 const getNewSpectrum = (): Spectrum => {
-  setupCanvas();
+  const { width, height, numSources, movementSpeed, colorSpeed } = state;
+  resetParams(state);
   return spectrumInitializers[mode].new(
     width,
     height,
@@ -231,7 +188,7 @@ const getNewSpectrum = (): Spectrum => {
 let fps = new FPS();
 
 const restartSpectrum = (): void => {
-  const shouldPlay = !isPaused();
+  const shouldPlay = animationId !== null;
 
   if (shouldPlay) {
     pause();
@@ -239,15 +196,10 @@ const restartSpectrum = (): void => {
 
   fps = new FPS();
 
-  if (mode === "webgl") {
-    canvas2d.classList.add("hide");
-    canvasWebgl.classList.remove("hide");
-  } else {
-    canvasWebgl.classList.add("hide");
-    canvas2d.classList.remove("hide");
-  }
+  (mode === "webgl" ? canvas2d : canvasWebgl).classList.add("hide");
+  (mode === "webgl" ? canvasWebgl : canvas2d).classList.remove("hide");
 
-  spectrum = getNewSpectrum();
+  state.spectrum = getNewSpectrum();
 
   if (shouldPlay) {
     play();
@@ -255,14 +207,13 @@ const restartSpectrum = (): void => {
 };
 
 const renderLoop = (): void => {
+  const { spectrum } = state;
   spectrum.draw();
   fps.render();
   spectrum.tick();
 
   animationId = window.requestAnimationFrame(renderLoop);
 };
-
-const isPaused = (): boolean => animationId === null;
 
 const play = (): void => {
   playPauseIcon.src = "/static/pause.svg";
@@ -280,53 +231,30 @@ const pause = (): void => {
 };
 
 document.getElementById("play-pause-button")!.addEventListener("click", () => {
-  if (isPaused()) {
+  if (animationId === null) {
     play();
   } else {
     pause();
   }
 });
 
-const resetState = (): void => {
-  const newState = initialStates[mode];
-  canvas = newState.canvas;
-
-  if (!lockParameters) {
-    width = newState.width;
-    height = newState.height;
-    numSources = newState.numSources;
-    movementSpeed = newState.movementSpeed;
-    colorSpeed = newState.colorSpeed;
-  }
-
-  restartSpectrum();
-};
-
-modeWebgl.addEventListener("click", () => {
-  if (mode !== "webgl") {
-    (mode === "wasm" ? modeWasm : modeJs).classList.remove("current-mode");
-    modeWebgl.classList.add("current-mode");
-    mode = "webgl";
-    resetState();
-  }
-});
-
-modeWasm.addEventListener("click", () => {
-  if (mode !== "wasm") {
-    (mode === "webgl" ? modeWebgl : modeJs).classList.remove("current-mode");
-    modeWasm.classList.add("current-mode");
-    mode = "wasm";
-    resetState();
-  }
-});
-
-modeJs.addEventListener("click", () => {
-  if (mode !== "js") {
-    (mode === "webgl" ? modeWebgl : modeWasm).classList.remove("current-mode");
-    modeJs.classList.add("current-mode");
-    mode = "js";
-    resetState();
-  }
+modes.forEach((modeName) => {
+  const modeButton = document.getElementById(
+    `mode-${modeName}`
+  ) as HTMLDivElement;
+  modeButton.addEventListener("click", () => {
+    if (mode !== modeName) {
+      document.getElementById(`mode-${mode}`)!.classList.remove("current-mode");
+      modeButton.classList.add("current-mode");
+      mode = modeName;
+      const newState = modeStates[mode];
+      state.canvas = newState.canvas;
+      if (!lockParameters) {
+        state = { ...state, ...newState };
+      }
+      restartSpectrum();
+    }
+  });
 });
 
 modeUnlock.addEventListener("click", () => {
@@ -345,68 +273,39 @@ modeLock.addEventListener("click", () => {
   }
 });
 
-setWidth.max = MAX_WIDTH.toString();
-setWidth.value = width.toString();
-setWidth.addEventListener("change", (e) => {
-  const newWidth = (e.target as HTMLInputElement).value;
-  width = parseInt(newWidth);
-  widthText.textContent = width.toString();
-  restartSpectrum();
+params.forEach((param) => {
+  const setter = document.getElementById(
+    `set-${kebabParams[param]}`
+  )! as HTMLInputElement;
+
+  if (param === "width" || param === "height" || param === "numSources") {
+    setter.max = UPPER_BOUNDS[param].toString();
+  }
+
+  setter.value = state[param].toString();
+  setter.addEventListener("change", (e) => {
+    const newParam = (e.target as HTMLInputElement).value;
+    state[param] = parseInt(newParam);
+    document.getElementById(
+      kebabParams[param]
+    )!.textContent = newParam.toString();
+    restartSpectrum();
+  });
 });
 
-setHeight.max = MAX_HEIGHT.toString();
-setHeight.value = height.toString();
-setHeight.addEventListener("change", (e) => {
-  const newHeight = (e.target as HTMLInputElement).value;
-  height = parseInt(newHeight);
-  heightText.textContent = height.toString();
-  restartSpectrum();
+document
+  .getElementById("restart-button")!
+  .addEventListener("click", () => (state.spectrum = getNewSpectrum()));
+
+(document.getElementById(
+  "download-link"
+) as HTMLAnchorElement).addEventListener("click", function () {
+  this.href = state.canvas
+    .toDataURL("image/png")
+    .replace("image/png", "image/octet-stream");
 });
 
-// See note in initialStates about iOS.
-setNumSources.max = Math.min(
-  100,
-  Math.floor(
-    contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
-      UNIFORMS_PER_SOURCE
-  )
-).toString();
-setNumSources.value = numSources.toString();
-setNumSources.addEventListener("change", (e) => {
-  const newNumSources = (e.target as HTMLInputElement).value;
-  numSources = parseInt(newNumSources);
-  numSourcesText.textContent = numSources.toString();
-  restartSpectrum();
-});
-
-setMovementSpeed.value = movementSpeed.toString();
-setMovementSpeed.addEventListener("change", (e) => {
-  const newMovementSpeed = (e.target as HTMLInputElement).value;
-  movementSpeed = parseInt(newMovementSpeed);
-  movementSpeedText.textContent = movementSpeed.toString();
-  restartSpectrum();
-});
-
-setColorSpeed.value = colorSpeed.toString();
-setColorSpeed.addEventListener("change", (e) => {
-  const newColorSpeed = (e.target as HTMLInputElement).value;
-  colorSpeed = parseInt(newColorSpeed);
-  colorSpeedText.textContent = colorSpeed.toString();
-  restartSpectrum();
-});
-
-document.getElementById("restart-button")!.addEventListener("click", () => {
-  spectrum = getNewSpectrum();
-});
-
-document.getElementById("download-link")!.addEventListener("click", () => {
-  downloadLink.setAttribute(
-    "href",
-    canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
-  );
-});
-
-collapse.addEventListener("click", () => {
+document.getElementById("collapse")!.addEventListener("click", () => {
   controls.classList.add("hide-controls");
   setTimeout(() => expand.classList.remove("hide-expand"), 500);
 });
@@ -416,6 +315,6 @@ expand.addEventListener("click", () => {
   controls.classList.remove("hide-controls");
 });
 
-canvasWebgl.classList.remove("hide");
+state.canvas.classList.remove("hide");
 controls.classList.remove("hide");
 play();
