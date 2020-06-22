@@ -18,9 +18,71 @@ This originated as a way for me to test out Rust with WebAssembly, but after see
 
 ## Algorithm
 
-For a given canvas, a number of "sources" is assigned. Each source is assigned a random position (x/y) that falls within the canvas, and a random hue value in the HSL color space. Every pixel in the canvas is colored according to a weighted average of distance from each source, using the inverse squared distance from each source as the weighting factor (with a small constant added value to avoid dividing by zero).
+For a given canvas, a number of "sources" are assigned. Each source is assigned a random position (x, y) that falls within the canvas, and a random hue value in the HSL color space. Every pixel in the canvas is colored according to a weighted average of distance from each source, using the inverse squared distance from each source as the weighting factor (with a small constant added value to avoid dividing by zero).
 
 However, as hue is a periodic/circular metric, weighting by mean will yield incorrect results. For example (in degrees), the mean of hues 10 and 350 will be 180, while the actual average hue will be 0. To account for this, each source's hue is broken in to sine and cosine components which are summed to reach a total. The arctangent is then applied to the total to calculate the resulting hue.
+
+The formula for calculating the hue of a pixel is as follows:
+
+![formula](<https://render.githubusercontent.com/render/math?math=hue(x,y)=\arctan{{\frac{\sum{\frac{\sin{source.hue}}{(x-source.x)^2+(y-source.y)^2+1}}}{\sum{\frac{\cos{source.hue}}{(x-source.x)^2+(y-source.y)^2+1}}}}}>)
+
+The saturation and lightness are held to be 100% and 50%, respectively, to get the purest form of the hue. The resulting HSL is converted to the RGB color space to set the color of the pixel
+
+## Usage
+
+Spectrum requires that you have the [Rust default toolchain](https://www.rust-lang.org/tools/install) and [Node.js](https://nodejs.org/en/download/) installed. Additionally, [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/#) is also required to build and package the WebAssembly.
+
+### Setup
+
+Build and package the WebAssembly using the `wasm-pack` script:
+
+```sh
+npm run wasm-pack
+```
+
+Install NPM dependencies using `npm install`: (_note: this requires the `wasm-pack` script to have been run as the results are marked as a local dependency_)
+
+```sh
+npm install
+```
+
+Start the application for local development using `npm start`:
+
+```sh
+npm start
+```
+
+Build and bundle the application to the `dist` directory using the `build` script:
+
+```sh
+npm run build
+```
+
+### Other scripts
+
+Serve files from the `dist` directtory using the `serve` script: (_note: requires the `build` script to have been run to generate the `dist` directory_):
+
+```sh
+npm run serve
+```
+
+#### Formatting
+
+Format files or check for formatting compliance with the `format` and `format:check` scripts, respectively:
+
+```sh
+npm run format
+npm run format:check
+```
+
+#### Linting
+
+Check for lint errors or fix them with the `lint` and `lint:fix` scripts, respectively:
+
+```sh
+npm run lint
+npm run lint:fix
+```
 
 ## References
 
@@ -29,4 +91,7 @@ Spectrum draws heavily from the following examples:
 - [The Rust and WebAssembly Game of Life Tutorial](https://rustwasm.github.io/book/game-of-life/introduction.html)
 - [The `web-sys` WebGL Example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html)
 
-A formula from the [IEEE Signal Processing Magazine](http://www-labs.iro.umontreal.ca/~mignotte/IFT2425/Documents/EfficientApproximationArctgFunction.pdf) is also used as a faster alternative to Rust's standard library arctangent function.
+### Formulas
+
+- A formula from the [IEEE Signal Processing Magazine](http://www-labs.iro.umontreal.ca/~mignotte/IFT2425/Documents/EfficientApproximationArctgFunction.pdf) is also used as a faster alternative to Rust's standard library arctangent function
+- The formula for converting between HSL and RGB is derived from [RapidTables HSL to RGB color conversion](https://www.rapidtables.com/convert/color/hsl-to-rgb.html).
