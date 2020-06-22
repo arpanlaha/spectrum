@@ -97,7 +97,7 @@ const WEBGL_NUM_SOURCES_UPPER_BOUND = Math.floor(
 const UPPER_BOUNDS = {
   height: MAX_HEIGHT,
   width: MAX_WIDTH,
-  numSources: WEBGL_NUM_SOURCES_UPPER_BOUND,
+  numSources: Math.min(100, WEBGL_NUM_SOURCES_UPPER_BOUND),
 };
 
 /* eslint-disable @typescript-eslint/no-magic-numbers */

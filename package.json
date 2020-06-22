@@ -1,7 +1,7 @@
 {
   "name": "spectrum",
   "version": "1.0.0",
-  "description": "Randomly-generated art using Rust + WebAssembly",
+  "description": "Randomly-generated art using Rust + WebAssembly.",
   "scripts": {
     "build": "rm -rf dist && webpack --config webpack.config.js",
     "format": "prettier --write \"**/*.{js,json,md,css}\"",
