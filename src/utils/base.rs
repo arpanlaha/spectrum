@@ -48,6 +48,8 @@ impl Hue {
     /// Converts the Hue to its corresponding RGBA value.
     ///
     /// Sets saturation to 100% and lightness to 50% to get the Hue's truest color value.
+    ///
+    /// Derived from [RapidTables HSL to RGB color conversion](https://www.rapidtables.com/convert/color/hsl-to-rgb.html).
     pub fn to_rgba(self) -> RGBA {
         let hue = self.0;
         if hue < consts::PI {
