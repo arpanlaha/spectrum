@@ -3,7 +3,7 @@ name = "spectrum"
 version = "1.0.0"
 authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
 edition = "2018"
-description="Randomly-generated art using Rust + WebAssembly"
+description="Randomly-generated art with Rust + WebAssembly"
 repository="https://github.com/arpanlaha/spectrum"
 license="MIT"
 
