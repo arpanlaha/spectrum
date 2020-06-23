@@ -24,7 +24,7 @@ However, as hue is a periodic/circular metric, weighting by mean will yield inco
 
 The formula for calculating the hue of a pixel is as follows:
 
-![formula](<https://render.githubusercontent.com/render/math?math=hue(x,y)=\arctan{{\frac{\sum{\frac{\sin{source.hue}}{(x-source.x)^2+(y-source.y)^2+1}}}{\sum{\frac{\cos{source.hue}}{(x-source.x)^2+(y-source.y)^2+1}}}}}>)
+![formula](<https://render.githubusercontent.com/render/math?math=hue(x,y)=\arctan{{\frac{\sum{\frac{\sin{source.hue}}{(x-source.x)^2%2B(y-source.y)^2%2B1}}}{\sum{\frac{\cos{source.hue}}{(x-source.x)^2%2B(y-source.y)^2%2B1}}}}}>)
 
 The saturation and lightness are held to be 100% and 50%, respectively, to get the purest form of the hue. The resulting HSL is converted to the RGB color space to set the color of the pixel
 
