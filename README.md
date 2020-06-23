@@ -66,6 +66,12 @@ Serve files from the `dist` directtory using the `serve` script: (_note: require
 npm run serve
 ```
 
+Minify `index.html` and `spectrum.css`: (_note: requires the `build` script to have been run to generate the `dist` directory_):
+
+```sh
+npm run minify
+```
+
 #### Formatting
 
 Format files or check for formatting compliance with the `format` and `format:check` scripts, respectively:
