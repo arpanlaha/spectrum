@@ -1,7 +1,7 @@
 [package]
 name = "spectrum"
 version = "1.0.0"
-authors = ["Arpan Laha <arpanlaha99@gmail.com>"]
+authors = ["Arpan Laha"]
 edition = "2018"
 description="Randomly-generated art with Rust + WebAssembly"
 repository="https://github.com/arpanlaha/spectrum"
@@ -33,9 +33,6 @@ features = [
   'WebGlShader',
   'WebGlUniformLocation',
 ]
-
-# [dev-dependencies]
-# wasm-bindgen-test = "0.2"
 
 [profile.release]
 opt-level = 3
