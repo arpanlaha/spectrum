@@ -17,6 +17,7 @@
       content="Arpan, Laha, Arpan Laha, Spectrum, WebAssembly, Rust, WASM, WebGl, HSL"
     />
     <meta name="author" content="Arpan Laha" />
+
     <link rel="shortcut icon" href="/static/logo.svg" />
     <link rel="manifest" href="/static/manifest.json" />
     <link
@@ -25,22 +26,29 @@
     />
     <link rel="stylesheet" type="text/css" href="/static/spectrum.css" />
     <link as="script" rel="preload" href="/startup.js" />
+
     <title>Spectrum</title>
   </head>
 
   <body>
     <canvas id="canvas-webgl" class="hide"></canvas>
+
     <canvas id="canvas-2d" class="hide"></canvas>
+
     <div id="controls" class="vertical-center blur hide">
       <h1>Spectrum</h1>
+
       <div id="fps">Waiting to start...</div>
+
       <div class="control-buttons horizontal-center">
         <button id="play-pause-button" type="button">
           <img id="play-pause-icon" src="/static/pause.svg" alt="Pause" />
         </button>
+
         <button type="button" id="restart-button">
           <img src="/static/refresh.svg" alt="Refresh" />
         </button>
+
         <a id="download-link" download="spectrum.png">
           <button id="download-button" type="button">
             <img src="/static/download.svg" alt="Download" />
@@ -50,6 +58,7 @@
 
       <div class="vertical-center">
         <label for="sources">Rendering method:</label>
+
         <div id="sources" class="modes horizontal-center">
           <div id="mode-webgl" class="mode left-mode current-mode">WebGL</div>
           <div id="mode-wasm" class="mode middle-mode">WebAssembly</div>
@@ -59,10 +68,12 @@
 
       <div class="vertical-center">
         <label for="lock-unlock">On rendering method change:</label>
+
         <div id="lock-unlock" class="modes horizontal-center">
           <div id="mode-unlock" class="mode left-mode current-mode">
             Use recommended
           </div>
+
           <div id="mode-lock" class="mode right-mode">Keep settings</div>
         </div>
       </div>
@@ -71,22 +82,26 @@
         <label for="set-width">Width (px): <span id="width"></span></label>
         <input type="range" id="set-width" min="100" step="10" />
       </div>
+
       <div class="control">
         <label for="set-height">Height (px): <span id="height"></span></label>
         <input type="range" id="set-height" min="100" step="10" />
       </div>
+
       <div class="control">
         <label for="set-num-sources">
           Sources: <span id="num-sources"></span>
         </label>
         <input type="range" id="set-num-sources" min="2" />
       </div>
+
       <div class="control">
         <label for="set-movement-speed">
           Movement speed: <span id="movement-speed"></span>
         </label>
         <input type="range" id="set-movement-speed" min="0" max="100" />
       </div>
+
       <div class="control">
         <label for="set-color-speed">
           Color speed: <span id="color-speed"></span>
@@ -109,6 +124,7 @@
         alt="collapse"
       />
     </div>
+
     <img
       id="expand"
       class="controls-arrow hide-expand"
@@ -135,6 +151,7 @@
     </div>
 
     <script src="./startup.js"></script>
+
     <noscript>Please enable JavaScript in order to run Spectrum.</noscript>
   </body>
 </html>
