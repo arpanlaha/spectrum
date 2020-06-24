@@ -2,7 +2,7 @@
 
 Animate randomly-generated art with Rust + WebAssembly.
 
-![Spectrum](/static/spectrum.png)
+![Spectrum](/static/spectrum.jpg)
 
 ## Background
 
