@@ -60,7 +60,7 @@ npm run build
 
 ### Other scripts
 
-Serve files from the `dist` directtory using the `serve` script: (_note: requires the `build` script to have been run to generate the `dist` directory_):
+Serve files from the `dist` directory using the `serve` script: (_note: requires the `build` script to have been run to generate the `dist` directory_):
 
 ```sh
 npm run serve
