@@ -6,7 +6,7 @@
     "build": "rm -rf dist && webpack --config webpack.config.js && npm run minify",
     "format": "prettier --write \"**/*.{js,json,md,css}\"",
     "format:check": "prettier --check \"**/*.{js,json,md,css}\"",
-    "minify": "html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype dist/index.html -o dist/index.html && cleancss dist/static/spectrum.css -o dist/static/spectrum.css",
+    "minify": "html-minifier-terser dist/index.html -o dist/index.html && cleancss dist/static/spectrum.css -o dist/static/spectrum.css",
     "lint": "eslint src && stylelint \"static/**/*.css\" && markdownlint README.md",
     "lint:fix": "eslint src && stylelint \"static/**/*.css\" && markdownlint --fix README.md",
     "serve": "static-server dist",
