@@ -1,7 +1,7 @@
 {
   "short_name": "Spectrum",
   "name": "Spectrum",
-  "description": "Randomly-generated art with Rust + WebAssembly",
+  "description": "Animate randomly-generated art with Rust + WebAssembly.",
   "author": "Arpan Laha",
   "icons": [
     {
