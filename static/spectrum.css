@@ -78,7 +78,7 @@ h1 {
 }
 
 .blur {
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(1vmin);
   background-blend-mode: exclusion;
 }
 
@@ -117,16 +117,16 @@ h1 {
 
 .left-mode {
   border-radius: 1vmin 0 0 1vmin;
-  border-width: 2px 1px 2px 2px;
+  border-width: 0.2vmin 0.1vmin 0.2vmin 0.2vmin;
 }
 
 .middle-mode {
-  border-width: 2px 1px 2px 1px;
+  border-width: 0.2vmin 0.1vmin 0.2vmin 0.1vmin;
 }
 
 .right-mode {
   border-radius: 0 1vmin 1vmin 0;
-  border-width: 2px 2px 2px 1px;
+  border-width: 0.2vmin 0.2vmin 0.2vmin 0.1vmin;
 }
 
 .current-mode {
@@ -174,7 +174,7 @@ h1 {
 #expand {
   position: fixed;
   opacity: 0.8;
-  filter: drop-shadow(1px, 1px, 1px, rgba(0, 0, 0, 1));
+  filter: drop-shadow(0.1vmin, 0.1vmin, 0.1vmin, rgba(0, 0, 0, 1));
 }
 
 .hide-controls #collapse {
@@ -315,7 +315,7 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: hsl(215, 100%, 50%);
   cursor: pointer;
   margin-top: -0.6vmin;
-  box-shadow: 1px 1px 4px hsl(0, 0%, 0%, 0.4);
+  box-shadow: 0.1vmin 0.1vmin 0.4vmin hsl(0, 0%, 0%, 0.4);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -325,7 +325,7 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   background-color: hsl(215, 100%, 50%);
   cursor: pointer;
-  box-shadow: 1px 1px 4px hsl(0, 0%, 0%, 0.4);
+  box-shadow: 0.1vmin 0.1vmin 0.4vmin hsl(0, 0%, 0%, 0.4);
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
