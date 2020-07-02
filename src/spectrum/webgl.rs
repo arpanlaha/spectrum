@@ -54,7 +54,7 @@ impl SpectrumWebGL {
         let fragment_shader = compile_shader(
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            &format!(
+            format!(
                 r#"
                     #define PI 3.141592653589793
                     #define TWO_PI 6.283185307179586
@@ -125,7 +125,7 @@ impl SpectrumWebGL {
                 "#,
                 num_sources * 4,
                 num_sources
-            )[..],
+            ).as_str(),
         );
 
         let program = context.create_program().unwrap();
