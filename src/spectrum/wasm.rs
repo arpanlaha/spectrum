@@ -30,17 +30,18 @@ impl SpectrumWasm {
     /// * `context` - the `2d` context belonging to the Spectrum's canvas.
     /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
     /// * `color_speed` - the range of each Source's color speed (`dh`)
+    #[must_use]
     pub fn new(
-        width: usize,
-        height: usize,
-        num_sources: usize,
+        width: u32,
+        height: u32,
+        num_sources: u32,
         movement_speed: f32,
         color_speed: f32,
-        canvas: HtmlCanvasElement,
-    ) -> SpectrumWasm {
-        let mut spectrum = SpectrumWasm {
+        canvas: &HtmlCanvasElement,
+    ) -> Self {
+        let mut spectrum = Self {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
-            data: vec![0u8; width * height * 4],
+            data: vec![0_u8; (width * height * 4) as usize],
             context: canvas
                 .get_context("2d")
                 .unwrap()
@@ -63,24 +64,23 @@ impl SpectrumWasm {
         for x in 0..width {
             let x_float = x as f32;
             for y in 0..self.base.height() {
-                let (hue_vector_cos, hue_vector_sin) =
-                    self.base
-                        .sources()
-                        .iter()
-                        .fold((0f32, 0f32), |(sum_cos, sum_sin), source| {
-                            let dist_factor = (x_float - source.x()).powi(2)
-                                + (y as f32 - source.y()).powi(2)
-                                + 1f32;
-                            (
-                                sum_cos + source.hue_cos() / dist_factor,
-                                sum_sin + source.hue_sin() / dist_factor,
-                            )
-                        });
+                let (hue_vector_cos, hue_vector_sin) = self.base.sources().iter().fold(
+                    (0_f32, 0_f32),
+                    |(sum_cos, sum_sin), source| {
+                        let dist_factor = (x_float - source.x()).powi(2)
+                            + (y as f32 - source.y()).powi(2)
+                            + 1_f32;
+                        (
+                            sum_cos + source.hue_cos() / dist_factor,
+                            sum_sin + source.hue_sin() / dist_factor,
+                        )
+                    },
+                );
 
                 let RGBA(r, g, b, a) =
                     Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgba();
 
-                let start = (x + y * width) * 4;
+                let start = ((x + y * width) * 4) as usize;
 
                 self.data[start] = r;
                 self.data[start + 1] = g;
@@ -96,8 +96,8 @@ impl SpectrumWasm {
                     width as u32,
                 )
                 .unwrap(),
-                0f64,
-                0f64,
+                0_f64,
+                0_f64,
             )
             .unwrap();
     }

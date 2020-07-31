@@ -24,14 +24,15 @@ impl SpectrumWebGL {
     /// * `context` - the `webgl` context belonging to the SpectrumWebGL's canvas.
     /// * `movement_speed` - the range of each Source's movement speed (`dx`, `dy`)
     /// * `color_speed` - the range of each Source's color speed (`dh`)
+    #[must_use]
     pub fn new(
-        width: usize,
-        height: usize,
-        num_sources: usize,
+        width: u32,
+        height: u32,
+        num_sources: u32,
         movement_speed: f32,
         color_speed: f32,
-        canvas: HtmlCanvasElement,
-    ) -> SpectrumWebGL {
+        canvas: &HtmlCanvasElement,
+    ) -> Self {
         let context = canvas
             .get_context("webgl")
             .unwrap()
@@ -54,78 +55,7 @@ impl SpectrumWebGL {
         let fragment_shader = compile_shader(
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            format!(
-                r#"
-                    #define PI 3.141592653589793
-                    #define TWO_PI 6.283185307179586
-                    #define PI_4 0.7853981633974483
-                    #define PI_3 1.0471975511965976
-                    #define PI_2 1.5707963267948966
-                    #define PI_3_2 4.71238898038469
-                    #define PI_2_3 2.0943951023931953
-                    #define PI_4_3 4.1887902047863905
-                    #define PI_5_3 5.235987755982989
-
-                    precision highp float;
-
-                    uniform float sources[{}];
-
-                    float atan_approx(float quotient) {{
-                        return (PI_4 + 0.273 * (1.0 - abs(quotient))) * quotient;
-                    }}
-
-                    float atan2_approx(float x, float y) {{
-                        if (abs(x) > abs(y)) {{
-                            if (x < 0.0) {{
-                                return atan_approx(y / x) + PI;
-                            }} else if (y < 0.0) {{
-                                return atan_approx(y / x) + TWO_PI;
-                            }} else {{
-                                return atan_approx(y / x);
-                            }}
-                        }} else if (y < 0.0) {{
-                            return PI_3_2 - atan_approx(x / y);
-                        }} else {{
-                            return PI_2 - atan_approx(x / y);
-                        }}
-                    }}
-
-                    void main() {{
-                        float x = gl_FragCoord[0];
-                        float y = gl_FragCoord[1];
-                        float cos_sum = 0.0;
-                        float sin_sum = 0.0;
-
-                        for (int i = 0; i < {}; i++) {{
-                            float dist_factor = pow(sources[4 * i] - x, 2.0) + pow(sources[4 * i + 1] - y, 2.0) + 1.0;
-                            cos_sum += sources[4 * i + 2] / dist_factor;
-                            sin_sum += sources[4 * i + 3] / dist_factor;
-                        }}
-
-                        float hue = atan2_approx(sin_sum, cos_sum);
-                       
-                        float secondary = 1.0 - abs(mod((hue / PI_3), 2.0) - 1.0);
-
-                        if (hue < PI) {{
-                            if (hue < PI_3) {{
-                                gl_FragColor = vec4(1.0, secondary, 0.0, 1.0);
-                            }} else if (hue < PI_2_3) {{
-                                gl_FragColor = vec4(secondary, 1.0, 0.0, 1.0);
-                            }} else {{
-                                gl_FragColor = vec4(0.0, 1.0, secondary, 1.0);
-                            }}
-                        }} else if (hue < PI_4_3) {{
-                            gl_FragColor = vec4(0.0, secondary, 1.0, 1.0);
-                        }} else if (hue < PI_5_3) {{
-                            gl_FragColor = vec4(secondary, 0.0, 1.0, 1.0);
-                        }} else {{
-                            gl_FragColor = vec4(1.0, 0.0, secondary, 1.0);
-                        }}
-                    }}
-                "#,
-                num_sources * 4,
-                num_sources
-            ).as_str(),
+            get_shader_source(num_sources).as_str(),
         );
 
         let program = context.create_program().unwrap();
@@ -142,7 +72,7 @@ impl SpectrumWebGL {
 
         let position_attribute_loc = context.get_attrib_location(&program, "a_position") as u32;
 
-        let vertex_coords = [-1f32, -1f32, 1f32, -1f32, 1f32, 1f32, -1f32, 1f32];
+        let vertex_coords = [-1_f32, -1_f32, 1_f32, -1_f32, 1_f32, 1_f32, -1_f32, 1_f32];
 
         let buffer = context.create_buffer().unwrap();
         context.bind_buffer(WebGlRenderingContext::ARRAY_BUFFER, Some(&buffer));
@@ -168,7 +98,7 @@ impl SpectrumWebGL {
             0,
         );
 
-        let spectrum = SpectrumWebGL {
+        let spectrum = Self {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
@@ -188,8 +118,7 @@ impl SpectrumWebGL {
             .base
             .sources()
             .iter()
-            .map(|source| vec![source.x(), source.y(), source.hue_cos(), source.hue_sin()])
-            .flatten()
+            .flat_map(|source| vec![source.x(), source.y(), source.hue_cos(), source.hue_sin()])
             .collect();
 
         let context = &self.context;
@@ -209,20 +138,16 @@ impl SpectrumWebGL {
     }
 }
 
-/// Compiles a WebGL shader from source.
+/// Compiles a `WebGL` shader from source.
 ///
-/// Obtained from the [`wasm-bindgen` Guide WebGL example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html).
+/// Obtained from the [`wasm-bindgen` Guide `WebGL` example](https://rustwasm.github.io/wasm-bindgen/examples/webgl.html).
 ///
 /// # Parameters
 ///
-/// * `context` - the WebGL context.
+/// * `context` - the `WebGL` context.
 /// * `shader_type` - the shader's type - vertex or fragment shader.
 /// * `source` - the GLSL shader source.
-pub fn compile_shader(
-    context: &WebGlRenderingContext,
-    shader_type: u32,
-    source: &str,
-) -> WebGlShader {
+fn compile_shader(context: &WebGlRenderingContext, shader_type: u32, source: &str) -> WebGlShader {
     let shader = context.create_shader(shader_type).unwrap();
     context.shader_source(&shader, source);
     context.compile_shader(&shader);
@@ -233,4 +158,79 @@ pub fn compile_shader(
         .unwrap();
 
     shader
+}
+
+fn get_shader_source(num_sources: u32) -> String {
+    format!(
+        r#"
+            #define PI 3.141592653589793
+            #define TWO_PI 6.283185307179586
+            #define PI_4 0.7853981633974483
+            #define PI_3 1.0471975511965976
+            #define PI_2 1.5707963267948966
+            #define PI_3_2 4.71238898038469
+            #define PI_2_3 2.0943951023931953
+            #define PI_4_3 4.1887902047863905
+            #define PI_5_3 5.235987755982989
+
+            precision highp float;
+
+            uniform float sources[{}];
+
+            float atan_approx(float quotient) {{
+                return (PI_4 + 0.273 * (1.0 - abs(quotient))) * quotient;
+            }}
+
+            float atan2_approx(float x, float y) {{
+                if (abs(x) > abs(y)) {{
+                    if (x < 0.0) {{
+                        return atan_approx(y / x) + PI;
+                    }} else if (y < 0.0) {{
+                        return atan_approx(y / x) + TWO_PI;
+                    }} else {{
+                        return atan_approx(y / x);
+                    }}
+                }} else if (y < 0.0) {{
+                    return PI_3_2 - atan_approx(x / y);
+                }} else {{
+                    return PI_2 - atan_approx(x / y);
+                }}
+            }}
+
+            void main() {{
+                float x = gl_FragCoord[0];
+                float y = gl_FragCoord[1];
+                float cos_sum = 0.0;
+                float sin_sum = 0.0;
+
+                for (int i = 0; i < {}; i++) {{
+                    float dist_factor = pow(sources[4 * i] - x, 2.0) + pow(sources[4 * i + 1] - y, 2.0) + 1.0;
+                    cos_sum += sources[4 * i + 2] / dist_factor;
+                    sin_sum += sources[4 * i + 3] / dist_factor;
+                }}
+
+                float hue = atan2_approx(sin_sum, cos_sum);
+                
+                float secondary = 1.0 - abs(mod((hue / PI_3), 2.0) - 1.0);
+
+                if (hue < PI) {{
+                    if (hue < PI_3) {{
+                        gl_FragColor = vec4(1.0, secondary, 0.0, 1.0);
+                    }} else if (hue < PI_2_3) {{
+                        gl_FragColor = vec4(secondary, 1.0, 0.0, 1.0);
+                    }} else {{
+                        gl_FragColor = vec4(0.0, 1.0, secondary, 1.0);
+                    }}
+                }} else if (hue < PI_4_3) {{
+                    gl_FragColor = vec4(0.0, secondary, 1.0, 1.0);
+                }} else if (hue < PI_5_3) {{
+                    gl_FragColor = vec4(secondary, 0.0, 1.0, 1.0);
+                }} else {{
+                    gl_FragColor = vec4(1.0, 0.0, secondary, 1.0);
+                }}
+            }}
+        "#,
+        num_sources * 4,
+        num_sources
+    )
 }

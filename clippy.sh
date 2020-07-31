@@ -1,0 +1,1 @@
+find . | grep "\.rs$" | xargs touch ; cargo clippy -- -D warnings
