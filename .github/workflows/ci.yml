@@ -137,7 +137,7 @@ jobs:
 
       - name: Deploy to development url
         if: github.ref != 'refs/heads/master'
-        uses: amondnet/vercel-action@v19
+        uses: amondnet/vercel-action@v19.0.1
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -147,7 +147,7 @@ jobs:
 
       - name: Deploy to production url
         if: github.ref == 'refs/heads/master'
-        uses: amondnet/vercel-action@v19
+        uses: amondnet/vercel-action@v19.0.1
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
