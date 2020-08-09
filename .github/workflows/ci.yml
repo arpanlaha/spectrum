@@ -144,7 +144,6 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID}}
           vercel-project-id: ${{ secrets.PROJECT_ID}}
           working-directory: dist
-          alias-domains: spectrumarpanlaha.vercel.app
 
       - name: Deploy to production url
         if: github.ref == 'refs/heads/master'
@@ -156,4 +155,3 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID}}
           vercel-project-id: ${{ secrets.PROJECT_ID}}
           working-directory: dist
-          alias-domains: spectrumarpanlaha.vercel.app
