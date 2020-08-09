@@ -1,4 +1,4 @@
-use js_sys::Math;
+use rand::{thread_rng, Rng};
 use std::f32::consts;
 use std::iter;
 
@@ -150,19 +150,21 @@ impl Source {
         movement_speed: f32,
         color_speed: f32,
     ) -> Self {
-        let hue = Hue(Math::random() as f32 * TWO_PI);
+        let mut rng = thread_rng();
+        let hue = Hue(rng.gen_range(0.0_f32, TWO_PI));
         let hue_val = hue.get();
         let hue_cos = hue_val.cos();
         let hue_sin = hue_val.sin();
         Self {
-            x: Math::random() as f32 * canvas_width,
-            y: Math::random() as f32 * canvas_height,
+            x: rng.gen_range(0.0_f32, canvas_width),
+            y: rng.gen_range(0.0_f32, canvas_height),
+
             hue,
             canvas_width,
             canvas_height,
-            dx: Math::random() as f32 * movement_speed - movement_speed / 2_f32,
-            dy: Math::random() as f32 * movement_speed - movement_speed / 2_f32,
-            dh: Math::random() as f32 * color_speed - color_speed / 2_f32,
+            dx: rng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
+            dy: rng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
+            dh: rng.gen_range(-color_speed / 2_f32, color_speed / 2_f32),
             hue_cos,
             hue_sin,
         }
