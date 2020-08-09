@@ -15,8 +15,8 @@ jobs:
         with:
           path: |
             $HOME/.cargo
-            wasm/target/release
-          key: ${{ runner.os }}-cache
+            target
+          key: spectrum-format
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
@@ -60,8 +60,8 @@ jobs:
         with:
           path: |
             $HOME/.cargo
-            wasm/target/release
-          key: ${{ runner.os }}-cache
+            target
+          key: spectrum-lint
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
@@ -105,8 +105,8 @@ jobs:
         with:
           path: |
             $HOME/.cargo
-            wasm/target/release
-          key: ${{ runner.os }}-cache
+            target
+          key: spectrum-deploy
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
