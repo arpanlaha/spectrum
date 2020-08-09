@@ -15,11 +15,12 @@ default = []
 
 [dependencies]
 wasm-bindgen = "0.2"
+getrandom = { version = "0.1", features = ["wasm-bindgen"] }
 js-sys = "0.3"
 rand = { version = "0.7", features = ["getrandom"] }
 wee_alloc = "0.4"
 
-console_error_panic_hook = { version = "0.1", optional = true }
+console_error_panic_hook = "0.1"
 
 [dependencies.web-sys]
 version = "0.3"
@@ -32,6 +33,7 @@ features = [
   'WebGlProgram',
   'WebGlShader',
   'WebGlUniformLocation',
+  "console",
 ]
 
 [profile.release]

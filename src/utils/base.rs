@@ -1,5 +1,4 @@
-use crate::utils::panic;
-use rand::{thread_rng, Rng};
+use rand::{rngs::OsRng, Rng};
 use std::f32::consts;
 use std::iter;
 
@@ -151,23 +150,20 @@ impl Source {
         movement_speed: f32,
         color_speed: f32,
     ) -> Self {
-        panic::set_panic_hook();
-
-        let mut rng = thread_rng();
-        let hue = Hue(rng.gen_range(0.0_f32, TWO_PI));
+        let hue = Hue(OsRng.gen_range(0.0_f32, TWO_PI));
         let hue_val = hue.get();
         let hue_cos = hue_val.cos();
         let hue_sin = hue_val.sin();
         Self {
-            x: rng.gen_range(0.0_f32, canvas_width),
-            y: rng.gen_range(0.0_f32, canvas_height),
+            x: OsRng.gen_range(0.0_f32, canvas_width),
+            y: OsRng.gen_range(0.0_f32, canvas_height),
 
             hue,
             canvas_width,
             canvas_height,
-            dx: rng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
-            dy: rng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
-            dh: rng.gen_range(-color_speed / 2_f32, color_speed / 2_f32),
+            dx: OsRng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
+            dy: OsRng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
+            dh: OsRng.gen_range(-color_speed / 2_f32, color_speed / 2_f32),
             hue_cos,
             hue_sin,
         }
