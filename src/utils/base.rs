@@ -1,3 +1,4 @@
+use crate::utils::panic;
 use rand::{thread_rng, Rng};
 use std::f32::consts;
 use std::iter;
@@ -150,6 +151,8 @@ impl Source {
         movement_speed: f32,
         color_speed: f32,
     ) -> Self {
+        panic::set_panic_hook();
+
         let mut rng = thread_rng();
         let hue = Hue(rng.gen_range(0.0_f32, TWO_PI));
         let hue_val = hue.get();
