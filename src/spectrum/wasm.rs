@@ -67,8 +67,7 @@ impl SpectrumWasm {
                 let (hue_vector_cos, hue_vector_sin) = self.base.sources().iter().fold(
                     (0_f32, 0_f32),
                     |(sum_cos, sum_sin), source| {
-                        let dist_factor = (x_float - source.x()).powi(2)
-                            + (y as f32 - source.y()).powi(2)
+                        let dist_factor = (x_float - source.x()).mul_add(x_float - source.x(), (y as f32 - source.y()) * (y as f32 - source.y()))
                             + 1_f32;
                         (
                             sum_cos + source.hue_cos() / dist_factor,
