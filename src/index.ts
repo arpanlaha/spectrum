@@ -178,7 +178,6 @@ const getInitialState = (mode: Mode): State => {
 
   resetParams(modeStates[mode]);
 
-  console.log("about to init");
 
   const spectrum = spectrumInitializers[mode].new(
     width,
@@ -189,7 +188,6 @@ const getInitialState = (mode: Mode): State => {
     mode === "webgl" ? canvasWebgl : canvas2d
   );
 
-  console.log("done init");
 
   return {
     spectrum,
