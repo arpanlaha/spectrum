@@ -3,6 +3,7 @@ use std::f32::consts;
 const TWO_PI: f32 = consts::PI * 2_f32;
 const THREE_HALVES_PI: f32 = consts::PI * 1.5_f32;
 
+#[inline(always)]
 /// Calculates the arctangent, given a quotient in the range [-1, 1].
 ///
 /// Obtained from [IEEE Signal Processing Magazine](http://www-labs.iro.umontreal.ca/~mignotte/IFT2425/Documents/EfficientApproximationArctgFunction.pdf).
@@ -14,6 +15,7 @@ pub fn atan_approx(quotient: f32) -> f32 {
     0.273_f32.mul_add(1_f32 - quotient.abs(), consts::FRAC_PI_4) * quotient
 }
 
+#[inline(always)]
 /// Calculates the arctangent from the cosine and sine.
 ///
 /// # Parameters
