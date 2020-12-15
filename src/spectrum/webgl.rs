@@ -160,7 +160,6 @@ fn compile_shader(context: &WebGlRenderingContext, shader_type: u32, source: &st
     shader
 }
 
-#[inline(always)]
 fn get_shader_source(num_sources: u32) -> String {
     format!(
         r#"

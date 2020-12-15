@@ -24,13 +24,11 @@ impl Hue {
         Self(hue)
     }
 
-    #[inline(always)]
     /// Returns the internal f32 value corresponding to the Hue.
     pub const fn get(self) -> f32 {
         self.0
     }
 
-    #[inline(always)]
     /// Increments the internal value by the specificied delta.
     ///
     /// If the new value lies outside the valid Hue range, it is adjusted accordingly by one period.
@@ -47,7 +45,6 @@ impl Hue {
         }
     }
 
-    #[inline(always)]
     /// Converts the Hue to its corresponding RGBA value.
     ///
     /// Sets saturation to 100% and lightness to 50% to get the Hue's truest color value.
@@ -172,25 +169,21 @@ impl Source {
         }
     }
 
-    #[inline(always)]
     /// Returns the x-coordinate of the Source.
     pub const fn x(&self) -> f32 {
         self.x
     }
 
-    #[inline(always)]
     /// Returns the y-coordinate of the Source.
     pub const fn y(&self) -> f32 {
         self.y
     }
 
-    #[inline(always)]
     /// Returns the cosine of the Source's hue.
     pub const fn hue_cos(&self) -> f32 {
         self.hue_cos
     }
 
-    #[inline(always)]
     /// Returns the sine of the Source's hue.
     pub const fn hue_sin(&self) -> f32 {
         self.hue_sin
