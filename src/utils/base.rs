@@ -37,12 +37,12 @@ impl Hue {
     ///
     /// * `dh` - the desired change to the internal value.
     fn tick(&mut self, dh: f32) {
-        self.0 += dh;
-        if self.0 >= TWO_PI {
-            self.0 -= TWO_PI;
-        } else if self.0 <= 0_f32 {
-            self.0 += TWO_PI;
-        }
+        self.0 = (self.0 + dh) % TWO_PI;
+        // if self.0 >= TWO_PI {
+        //     self.0 -= TWO_PI;
+        // } else if self.0 <= 0_f32 {
+        //     self.0 += TWO_PI;
+        // }
     }
 
     /// Converts the Hue to its corresponding RGBA value.

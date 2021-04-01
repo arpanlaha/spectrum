@@ -83,10 +83,12 @@ impl SpectrumWasm {
 
                 let start = ((x + y * width) * 4) as usize;
 
-                self.data[start] = r;
-                self.data[start + 1] = g;
-                self.data[start + 2] = b;
-                self.data[start + 3] = a;
+                unsafe {
+                    *self.data.get_unchecked_mut(start) = r;
+                    *self.data.get_unchecked_mut(start + 1) = g;
+                    *self.data.get_unchecked_mut(start + 2) = b;
+                    *self.data.get_unchecked_mut(start + 3) = a;
+                }
             }
         }
 
