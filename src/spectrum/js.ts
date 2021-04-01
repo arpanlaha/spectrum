@@ -10,9 +10,9 @@ const PI_5_3 = 5 * PI_3;
 const U8_MAX = 255;
 
 /**
- * Wrapper of four numbers in [0, 255] corresponding to RGBA for a single pixel.
+ * Wrapper of three numbers in [0, 255] corresponding to RGB for a single pixel.
  */
-type RGBA = [number, number, number, number];
+type RGB = [number, number, number];
 
 /**
  * Value in [0, 2π) corresponding to a hue value (in radians) in the HSL color space.
@@ -35,38 +35,33 @@ class Hue {
    * @param dh the desired change to the internal value.
    */
   tick(dh: number): void {
-    this.hue += dh;
-    if (this.hue >= TWO_PI) {
-      this.hue -= TWO_PI;
-    } else if (this.hue <= 0) {
-      this.hue += TWO_PI;
-    }
+    this.hue = (this.hue + dh) % TWO_PI;
   }
 
   /**
-   * Converts the Hue to its corresponding RGBA value.
+   * Converts the Hue to its corresponding RGB value.
    *
    * Sets saturation to 100% and lightness to 50% to get the Hue's truest color value.
    *
    * Derived from [RapidTables HSL to RGB color conversion](https://www.rapidtables.com/convert/color/hsl-to-rgb.html).
    */
-  toRgba(): RGBA {
+  toRgb(): RGB {
     if (this.hue < Math.PI) {
       if (this.hue < PI_3) {
-        return [U8_MAX, (U8_MAX * this.hue) / PI_3, 0, U8_MAX];
+        return [U8_MAX, (U8_MAX * this.hue) / PI_3, 0];
       }
       if (this.hue < PI_2_3) {
-        return [U8_MAX * (2 - this.hue / PI_3), U8_MAX, 0, U8_MAX];
+        return [U8_MAX * (2 - this.hue / PI_3), U8_MAX, 0];
       }
-      return [0, U8_MAX, U8_MAX * (this.hue / PI_3 - 2), U8_MAX];
+      return [0, U8_MAX, U8_MAX * (this.hue / PI_3 - 2)];
     }
     if (this.hue < PI_4_3) {
-      return [0, U8_MAX * (4 - this.hue / PI_3), U8_MAX, U8_MAX];
+      return [0, U8_MAX * (4 - this.hue / PI_3), U8_MAX];
     }
     if (this.hue < PI_5_3) {
-      return [U8_MAX * (this.hue / PI_3 - 4), 0, U8_MAX, U8_MAX];
+      return [U8_MAX * (this.hue / PI_3 - 4), 0, U8_MAX];
     }
-    return [U8_MAX, 0, U8_MAX * (6 - this.hue / PI_3), U8_MAX];
+    return [U8_MAX, 0, U8_MAX * (6 - this.hue / PI_3)];
   }
 }
 
@@ -253,8 +248,10 @@ export default class SpectrumJS {
    * As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
    */
   draw(): void {
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
+    for (let y = 0; y < this.height; y++) {
+      const y_by_width = y * this.width;
+
+      for (let x = 0; x < this.width; x++) {
         let [hueVectorCos, hueVectorSin] = [0, 0];
         this.sources.forEach((source) => {
           const distFactor =
@@ -263,15 +260,15 @@ export default class SpectrumJS {
           hueVectorSin += source.hueSin / distFactor;
         });
 
-        const start = (x + y * this.width) * 4;
-        const [r, g, b, a] = new Hue(
+        const start = (x + y_by_width) * 4;
+        const [r, g, b] = new Hue(
           atan2Approx(hueVectorCos, hueVectorSin)
-        ).toRgba();
+        ).toRgb();
 
         this.data[start] = r;
         this.data[start + 1] = g;
         this.data[start + 2] = b;
-        this.data[start + 3] = a;
+        this.data[start + 3] = U8_MAX;
       }
     }
 
