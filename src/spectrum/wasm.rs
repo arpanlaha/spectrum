@@ -64,13 +64,17 @@ impl SpectrumWasm {
         let width = self.base.width();
         for y in 0..self.base.height() {
             let y_float = y as f32;
+            let y_by_width = y * width;
+
             for x in 0..width {
                 let (hue_vector_cos, hue_vector_sin) = self.base.sources().iter().fold(
                     (0_f32, 0_f32),
                     |(sum_cos, sum_sin), source| {
                         let x_diff = x as f32 - source.x();
                         let y_diff = y_float - source.y();
+
                         let dist_factor = (x_diff).mul_add(x_diff, y_diff * y_diff) + 1_f32;
+
                         (
                             sum_cos + source.hue_cos() / dist_factor,
                             sum_sin + source.hue_sin() / dist_factor,
@@ -81,7 +85,7 @@ impl SpectrumWasm {
                 let RGB(r, g, b) =
                     Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgb();
 
-                let start = ((x + y * width) * 4) as usize;
+                let start = ((x + y_by_width) * 4) as usize;
 
                 unsafe {
                     *self.data.get_unchecked_mut(start) = r;
