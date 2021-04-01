@@ -7,8 +7,8 @@ const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2_f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4_f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5_f32;
 
-/// Wrapper of four byte values corresponding to RGBA for a single pixel.
-pub struct RGBA(pub u8, pub u8, pub u8, pub u8);
+/// Wrapper of three byte values corresponding to RGB for a single pixel.
+pub struct RGB(pub u8, pub u8, pub u8);
 
 /// Value in [0, 2π) corresponding to a hue value (in radians) in the HSL color space.
 #[derive(Clone, Copy)]
@@ -38,63 +38,48 @@ impl Hue {
     /// * `dh` - the desired change to the internal value.
     fn tick(&mut self, dh: f32) {
         self.0 = (self.0 + dh) % TWO_PI;
-        // if self.0 >= TWO_PI {
-        //     self.0 -= TWO_PI;
-        // } else if self.0 <= 0_f32 {
-        //     self.0 += TWO_PI;
-        // }
     }
 
-    /// Converts the Hue to its corresponding RGBA value.
+    /// Converts the Hue to its corresponding RGB value.
     ///
     /// Sets saturation to 100% and lightness to 50% to get the Hue's truest color value.
     ///
     /// Derived from [`RapidTables` HSL to RGB color conversion](https://www.rapidtables.com/convert/color/hsl-to-rgb.html).
-    pub fn to_rgba(self) -> RGBA {
+    pub fn to_rgb(self) -> RGB {
         let hue = self.0;
         if hue < consts::PI {
             if hue < consts::FRAC_PI_3 {
-                RGBA(
-                    u8::MAX,
-                    (255_f32 * hue / consts::FRAC_PI_3) as u8,
-                    0,
-                    u8::MAX,
-                )
+                RGB(u8::MAX, (255_f32 * hue / consts::FRAC_PI_3) as u8, 0)
             } else if hue < TWO_THIRDS_PI {
-                RGBA(
+                RGB(
                     (255_f32 * (2_f32 - hue / consts::FRAC_PI_3)) as u8,
                     u8::MAX,
                     0,
-                    u8::MAX,
                 )
             } else {
-                RGBA(
+                RGB(
                     0,
                     u8::MAX,
                     (255_f32 * (hue / consts::FRAC_PI_3 - 2_f32)) as u8,
-                    u8::MAX,
                 )
             }
         } else if hue < FOUR_THIRDS_PI {
-            RGBA(
+            RGB(
                 0,
                 (255_f32 * (4_f32 - hue / consts::FRAC_PI_3)) as u8,
                 u8::MAX,
-                u8::MAX,
             )
         } else if hue < FIVE_THIRDS_PI {
-            RGBA(
+            RGB(
                 (255_f32 * (hue / consts::FRAC_PI_3 - 4_f32)) as u8,
                 0,
                 u8::MAX,
-                u8::MAX,
             )
         } else {
-            RGBA(
+            RGB(
                 u8::MAX,
                 0,
                 (255_f32 * (6_f32 - hue / consts::FRAC_PI_3)) as u8,
-                u8::MAX,
             )
         }
     }

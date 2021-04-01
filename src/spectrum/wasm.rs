@@ -1,8 +1,9 @@
+use std::u8;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
 
-use crate::utils::base::{BaseSpectrum, Hue, RGBA};
+use crate::utils::base::{BaseSpectrum, Hue, RGB};
 use crate::utils::math;
 
 /// A WebAssembly-only implementation of Spectrum.
@@ -61,16 +62,15 @@ impl SpectrumWasm {
     /// As hue in HSL is a circular/periodic metric, a numerical average is inaccurate - instead, hue is broken into sine and cosine components which are summed and reconstructed into the resulting Hue.
     pub fn draw(&mut self) {
         let width = self.base.width();
-        for x in 0..width {
-            let x_float = x as f32;
-            for y in 0..self.base.height() {
+        for y in 0..self.base.height() {
+            let y_float = y as f32;
+            for x in 0..width {
                 let (hue_vector_cos, hue_vector_sin) = self.base.sources().iter().fold(
                     (0_f32, 0_f32),
                     |(sum_cos, sum_sin), source| {
-                        let dist_factor = (x_float - source.x()).mul_add(
-                            x_float - source.x(),
-                            (y as f32 - source.y()) * (y as f32 - source.y()),
-                        ) + 1_f32;
+                        let x_diff = x as f32 - source.x();
+                        let y_diff = y_float - source.y();
+                        let dist_factor = (x_diff).mul_add(x_diff, y_diff * y_diff) + 1_f32;
                         (
                             sum_cos + source.hue_cos() / dist_factor,
                             sum_sin + source.hue_sin() / dist_factor,
@@ -78,8 +78,8 @@ impl SpectrumWasm {
                     },
                 );
 
-                let RGBA(r, g, b, a) =
-                    Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgba();
+                let RGB(r, g, b) =
+                    Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgb();
 
                 let start = ((x + y * width) * 4) as usize;
 
@@ -87,7 +87,7 @@ impl SpectrumWasm {
                     *self.data.get_unchecked_mut(start) = r;
                     *self.data.get_unchecked_mut(start + 1) = g;
                     *self.data.get_unchecked_mut(start + 2) = b;
-                    *self.data.get_unchecked_mut(start + 3) = a;
+                    *self.data.get_unchecked_mut(start + 3) = u8::MAX;
                 }
             }
         }
