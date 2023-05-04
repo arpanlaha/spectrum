@@ -88,7 +88,7 @@ impl SpectrumWasm {
 
                 dist_factor_inverse_sum = dist_factor_inverse_sum.min(1.);
                 let adjusted_dist_factor_inverse_sum = dist_factor_inverse_sum.powf(0.3);
-                let alpha = ((u8::MAX as f32) * adjusted_dist_factor_inverse_sum) as u8;
+                let alpha = (f32::from(u8::MAX) * adjusted_dist_factor_inverse_sum) as u8;
 
                 let RGB(r, g, b) =
                     Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgb();
@@ -108,7 +108,7 @@ impl SpectrumWasm {
             .put_image_data(
                 &ImageData::new_with_u8_clamped_array(
                     wasm_bindgen::Clamped(self.data.as_mut_slice()),
-                    width as u32,
+                    width,
                 )
                 .unwrap(),
                 0_f64,
