@@ -252,13 +252,20 @@ export default class SpectrumJS {
       const y_by_width = y * this.width;
 
       for (let x = 0; x < this.width; x++) {
+        let distFactorInverseSum = 0;
+
         let [hueVectorCos, hueVectorSin] = [0, 0];
         this.sources.forEach((source) => {
           const distFactor =
             Math.pow(x - source.x, 2) + Math.pow(y - source.y, 2) + 1;
           hueVectorCos += source.hueCos / distFactor;
           hueVectorSin += source.hueSin / distFactor;
+
+          distFactorInverseSum += 1 / distFactor;
         });
+
+        distFactorInverseSum = Math.min(distFactorInverseSum, 1);
+        const alpha = Math.round(U8_MAX * Math.pow(distFactorInverseSum, 0.3));
 
         const start = (x + y_by_width) * 4;
         const [r, g, b] = new Hue(
@@ -268,7 +275,7 @@ export default class SpectrumJS {
         this.data[start] = r;
         this.data[start + 1] = g;
         this.data[start + 2] = b;
-        this.data[start + 3] = U8_MAX;
+        this.data[start + 3] = alpha;
       }
     }
 

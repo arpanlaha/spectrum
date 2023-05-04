@@ -73,6 +73,7 @@ const expand = document.getElementById("expand") as HTMLImageElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl", {
   preserveDrawingBuffer: true,
+  premultipliedAlpha: false,
 }) as WebGLRenderingContext;
 
 // Scale canvas to account for device pixel ratio.
@@ -149,12 +150,11 @@ const resetParams = (state: InitialState): void => {
   const { canvas, width, height } = state;
 
   params.forEach((param) => {
-    document.getElementById(kebabParams[param])!.textContent = state[
-      param
-    ].toString();
-    (document.getElementById(
-      `set-${kebabParams[param]}`
-    ) as HTMLInputElement).value = state[param].toString();
+    document.getElementById(kebabParams[param])!.textContent =
+      state[param].toString();
+    (
+      document.getElementById(`set-${kebabParams[param]}`) as HTMLInputElement
+    ).value = state[param].toString();
   });
 
   canvas.style.width = `${Math.round(width / DEVICE_SCALE)}px`;
@@ -172,12 +172,10 @@ const resetParams = (state: InitialState): void => {
  * @param mode the initial mode.
  */
 const getInitialState = (mode: Mode): State => {
-  const { width, height, numSources, movementSpeed, colorSpeed } = modeStates[
-    mode
-  ];
+  const { width, height, numSources, movementSpeed, colorSpeed } =
+    modeStates[mode];
 
   resetParams(modeStates[mode]);
-
 
   const spectrum = spectrumInitializers[mode].new(
     width,
@@ -187,7 +185,6 @@ const getInitialState = (mode: Mode): State => {
     colorSpeed * COLOR_SPEED_FACTOR,
     mode === "webgl" ? canvasWebgl : canvas2d
   );
-
 
   return {
     spectrum,
@@ -306,9 +303,9 @@ document
   .addEventListener("click", () => (state.spectrum = getNewSpectrum()));
 
 // Set up download button event listener.
-(document.getElementById(
-  "download-link"
-) as HTMLAnchorElement).addEventListener("click", function () {
+(
+  document.getElementById("download-link") as HTMLAnchorElement
+).addEventListener("click", function () {
   this.href = state.canvas
     .toDataURL("image/png")
     .replace("image/png", "image/octet-stream");
@@ -366,9 +363,8 @@ params.forEach((param) => {
   setter.addEventListener("change", (e) => {
     const newParam = (e.target as HTMLInputElement).value;
     state[param] = parseInt(newParam);
-    document.getElementById(
-      kebabParams[param]
-    )!.textContent = newParam.toString();
+    document.getElementById(kebabParams[param])!.textContent =
+      newParam.toString();
     restartSpectrum();
   });
 });

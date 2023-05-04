@@ -202,12 +202,21 @@ fn get_shader_source(num_sources: u32) -> String {
                 float y = gl_FragCoord[1];
                 float cos_sum = 0.0;
                 float sin_sum = 0.0;
+                float dist_factor_inverse_sum = 0.0;
 
                 for (int i = 0; i < {}; i++) {{
                     float dist_factor = pow(sources[4 * i] - x, 2.0) + pow(sources[4 * i + 1] - y, 2.0) + 1.0;
                     cos_sum += sources[4 * i + 2] / dist_factor;
                     sin_sum += sources[4 * i + 3] / dist_factor;
+
+                    dist_factor_inverse_sum += 1.0 / dist_factor;
                 }}
+
+                if (dist_factor_inverse_sum > 1.0) {{
+                    dist_factor_inverse_sum = 1.0;
+                }}
+
+                float alpha = pow(dist_factor_inverse_sum, 0.3);
 
                 float hue = atan2_approx(sin_sum, cos_sum);
                 
@@ -215,18 +224,18 @@ fn get_shader_source(num_sources: u32) -> String {
 
                 if (hue < PI) {{
                     if (hue < PI_3) {{
-                        gl_FragColor = vec4(1.0, secondary, 0.0, 1.0);
+                        gl_FragColor = vec4(1.0, secondary, 0.0, alpha);
                     }} else if (hue < PI_2_3) {{
-                        gl_FragColor = vec4(secondary, 1.0, 0.0, 1.0);
+                        gl_FragColor = vec4(secondary, 1.0, 0.0, alpha);
                     }} else {{
-                        gl_FragColor = vec4(0.0, 1.0, secondary, 1.0);
+                        gl_FragColor = vec4(0.0, 1.0, secondary, alpha);
                     }}
                 }} else if (hue < PI_4_3) {{
-                    gl_FragColor = vec4(0.0, secondary, 1.0, 1.0);
+                    gl_FragColor = vec4(0.0, secondary, 1.0, alpha);
                 }} else if (hue < PI_5_3) {{
-                    gl_FragColor = vec4(secondary, 0.0, 1.0, 1.0);
+                    gl_FragColor = vec4(secondary, 0.0, 1.0, alpha);
                 }} else {{
-                    gl_FragColor = vec4(1.0, 0.0, secondary, 1.0);
+                    gl_FragColor = vec4(1.0, 0.0, secondary, alpha);
                 }}
             }}
         "#,

@@ -67,20 +67,28 @@ impl SpectrumWasm {
             let y_by_width = y * width;
 
             for x in 0..width {
-                let (hue_vector_cos, hue_vector_sin) = self.base.sources().iter().fold(
-                    (0_f32, 0_f32),
-                    |(sum_cos, sum_sin), source| {
-                        let x_diff = x as f32 - source.x();
-                        let y_diff = y_float - source.y();
+                let mut dist_factor_inverse_sum: f32 = 0.;
 
-                        let dist_factor = (x_diff).mul_add(x_diff, y_diff * y_diff) + 1_f32;
+                let (hue_vector_cos, hue_vector_sin) =
+                    self.base
+                        .sources()
+                        .iter()
+                        .fold((0., 0.), |(sum_cos, sum_sin), source| {
+                            let x_diff = x as f32 - source.x();
+                            let y_diff = y_float - source.y();
 
-                        (
-                            sum_cos + source.hue_cos() / dist_factor,
-                            sum_sin + source.hue_sin() / dist_factor,
-                        )
-                    },
-                );
+                            let dist_factor = (x_diff).mul_add(x_diff, y_diff * y_diff) + 1.;
+                            dist_factor_inverse_sum += 1. / dist_factor;
+
+                            (
+                                sum_cos + source.hue_cos() / dist_factor,
+                                sum_sin + source.hue_sin() / dist_factor,
+                            )
+                        });
+
+                dist_factor_inverse_sum = dist_factor_inverse_sum.min(1.);
+                let adjusted_dist_factor_inverse_sum = dist_factor_inverse_sum.powf(0.3);
+                let alpha = ((u8::MAX as f32) * adjusted_dist_factor_inverse_sum) as u8;
 
                 let RGB(r, g, b) =
                     Hue::new(math::atan2_approx(hue_vector_cos, hue_vector_sin)).to_rgb();
@@ -91,7 +99,7 @@ impl SpectrumWasm {
                     *self.data.get_unchecked_mut(start) = r;
                     *self.data.get_unchecked_mut(start + 1) = g;
                     *self.data.get_unchecked_mut(start + 2) = b;
-                    *self.data.get_unchecked_mut(start + 3) = u8::MAX;
+                    *self.data.get_unchecked_mut(start + 3) = alpha;
                 }
             }
         }
