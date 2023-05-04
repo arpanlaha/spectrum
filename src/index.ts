@@ -72,8 +72,8 @@ const modeUnlock = document.getElementById("mode-unlock") as HTMLDivElement;
 const expand = document.getElementById("expand") as HTMLImageElement;
 
 const contextWebgl = canvasWebgl.getContext("webgl", {
+  powerPreference: "high-performance",
   preserveDrawingBuffer: true,
-  premultipliedAlpha: false,
 }) as WebGLRenderingContext;
 
 // Scale canvas to account for device pixel ratio.

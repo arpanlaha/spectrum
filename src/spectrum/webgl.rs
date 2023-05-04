@@ -216,26 +216,26 @@ fn get_shader_source(num_sources: u32) -> String {
                     dist_factor_inverse_sum = 1.0;
                 }}
 
-                float alpha = pow(dist_factor_inverse_sum, 0.3);
+                float alpha_factor = pow(dist_factor_inverse_sum, 0.3);
 
                 float hue = atan2_approx(sin_sum, cos_sum);
                 
-                float secondary = 1.0 - abs(mod((hue / PI_3), 2.0) - 1.0);
+                float secondary = (1.0 - abs(mod((hue / PI_3), 2.0) - 1.0)) * alpha_factor;
 
                 if (hue < PI) {{
                     if (hue < PI_3) {{
-                        gl_FragColor = vec4(1.0, secondary, 0.0, alpha);
+                        gl_FragColor = vec4(alpha_factor, secondary, 0.0, 1.0);
                     }} else if (hue < PI_2_3) {{
-                        gl_FragColor = vec4(secondary, 1.0, 0.0, alpha);
+                        gl_FragColor = vec4(secondary, alpha_factor, 0.0, 1.0);
                     }} else {{
-                        gl_FragColor = vec4(0.0, 1.0, secondary, alpha);
+                        gl_FragColor = vec4(0.0, alpha_factor, secondary, 1.0);
                     }}
                 }} else if (hue < PI_4_3) {{
-                    gl_FragColor = vec4(0.0, secondary, 1.0, alpha);
+                    gl_FragColor = vec4(0.0, secondary, alpha_factor, 1.0);
                 }} else if (hue < PI_5_3) {{
-                    gl_FragColor = vec4(secondary, 0.0, 1.0, alpha);
+                    gl_FragColor = vec4(secondary, 0.0, alpha_factor, 1.0);
                 }} else {{
-                    gl_FragColor = vec4(1.0, 0.0, secondary, alpha);
+                    gl_FragColor = vec4(alpha_factor, 0.0, secondary, 1.0);
                 }}
             }}
         "#,
