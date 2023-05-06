@@ -3,6 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGlProgram, WebGlRenderingContext, WebGlShader};
 
 use crate::utils::base::BaseSpectrum;
+use crate::utils::base::SOURCE_DROPOFF_FACTOR;
 
 /// A WebGL + WebAssembly implementation of Spectrum.
 #[wasm_bindgen]
@@ -29,8 +30,9 @@ impl SpectrumWebGL {
         width: u32,
         height: u32,
         num_sources: u32,
-        movement_speed: f32,
-        color_speed: f32,
+        movement_speed: u32,
+        color_speed: u32,
+        source_dropoff: u32,
         canvas: &HtmlCanvasElement,
     ) -> Self {
         let context = canvas
@@ -52,10 +54,12 @@ impl SpectrumWebGL {
             "#,
         );
 
+        let transformed_source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.);
+
         let fragment_shader = compile_shader(
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            get_shader_source(num_sources).as_str(),
+            get_shader_source(num_sources, transformed_source_dropoff as f32).as_str(),
         );
 
         let program = context.create_program().unwrap();
@@ -160,7 +164,7 @@ fn compile_shader(context: &WebGlRenderingContext, shader_type: u32, source: &st
     shader
 }
 
-fn get_shader_source(num_sources: u32) -> String {
+fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
     format!(
         r#"
             #define PI 3.141592653589793
@@ -216,7 +220,7 @@ fn get_shader_source(num_sources: u32) -> String {
                     dist_factor_inverse_sum = 1.0;
                 }}
 
-                float alpha_factor = pow(dist_factor_inverse_sum, 0.3);
+                float alpha_factor = pow(dist_factor_inverse_sum, {});
 
                 float hue = atan2_approx(sin_sum, cos_sum);
                 
@@ -240,6 +244,11 @@ fn get_shader_source(num_sources: u32) -> String {
             }}
         "#,
         num_sources * 4,
-        num_sources
+        num_sources,
+        if source_dropoff == 0. {
+            String::from("0.")
+        } else {
+            source_dropoff.to_string()
+        }
     )
 }

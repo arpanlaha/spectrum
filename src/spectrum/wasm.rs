@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, ImageData};
 
+use crate::utils::base::SOURCE_DROPOFF_FACTOR;
 use crate::utils::base::{BaseSpectrum, Hue, RGB};
 use crate::utils::math;
 
@@ -17,6 +18,8 @@ pub struct SpectrumWasm {
 
     /// The `2d` context belonging to the Spectrum's canvas.
     context: CanvasRenderingContext2d,
+
+    source_dropoff: f32,
 }
 
 #[wasm_bindgen]
@@ -36,8 +39,9 @@ impl SpectrumWasm {
         width: u32,
         height: u32,
         num_sources: u32,
-        movement_speed: f32,
-        color_speed: f32,
+        movement_speed: u32,
+        color_speed: u32,
+        source_dropoff: f32,
         canvas: &HtmlCanvasElement,
     ) -> Self {
         let mut spectrum = Self {
@@ -49,6 +53,7 @@ impl SpectrumWasm {
                 .unwrap()
                 .dyn_into::<CanvasRenderingContext2d>()
                 .unwrap(),
+            source_dropoff: ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.),
         };
         spectrum.draw();
 
@@ -87,7 +92,8 @@ impl SpectrumWasm {
                         });
 
                 dist_factor_inverse_sum = dist_factor_inverse_sum.min(1.);
-                let adjusted_dist_factor_inverse_sum = dist_factor_inverse_sum.powf(0.3);
+                let adjusted_dist_factor_inverse_sum =
+                    dist_factor_inverse_sum.powf(self.source_dropoff);
                 let alpha = (f32::from(u8::MAX) * adjusted_dist_factor_inverse_sum) as u8;
 
                 let RGB(r, g, b) =

@@ -9,15 +9,19 @@ const MAX_HEIGHT = document.body.clientHeight * DEVICE_SCALE;
 const WEBGL_SCALE = 1;
 const WASM_SCALE = 0.4;
 const JS_SCALE = 0.25;
-const MOVEMENT_SPEED_FACTOR = 0.2;
-const COLOR_SPEED_FACTOR = 0.002;
 const UNIFORMS_PER_SOURCE = 4;
 
 // Types
 
 type Mode = "webgl" | "wasm" | "js";
 
-type Param = "width" | "height" | "numSources" | "movementSpeed" | "colorSpeed";
+type Param =
+  | "width"
+  | "height"
+  | "numSources"
+  | "movementSpeed"
+  | "colorSpeed"
+  | "sourceDropoff";
 
 interface Spectrum {
   draw: () => void;
@@ -31,6 +35,7 @@ interface InitialState {
   numSources: number;
   movementSpeed: number;
   colorSpeed: number;
+  sourceDropoff: number;
 }
 
 interface State extends InitialState {
@@ -45,17 +50,19 @@ const params: Param[] = [
   "numSources",
   "movementSpeed",
   "colorSpeed",
+  "sourceDropoff",
 ];
 
 /**
  * Converts parameters from camelCase (for use in scripts) to kebab-case (for use in HTML/CSS).
  */
-const kebabParams = {
+const kebabParams: Record<Param, string> = {
   width: "width",
   height: "height",
   numSources: "num-sources",
   movementSpeed: "movement-speed",
   colorSpeed: "color-speed",
+  sourceDropoff: "source-dropoff",
 };
 
 // Reused html elements
@@ -113,6 +120,7 @@ const modeStates: Record<Mode, InitialState> = {
     numSources: Math.min(20, WEBGL_NUM_SOURCES_UPPER_BOUND),
     movementSpeed: 10,
     colorSpeed: 10,
+    sourceDropoff: 50,
   },
   wasm: {
     canvas: canvas2d,
@@ -121,6 +129,7 @@ const modeStates: Record<Mode, InitialState> = {
     numSources: 10,
     movementSpeed: 10,
     colorSpeed: 20,
+    sourceDropoff: 50,
   },
   js: {
     canvas: canvas2d,
@@ -129,6 +138,7 @@ const modeStates: Record<Mode, InitialState> = {
     numSources: 10,
     movementSpeed: 10,
     colorSpeed: 20,
+    sourceDropoff: 50,
   },
 };
 /* eslint-enable @typescript-eslint/no-magic-numbers */
@@ -172,8 +182,14 @@ const resetParams = (state: InitialState): void => {
  * @param mode the initial mode.
  */
 const getInitialState = (mode: Mode): State => {
-  const { width, height, numSources, movementSpeed, colorSpeed } =
-    modeStates[mode];
+  const {
+    width,
+    height,
+    numSources,
+    movementSpeed,
+    colorSpeed,
+    sourceDropoff,
+  } = modeStates[mode];
 
   resetParams(modeStates[mode]);
 
@@ -181,8 +197,9 @@ const getInitialState = (mode: Mode): State => {
     width,
     height,
     numSources,
-    movementSpeed * MOVEMENT_SPEED_FACTOR,
-    colorSpeed * COLOR_SPEED_FACTOR,
+    movementSpeed,
+    colorSpeed,
+    sourceDropoff,
     mode === "webgl" ? canvasWebgl : canvas2d
   );
 
@@ -216,14 +233,22 @@ let animationId: number | null = null;
  * Fetches a new Spectrum based on current state.
  */
 const getNewSpectrum = (): Spectrum => {
-  const { width, height, numSources, movementSpeed, colorSpeed } = state;
+  const {
+    width,
+    height,
+    numSources,
+    movementSpeed,
+    colorSpeed,
+    sourceDropoff,
+  } = state;
   resetParams(state);
   return spectrumInitializers[mode].new(
     width,
     height,
     numSources,
-    movementSpeed * MOVEMENT_SPEED_FACTOR,
-    colorSpeed * COLOR_SPEED_FACTOR,
+    movementSpeed,
+    colorSpeed,
+    sourceDropoff,
     mode === "webgl" ? canvasWebgl : canvas2d
   );
 };

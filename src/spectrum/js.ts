@@ -8,6 +8,9 @@ const PI_2_3 = 2 * PI_3;
 const PI_4_3 = 2 * PI_2_3;
 const PI_5_3 = 5 * PI_3;
 const U8_MAX = 255;
+const MOVEMENT_SPEED_FACTOR = 0.2;
+const COLOR_SPEED_FACTOR = 0.002;
+const SOURCE_DROPOFF_FACTOR = 0.01;
 
 /**
  * Wrapper of three numbers in [0, 255] corresponding to RGB for a single pixel.
@@ -122,14 +125,19 @@ class Source {
     movementSpeed: number,
     colorSpeed: number
   ) {
+    const transformedMovementSpeed = movementSpeed * MOVEMENT_SPEED_FACTOR;
+    const transformedColorSpeed = colorSpeed * COLOR_SPEED_FACTOR;
+
     this.x = Math.random() * canvasWidth;
     this.y = Math.random() * canvasHeight;
     this.hue = new Hue(Math.random() * TWO_PI);
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
-    this.dx = Math.random() * movementSpeed - movementSpeed / 2;
-    this.dy = Math.random() * movementSpeed - movementSpeed / 2;
-    this.dh = Math.random() * colorSpeed - colorSpeed / 2;
+    this.dx =
+      Math.random() * transformedMovementSpeed - transformedMovementSpeed / 2;
+    this.dy =
+      Math.random() * transformedMovementSpeed - transformedMovementSpeed / 2;
+    this.dh = Math.random() * transformedColorSpeed - transformedColorSpeed / 2;
     this.hueCos = Math.cos(this.hue.hue);
     this.hueSin = Math.sin(this.hue.hue);
   }
@@ -183,6 +191,8 @@ export default class SpectrumJS {
    */
   sources: Source[];
 
+  sourceDropoff: number;
+
   /**
    * The Spectrum's pixel data.
    */
@@ -199,6 +209,7 @@ export default class SpectrumJS {
     numSources: number,
     movementSpeed: number,
     colorSpeed: number,
+    sourceDropoff: number,
     canvas: HTMLCanvasElement
   ) {
     this.width = width;
@@ -207,6 +218,7 @@ export default class SpectrumJS {
       { length: numSources },
       () => new Source(width, height, movementSpeed, colorSpeed)
     );
+    this.sourceDropoff = Math.pow(sourceDropoff * SOURCE_DROPOFF_FACTOR, 2);
     this.data = new Uint8ClampedArray(4 * width * height);
     this.context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -228,6 +240,7 @@ export default class SpectrumJS {
     numSources: number,
     movementSpeed: number,
     colorSpeed: number,
+    sourceDropoff: number,
     canvas: HTMLCanvasElement
   ): SpectrumJS {
     return new SpectrumJS(
@@ -236,6 +249,7 @@ export default class SpectrumJS {
       numSources,
       movementSpeed,
       colorSpeed,
+      sourceDropoff,
       canvas
     );
   }
@@ -265,7 +279,9 @@ export default class SpectrumJS {
         });
 
         distFactorInverseSum = Math.min(distFactorInverseSum, 1);
-        const alpha = Math.round(U8_MAX * Math.pow(distFactorInverseSum, 0.3));
+        const alpha = Math.round(
+          U8_MAX * Math.pow(distFactorInverseSum, this.sourceDropoff)
+        );
 
         const start = (x + y_by_width) * 4;
         const [r, g, b] = new Hue(

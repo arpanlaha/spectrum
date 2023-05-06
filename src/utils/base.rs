@@ -6,6 +6,9 @@ const TWO_PI: f32 = consts::PI * 2_f32;
 const TWO_THIRDS_PI: f32 = consts::FRAC_PI_3 * 2_f32;
 const FOUR_THIRDS_PI: f32 = consts::FRAC_PI_3 * 4_f32;
 const FIVE_THIRDS_PI: f32 = consts::FRAC_PI_3 * 5_f32;
+pub const SOURCE_DROPOFF_FACTOR: f32 = 0.01;
+const MOVEMENT_SPEED_FACTOR: f32 = 0.2;
+const COLOR_SPEED_FACTOR: f32 = 0.002;
 
 /// Wrapper of three byte values corresponding to RGB for a single pixel.
 pub struct RGB(pub u8, pub u8, pub u8);
@@ -118,6 +121,14 @@ pub struct Source {
     hue_sin: f32,
 }
 
+fn get_speed(input: f32) -> f32 {
+    if input == 0. {
+        input
+    } else {
+        OsRng.gen_range(-input / 2., input / 2.)
+    }
+}
+
 impl Source {
     /// Constructs a new Source.
     ///
@@ -132,13 +143,17 @@ impl Source {
     pub fn new(
         canvas_width: f32,
         canvas_height: f32,
-        movement_speed: f32,
-        color_speed: f32,
+        movement_speed: u32,
+        color_speed: u32,
     ) -> Self {
         let hue = Hue(OsRng.gen_range(0.0_f32, TWO_PI));
         let hue_val = hue.get();
         let hue_cos = hue_val.cos();
         let hue_sin = hue_val.sin();
+
+        let movement_speed_float = (movement_speed as f32) * MOVEMENT_SPEED_FACTOR;
+        let color_speed_float = (color_speed as f32) * COLOR_SPEED_FACTOR;
+
         Self {
             x: OsRng.gen_range(0.0_f32, canvas_width),
             y: OsRng.gen_range(0.0_f32, canvas_height),
@@ -146,9 +161,9 @@ impl Source {
             hue,
             canvas_width,
             canvas_height,
-            dx: OsRng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
-            dy: OsRng.gen_range(-movement_speed / 2_f32, movement_speed / 2_f32),
-            dh: OsRng.gen_range(-color_speed / 2_f32, color_speed / 2_f32),
+            dx: get_speed(movement_speed_float),
+            dy: get_speed(movement_speed_float),
+            dh: get_speed(color_speed_float),
             hue_cos,
             hue_sin,
         }
@@ -232,8 +247,8 @@ impl BaseSpectrum {
         width: u32,
         height: u32,
         num_sources: u32,
-        movement_speed: f32,
-        color_speed: f32,
+        movement_speed: u32,
+        color_speed: u32,
     ) -> Self {
         let width_float = width as f32;
         let height_float = height as f32;
