@@ -126,7 +126,7 @@ fn get_speed(input: f32) -> f32 {
     if input == 0. {
         input
     } else {
-        OsRng.gen_range(-input / 2., input / 2.)
+        OsRng.gen_range((-input / 2.)..(input / 2.))
     }
 }
 
@@ -147,7 +147,7 @@ impl Source {
         movement_speed: u32,
         color_speed: u32,
     ) -> Self {
-        let hue = Hue(OsRng.gen_range(0.0_f32, TWO_PI));
+        let hue = Hue(OsRng.gen_range(0.0_f32..TWO_PI));
         let hue_val = hue.get();
         let hue_cos = hue_val.cos();
         let hue_sin = hue_val.sin();
@@ -156,8 +156,8 @@ impl Source {
         let color_speed_float = (color_speed as f32) * COLOR_SPEED_FACTOR;
 
         Self {
-            x: OsRng.gen_range(0.0_f32, canvas_width),
-            y: OsRng.gen_range(0.0_f32, canvas_height),
+            x: OsRng.gen_range(0.0_f32..canvas_width),
+            y: OsRng.gen_range(0.0_f32..canvas_height),
 
             hue,
             canvas_width,

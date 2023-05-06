@@ -2,7 +2,7 @@
 name = "spectrum"
 version = "1.0.0"
 authors = ["Arpan Laha"]
-edition = "2018"
+edition = "2021"
 description = "Animate randomly-generated art with Rust + WebAssembly."
 repository = "https://github.com/arpanlaha/spectrum"
 license = "MIT"
@@ -18,7 +18,7 @@ debug = ["console_error_panic_hook"]
 wasm-bindgen = "0.2"
 getrandom = { version = "0.2", features = ["js"] }
 js-sys = "0.3"
-rand = { version = "0.7", features = ["getrandom", "wasm-bindgen"] }
+rand = { version = "0.8", features = ["getrandom"] }
 wee_alloc = "0.4"
 console_error_panic_hook = { version = "0.1", optional = true }
 
