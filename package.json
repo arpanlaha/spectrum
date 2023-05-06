@@ -23,20 +23,21 @@
     "wasm-spectrum": "file:wasm-spectrum"
   },
   "devDependencies": {
-    "@hack4impact-uiuc/eslint-plugin": "^2.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.59.2",
     "clean-css-cli": "^5.2.2",
-    "copy-webpack-plugin": "^9.0.1",
-    "eslint": "^7.32.0",
-    "html-minifier-terser": "^6.0.2",
-    "markdownlint-cli": "^0.29.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "eslint": "^8.40.0",
+    "eslint-plugin-import": "^2.27.5",
+    "html-minifier-terser": "^7.2.0",
+    "markdownlint-cli": "^0.34.0",
     "prettier": "^2.2.1",
     "static-server": "^2.2.1",
-    "stylelint": "^14.0.1",
-    "stylelint-config-standard": "^23.0.0",
+    "stylelint": "^15.6.1",
+    "stylelint-config-standard": "^33.0.0",
     "ts-loader": "^9.2.6",
-    "typescript": "^4.2.3",
+    "typescript": "^5.0.4",
     "webpack": "^5.29.0",
-    "webpack-cli": "^4.6.0",
+    "webpack-cli": "^5.0.2",
     "webpack-dev-server": "^4.4.0"
   }
 }

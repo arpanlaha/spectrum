@@ -1,10 +1,13 @@
 {
-  "plugins": ["@hack4impact-uiuc"],
+  "plugins": ["@typescript-eslint", "import"],
   "extends": [
-    "plugin:@hack4impact-uiuc/base",
-    "plugin:@hack4impact-uiuc/typescript"
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/recommended"
   ],
+  "parser": "@typescript-eslint/parser",
   "rules": {
+    "@typescript-eslint/no-non-null-assertion": "off",
     "import/named": "off",
     "import/no-unresolved": "off"
   }
