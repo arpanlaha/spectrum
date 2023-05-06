@@ -11,7 +11,8 @@
     "lint:fix": "eslint src && stylelint \"static/**/*.css\" && markdownlint --fix README.md",
     "serve": "static-server dist",
     "start": "webpack-dev-server",
-    "wasm-pack": "wasm-pack build --out-dir wasm-spectrum"
+    "wasm-pack": "wasm-pack build --out-dir wasm-spectrum --dev --features debug",
+    "wasm-pack:release": "wasm-pack build --out-dir wasm-spectrum --release"
   },
   "repository": {
     "type": "git",

@@ -1,3 +1,4 @@
+use crate::utils::panic;
 use rand::{rngs::OsRng, Rng};
 use std::f32::consts;
 use std::iter;
@@ -250,6 +251,8 @@ impl BaseSpectrum {
         movement_speed: u32,
         color_speed: u32,
     ) -> Self {
+        panic::set_panic_hook();
+
         let width_float = width as f32;
         let height_float = height as f32;
 

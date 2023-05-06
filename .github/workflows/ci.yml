@@ -35,7 +35,7 @@ jobs:
           use-tool-cache: true
 
       - name: Build WebAssembly
-        run: wasm-pack build --out-dir wasm-spectrum
+        run: wasm-pack build --out-dir wasm-spectrum --dev
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -80,7 +80,7 @@ jobs:
           use-tool-cache: true
 
       - name: Build WebAssembly
-        run: wasm-pack build --out-dir wasm-spectrum
+        run: wasm-pack build --out-dir wasm-spectrum --dev
 
       - name: Set up Node
         uses: actions/setup-node@v1
@@ -122,7 +122,7 @@ jobs:
           use-tool-cache: true
 
       - name: Build WebAssembly
-        run: wasm-pack build --out-dir wasm-spectrum
+        run: wasm-pack build --out-dir wasm-spectrum --release
 
       - name: Set up Node
         uses: actions/setup-node@v1

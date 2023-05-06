@@ -33,4 +33,7 @@ module.exports = {
   experiments: {
     syncWebAssembly: true,
   },
+  performance: {
+    assetFilter: () => false,
+  },
 };

@@ -10,12 +10,17 @@ license = "MIT"
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+default = []
+debug = ["console_error_panic_hook"]
+
 [dependencies]
 wasm-bindgen = "0.2"
 getrandom = { version = "0.2", features = ["js"] }
 js-sys = "0.3"
 rand = { version = "0.7", features = ["getrandom", "wasm-bindgen"] }
 wee_alloc = "0.4"
+console_error_panic_hook = { version = "0.1", optional = true }
 
 [dependencies.web-sys]
 version = "0.3"

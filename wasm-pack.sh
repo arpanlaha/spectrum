@@ -1,1 +1,0 @@
-wasm-pack build --out-dir wasm-spectrum
