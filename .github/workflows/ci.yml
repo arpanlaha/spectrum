@@ -28,11 +28,7 @@ jobs:
         run: cargo fmt -- --check
 
       - name: Install wasm-pack
-        uses: actions-rs/install@v0.1
-        with:
-          crate: wasm-pack
-          version: latest
-          use-tool-cache: true
+        run: cargo install wasm-pack
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --dev
@@ -73,11 +69,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Install wasm-pack
-        uses: actions-rs/install@v0.1
-        with:
-          crate: wasm-pack
-          version: latest
-          use-tool-cache: true
+        run: cargo install wasm-pack
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --dev
@@ -115,11 +107,7 @@ jobs:
           toolchain: stable
 
       - name: Install wasm-pack
-        uses: actions-rs/install@v0.1
-        with:
-          crate: wasm-pack
-          version: latest
-          use-tool-cache: true
+        run: cargo install wasm-pack
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --release
