@@ -16,7 +16,7 @@ jobs:
           path: |
             $HOME/.cargo
             target
-          key: spectrum-format
+          key: spectrum-dev-${{ hashFiles('Cargo.lock') }}
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
@@ -57,7 +57,7 @@ jobs:
           path: |
             $HOME/.cargo
             target
-          key: spectrum-lint
+          key: spectrum-dev-${{ hashFiles('Cargo.lock') }}
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
@@ -98,7 +98,7 @@ jobs:
           path: |
             $HOME/.cargo
             target
-          key: spectrum-deploy
+          key: spectrum-release-${{ hashFiles('Cargo.lock') }}
 
       - name: Install rust toolchain
         uses: actions-rs/toolchain@v1
