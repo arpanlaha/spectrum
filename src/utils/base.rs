@@ -200,14 +200,14 @@ impl Source {
     pub fn update_movement_speed(&mut self, movement_speed: u32) {
         let movement_speed_float = (movement_speed as f32) * MOVEMENT_SPEED_FACTOR;
 
-        self.dx = get_speed(movement_speed_float, self.dx_random);
-        self.dy = get_speed(movement_speed_float, self.dy_random);
+        self.dx = self.dx.signum() * get_speed(movement_speed_float, self.dx_random).abs();
+        self.dy = self.dy.signum() * get_speed(movement_speed_float, self.dy_random).abs();
     }
 
     pub fn update_color_speed(&mut self, color_speed: u32) {
         let color_speed_float = (color_speed as f32) * COLOR_SPEED_FACTOR;
 
-        self.dh = get_speed(color_speed_float, self.dh_random);
+        self.dh = self.dh.signum() * get_speed(color_speed_float, self.dh_random).abs();
     }
 
     /// Increments the Source by one frame.

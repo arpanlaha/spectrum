@@ -157,15 +157,24 @@ class Source {
     const transformedMovementSpeed = movementSpeed * MOVEMENT_SPEED_FACTOR;
 
     this.dx =
-      this._dxRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
+      Math.sign(this.dx) *
+      Math.abs(
+        this._dxRandom * transformedMovementSpeed - transformedMovementSpeed / 2
+      );
     this.dy =
-      this._dyRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
+      Math.sign(this.dy) *
+      Math.abs(
+        this._dyRandom * transformedMovementSpeed - transformedMovementSpeed / 2
+      );
   }
 
   updateColorSpeed(colorSpeed: number): void {
     const transformedColorSpeed = colorSpeed * COLOR_SPEED_FACTOR;
     this.dh =
-      this._dhRandom * transformedColorSpeed - transformedColorSpeed / 2;
+      Math.sign(this.dh) *
+      Math.abs(
+        this._dhRandom * transformedColorSpeed - transformedColorSpeed / 2
+      );
   }
 
   /**
