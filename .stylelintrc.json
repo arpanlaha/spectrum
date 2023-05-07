@@ -2,6 +2,7 @@
   "extends": "stylelint-config-standard",
   "rules": {
     "declaration-colon-newline-after": null,
+    "property-no-vendor-prefix": null,
     "value-list-comma-newline-after": null
   }
 }
