@@ -390,6 +390,25 @@ params.forEach((param) => {
     state[param] = parseInt(newParam);
     document.getElementById(kebabParams[param])!.textContent =
       newParam.toString();
+
+    const { spectrum } = state;
+    if (spectrum instanceof SpectrumJS) {
+      switch (param) {
+        case "movementSpeed":
+          spectrum.updateMovementSpeed(state[param]);
+          break;
+        case "colorSpeed":
+          spectrum.updateColorSpeed(state[param]);
+          break;
+        case "sourceDropoff":
+          spectrum.updateSourceDropoff(state[param]);
+          break;
+        default:
+          restartSpectrum();
+      }
+      return;
+    }
+
     restartSpectrum();
   });
 });

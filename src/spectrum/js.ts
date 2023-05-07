@@ -80,21 +80,6 @@ class Source {
   y: number;
 
   /**
-   * The internal Hue value of the Source.
-   */
-  hue: Hue;
-
-  /**
-   * The width of the Spectrum canvas.
-   */
-  canvasWidth: number;
-
-  /**
-   * The height of the spectrum canvas:
-   */
-  canvasHeight: number;
-
-  /**
    * The rate of movement in the x direction.
    */
   dx: number;
@@ -119,6 +104,25 @@ class Source {
    */
   hueSin: number;
 
+  /**
+   * The internal Hue value of the Source.
+   */
+  readonly hue: Hue;
+
+  /**
+   * The width of the Spectrum canvas.
+   */
+  readonly canvasWidth: number;
+
+  /**
+   * The height of the spectrum canvas:
+   */
+  readonly canvasHeight: number;
+
+  private readonly _dxRandom: number;
+  private readonly _dyRandom: number;
+  private readonly _dhRandom: number;
+
   constructor(
     canvasWidth: number,
     canvasHeight: number,
@@ -133,13 +137,35 @@ class Source {
     this.hue = new Hue(Math.random() * TWO_PI);
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
+
+    this._dxRandom = Math.random();
+    this._dyRandom = Math.random();
+    this._dhRandom = Math.random();
+
     this.dx =
-      Math.random() * transformedMovementSpeed - transformedMovementSpeed / 2;
+      this._dxRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
     this.dy =
-      Math.random() * transformedMovementSpeed - transformedMovementSpeed / 2;
-    this.dh = Math.random() * transformedColorSpeed - transformedColorSpeed / 2;
+      this._dyRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
+    this.dh =
+      this._dhRandom * transformedColorSpeed - transformedColorSpeed / 2;
+
     this.hueCos = Math.cos(this.hue.hue);
     this.hueSin = Math.sin(this.hue.hue);
+  }
+
+  updateMovementSpeed(movementSpeed: number): void {
+    const transformedMovementSpeed = movementSpeed * MOVEMENT_SPEED_FACTOR;
+
+    this.dx =
+      this._dxRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
+    this.dy =
+      this._dyRandom * transformedMovementSpeed - transformedMovementSpeed / 2;
+  }
+
+  updateColorSpeed(colorSpeed: number): void {
+    const transformedColorSpeed = colorSpeed * COLOR_SPEED_FACTOR;
+    this.dh =
+      this._dhRandom * transformedColorSpeed - transformedColorSpeed / 2;
   }
 
   /**
@@ -306,6 +332,24 @@ export default class SpectrumJS {
    * Increments all of the Spectrum's sources by one frame.
    */
   tick(): void {
-    this.sources.forEach((source) => source.tick());
+    for (const source of this.sources) {
+      source.tick();
+    }
+  }
+
+  updateMovementSpeed(movementSpeed: number): void {
+    for (const source of this.sources) {
+      source.updateMovementSpeed(movementSpeed);
+    }
+  }
+
+  updateColorSpeed(colorSpeed: number): void {
+    for (const source of this.sources) {
+      source.updateColorSpeed(colorSpeed);
+    }
+  }
+
+  updateSourceDropoff(sourceDropoff: number): void {
+    this.sourceDropoff = Math.pow(sourceDropoff * SOURCE_DROPOFF_FACTOR, 2);
   }
 }
