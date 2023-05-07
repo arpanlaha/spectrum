@@ -84,7 +84,7 @@ h1 {
 
 #controls {
   background: radial-gradient(#19191980, #19191910), url("/static/noise.svg");
-  border-right: 1px solid rgba(102 102 102 / 20%);
+  border: 1px solid rgba(102 102 102 / 20%);
   white-space: nowrap;
   position: fixed;
   transition: transform 0.5s;
