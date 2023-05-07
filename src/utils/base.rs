@@ -127,7 +127,7 @@ pub struct Source {
 }
 
 fn get_speed(input: f32, random: f32) -> f32 {
-    input * random - input / 2.
+    input.mul_add(random, -input / 2.)
 }
 
 impl Source {

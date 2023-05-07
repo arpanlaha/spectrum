@@ -105,7 +105,7 @@ impl SpectrumWebGL {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
-            source_dropoff: ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.),
+            source_dropoff: ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powi(2),
         };
 
         spectrum.draw();
@@ -150,7 +150,7 @@ impl SpectrumWebGL {
 
     #[allow(non_snake_case)]
     pub fn updateSourceDropoff(&mut self, source_dropoff: u32) {
-        self.source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.);
+        self.source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powi(2);
     }
 
     /// Increments all of the Spectrum's sources by one frame.
