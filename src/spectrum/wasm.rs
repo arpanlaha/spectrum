@@ -133,6 +133,11 @@ impl SpectrumWasm {
         self.base.update_color_speed(color_speed);
     }
 
+    #[allow(non_snake_case)]
+    pub fn updateSourceDropoff(&mut self, source_dropoff: u32) {
+        self.source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.);
+    }
+
     /// Increments all of the Spectrum's sources by one frame.
     pub fn tick(&mut self) {
         self.base.tick();

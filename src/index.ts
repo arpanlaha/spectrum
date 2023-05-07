@@ -26,6 +26,9 @@ type Param =
 interface Spectrum {
   draw: () => void;
   tick: () => void;
+  updateMovementSpeed: (movementSpeed: number) => void;
+  updateColorSpeed: (colorSpeed: number) => void;
+  updateSourceDropoff: (sourceDropoff: number) => void;
 }
 
 interface InitialState {
@@ -95,7 +98,7 @@ const contextWebgl = canvasWebgl.getContext("webgl", {
  * iOS is dumb and has a limited number of fragment shader uniforms.
  */
 const WEBGL_NUM_SOURCES_UPPER_BOUND = Math.floor(
-  contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) /
+  (contextWebgl.getParameter(contextWebgl.MAX_FRAGMENT_UNIFORM_VECTORS) - 1) /
     UNIFORMS_PER_SOURCE
 );
 
@@ -392,24 +395,19 @@ params.forEach((param) => {
       newParam.toString();
 
     const { spectrum } = state;
-    if (spectrum instanceof SpectrumJS) {
-      switch (param) {
-        case "movementSpeed":
-          spectrum.updateMovementSpeed(state[param]);
-          break;
-        case "colorSpeed":
-          spectrum.updateColorSpeed(state[param]);
-          break;
-        case "sourceDropoff":
-          spectrum.updateSourceDropoff(state[param]);
-          break;
-        default:
-          restartSpectrum();
-      }
-      return;
+    switch (param) {
+      case "movementSpeed":
+        spectrum.updateMovementSpeed(state[param]);
+        break;
+      case "colorSpeed":
+        spectrum.updateColorSpeed(state[param]);
+        break;
+      case "sourceDropoff":
+        spectrum.updateSourceDropoff(state[param]);
+        break;
+      default:
+        restartSpectrum();
     }
-
-    restartSpectrum();
   });
 });
 

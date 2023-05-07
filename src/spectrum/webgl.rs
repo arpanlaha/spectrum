@@ -11,6 +11,7 @@ pub struct SpectrumWebGL {
     base: BaseSpectrum,
     context: WebGlRenderingContext,
     program: WebGlProgram,
+    source_dropoff: f32,
 }
 
 #[wasm_bindgen]
@@ -54,12 +55,10 @@ impl SpectrumWebGL {
             "#,
         );
 
-        let transformed_source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.);
-
         let fragment_shader = compile_shader(
             &context,
             WebGlRenderingContext::FRAGMENT_SHADER,
-            get_shader_source(num_sources, transformed_source_dropoff as f32).as_str(),
+            get_shader_source(num_sources).as_str(),
         );
 
         let program = context.create_program().unwrap();
@@ -106,7 +105,9 @@ impl SpectrumWebGL {
             base: BaseSpectrum::new(width, height, num_sources, movement_speed, color_speed),
             context,
             program,
+            source_dropoff: ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.),
         };
+
         spectrum.draw();
 
         spectrum
@@ -127,11 +128,12 @@ impl SpectrumWebGL {
 
         let context = &self.context;
 
-        let source_info_loc = context
-            .get_uniform_location(&self.program, "sources")
-            .unwrap();
+        let source_info_loc = context.get_uniform_location(&self.program, "sources");
 
-        context.uniform1fv_with_f32_array(Some(&source_info_loc), source_info.as_slice());
+        let source_dropoff_info_loc = context.get_uniform_location(&self.program, "source_dropoff");
+
+        context.uniform1fv_with_f32_array(source_info_loc.as_ref(), source_info.as_slice());
+        context.uniform1f(source_dropoff_info_loc.as_ref(), self.source_dropoff);
 
         context.draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
@@ -144,6 +146,11 @@ impl SpectrumWebGL {
     #[allow(non_snake_case)]
     pub fn updateColorSpeed(&mut self, color_speed: u32) {
         self.base.update_color_speed(color_speed);
+    }
+
+    #[allow(non_snake_case)]
+    pub fn updateSourceDropoff(&mut self, source_dropoff: u32) {
+        self.source_dropoff = ((source_dropoff as f32) * SOURCE_DROPOFF_FACTOR).powf(2.);
     }
 
     /// Increments all of the Spectrum's sources by one frame.
@@ -174,7 +181,7 @@ fn compile_shader(context: &WebGlRenderingContext, shader_type: u32, source: &st
     shader
 }
 
-fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
+fn get_shader_source(num_sources: u32) -> String {
     format!(
         r#"
             #define PI 3.141592653589793
@@ -190,6 +197,7 @@ fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
             precision highp float;
 
             uniform float sources[{}];
+            uniform float source_dropoff;
 
             float atan_approx(float quotient) {{
                 return (PI_4 + 0.273 * (1.0 - abs(quotient))) * quotient;
@@ -230,7 +238,7 @@ fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
                     dist_factor_inverse_sum = 1.0;
                 }}
 
-                float alpha_factor = pow(dist_factor_inverse_sum, {});
+                float alpha_factor = pow(dist_factor_inverse_sum, source_dropoff);
 
                 float hue = atan2_approx(sin_sum, cos_sum);
                 
@@ -255,10 +263,5 @@ fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
         "#,
         num_sources * 4,
         num_sources,
-        if source_dropoff == 0. || source_dropoff == 1. {
-            format!("{}.", source_dropoff)
-        } else {
-            source_dropoff.to_string()
-        }
     )
 }
