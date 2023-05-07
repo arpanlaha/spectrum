@@ -136,6 +136,16 @@ impl SpectrumWebGL {
         context.draw_arrays(WebGlRenderingContext::TRIANGLE_FAN, 0, 4);
     }
 
+    #[allow(non_snake_case)]
+    pub fn updateMovementSpeed(&mut self, movement_speed: u32) {
+        self.base.update_movement_speed(movement_speed);
+    }
+
+    #[allow(non_snake_case)]
+    pub fn updateColorSpeed(&mut self, color_speed: u32) {
+        self.base.update_color_speed(color_speed);
+    }
+
     /// Increments all of the Spectrum's sources by one frame.
     pub fn tick(&mut self) {
         self.base.tick();
