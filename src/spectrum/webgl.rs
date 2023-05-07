@@ -245,8 +245,8 @@ fn get_shader_source(num_sources: u32, source_dropoff: f32) -> String {
         "#,
         num_sources * 4,
         num_sources,
-        if source_dropoff == 0. {
-            String::from("0.")
+        if source_dropoff == 0. || source_dropoff == 1. {
+            format!("{}.", source_dropoff)
         } else {
             source_dropoff.to_string()
         }
