@@ -120,14 +120,14 @@ pub struct Source {
 
     /// The sine of the internal Hue value.
     hue_sin: f32,
+
+    dx_random: f32,
+    dy_random: f32,
+    dh_random: f32,
 }
 
-fn get_speed(input: f32) -> f32 {
-    if input == 0. {
-        input
-    } else {
-        OsRng.gen_range((-input / 2.)..(input / 2.))
-    }
+fn get_speed(input: f32, random: f32) -> f32 {
+    input * random - input / 2.
 }
 
 impl Source {
@@ -155,6 +155,10 @@ impl Source {
         let movement_speed_float = (movement_speed as f32) * MOVEMENT_SPEED_FACTOR;
         let color_speed_float = (color_speed as f32) * COLOR_SPEED_FACTOR;
 
+        let dx_random: f32 = OsRng.gen();
+        let dy_random: f32 = OsRng.gen();
+        let dh_random: f32 = OsRng.gen();
+
         Self {
             x: OsRng.gen_range(0.0_f32..canvas_width),
             y: OsRng.gen_range(0.0_f32..canvas_height),
@@ -162,9 +166,12 @@ impl Source {
             hue,
             canvas_width,
             canvas_height,
-            dx: get_speed(movement_speed_float),
-            dy: get_speed(movement_speed_float),
-            dh: get_speed(color_speed_float),
+            dx_random,
+            dy_random,
+            dh_random,
+            dx: get_speed(movement_speed_float, dx_random),
+            dy: get_speed(movement_speed_float, dy_random),
+            dh: get_speed(color_speed_float, dh_random),
             hue_cos,
             hue_sin,
         }
@@ -188,6 +195,19 @@ impl Source {
     /// Returns the sine of the Source's hue.
     pub const fn hue_sin(&self) -> f32 {
         self.hue_sin
+    }
+
+    pub fn update_movement_speed(&mut self, movement_speed: u32) {
+        let movement_speed_float = (movement_speed as f32) * MOVEMENT_SPEED_FACTOR;
+
+        self.dx = get_speed(movement_speed_float, self.dx_random);
+        self.dy = get_speed(movement_speed_float, self.dy_random);
+    }
+
+    pub fn update_color_speed(&mut self, color_speed: u32) {
+        let color_speed_float = (color_speed as f32) * COLOR_SPEED_FACTOR;
+
+        self.dh = get_speed(color_speed_float, self.dh_random);
     }
 
     /// Increments the Source by one frame.
@@ -279,6 +299,18 @@ impl BaseSpectrum {
     /// Returns a reference to the vector containing the `BaseSpectrum`'s Sources.
     pub const fn sources(&self) -> &Vec<Source> {
         &self.sources
+    }
+
+    pub fn update_movement_speed(&mut self, movement_speed: u32) {
+        for source in &mut self.sources {
+            source.update_movement_speed(movement_speed);
+        }
+    }
+
+    pub fn update_color_speed(&mut self, color_speed: u32) {
+        for source in &mut self.sources {
+            source.update_color_speed(color_speed);
+        }
     }
 
     /// Increments the `BaseSpectrum`'s sources by one frame.
