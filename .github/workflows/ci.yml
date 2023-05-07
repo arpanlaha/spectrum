@@ -31,7 +31,12 @@ jobs:
         run: cargo fmt -- --check
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        run: |
+          if wasm-pack -V then;
+            echo "wasm-pack is already installed."
+          else
+            cargo install wasm-pack
+          fi
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --dev
@@ -75,7 +80,12 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        run: |
+          if wasm-pack -V then;
+            echo "wasm-pack is already installed."
+          else
+            cargo install wasm-pack
+          fi
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --dev
@@ -116,7 +126,12 @@ jobs:
           toolchain: stable
 
       - name: Install wasm-pack
-        run: cargo install wasm-pack
+        run: |
+          if wasm-pack -V then;
+            echo "wasm-pack is already installed."
+          else
+            cargo install wasm-pack
+          fi
 
       - name: Build WebAssembly
         run: wasm-pack build --out-dir wasm-spectrum --release
