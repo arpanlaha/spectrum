@@ -32,7 +32,7 @@ jobs:
 
       - name: Install wasm-pack
         run: |
-          if wasm-pack -V then;
+          if wasm-pack -V; then
             echo "wasm-pack is already installed."
           else
             cargo install wasm-pack
@@ -81,7 +81,7 @@ jobs:
 
       - name: Install wasm-pack
         run: |
-          if wasm-pack -V then;
+          if wasm-pack -V; then
             echo "wasm-pack is already installed."
           else
             cargo install wasm-pack
@@ -127,7 +127,7 @@ jobs:
 
       - name: Install wasm-pack
         run: |
-          if wasm-pack -V then;
+          if wasm-pack -V; then
             echo "wasm-pack is already installed."
           else
             cargo install wasm-pack
