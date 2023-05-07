@@ -52,9 +52,11 @@
   </head>
 
   <body>
-    <canvas id="canvas-webgl" class="hide"></canvas>
+    <main>
+      <canvas id="canvas-webgl" class="hide"></canvas>
 
-    <canvas id="canvas-2d" class="hide"></canvas>
+      <canvas id="canvas-2d" class="hide"></canvas>
+    </main>
 
     <aside id="controls" class="vertical-center blur hide">
       <h1>Spectrum</h1>
@@ -130,7 +132,7 @@
         <input type="range" id="set-color-speed" min="0" max="100" />
       </div>
 
-       <div class="control">
+      <div class="control">
         <label for="set-source-dropoff">
           Source drop-off: <span id="source-dropoff"></span>
         </label>
@@ -151,7 +153,7 @@
         src="/static/left-arrow.svg"
         alt="collapse"
       />
-    </div>
+    </aside>
 
     <img
       id="expand"
