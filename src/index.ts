@@ -23,6 +23,8 @@ type Param =
   | "colorSpeed"
   | "sourceDropoff";
 
+type InPlaceUpdateParam = "movementSpeed" | "colorSpeed" | "sourceDropoff";
+
 interface Spectrum {
   draw: () => void;
   tick: () => void;
@@ -55,6 +57,14 @@ const params: Param[] = [
   "colorSpeed",
   "sourceDropoff",
 ];
+
+function isInPlaceUpdateParam(param: Param): param is InPlaceUpdateParam {
+  return (
+    param === "movementSpeed" ||
+    param === "colorSpeed" ||
+    param === "sourceDropoff"
+  );
+}
 
 /**
  * Converts parameters from camelCase (for use in scripts) to kebab-case (for use in HTML/CSS).
@@ -388,27 +398,40 @@ params.forEach((param) => {
   }
 
   setter.value = state[param].toString();
-  setter.addEventListener("change", (e) => {
-    const newParam = (e.target as HTMLInputElement).value;
-    state[param] = parseInt(newParam);
-    document.getElementById(kebabParams[param])!.textContent =
-      newParam.toString();
 
-    const { spectrum } = state;
-    switch (param) {
-      case "movementSpeed":
-        spectrum.updateMovementSpeed(state[param]);
-        break;
-      case "colorSpeed":
-        spectrum.updateColorSpeed(state[param]);
-        break;
-      case "sourceDropoff":
-        spectrum.updateSourceDropoff(state[param]);
-        break;
-      default:
-        restartSpectrum();
-    }
-  });
+  if (isInPlaceUpdateParam(param)) {
+    setter.addEventListener("input", (e) => {
+      const newParam = (e.target as HTMLInputElement).value;
+      state[param] = parseInt(newParam);
+      document.getElementById(kebabParams[param])!.textContent =
+        newParam.toString();
+
+      const { spectrum } = state;
+
+      switch (param) {
+        case "movementSpeed":
+          spectrum.updateMovementSpeed(state[param]);
+          break;
+        case "colorSpeed":
+          spectrum.updateColorSpeed(state[param]);
+          break;
+        case "sourceDropoff":
+          spectrum.updateSourceDropoff(state[param]);
+          break;
+        default:
+          restartSpectrum();
+      }
+    });
+  } else {
+    setter.addEventListener("change", (e) => {
+      const newParam = (e.target as HTMLInputElement).value;
+      state[param] = parseInt(newParam);
+      document.getElementById(kebabParams[param])!.textContent =
+        newParam.toString();
+
+      restartSpectrum();
+    });
+  }
 });
 
 // Set up controls collapse event listener.
