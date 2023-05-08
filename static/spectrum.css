@@ -44,9 +44,9 @@ body {
 
 button {
   border: none;
-  background-color: hsl(215deg 100% 50%);
+  background-color: hsl(215deg 30% 40%);
   transition: background-color 0.2s;
-  color: #fff;
+  color: #000;
   font-family: "Nunito Sans", sans-serif;
   border-radius: 100%;
   padding: 0;
@@ -59,17 +59,17 @@ button {
 }
 
 button:hover {
-  background-color: hsl(215deg 100% 45%);
+  background-color: hsl(215deg 30% 35%);
   transition: background-color 0.2s;
 }
 
 button:focus {
-  background-color: hsl(215deg 100% 60%);
+  background-color: hsl(215deg 30% 50%);
   transition: background-color 0.2s;
 }
 
 button:active {
-  background-color: hsl(215deg 100% 40%);
+  background-color: hsl(215deg 30% 30%);
   transition: background-color 0.2s;
 }
 
@@ -83,7 +83,7 @@ h1 {
 }
 
 #controls {
-  background: radial-gradient(#19191980, #19191910), url("/static/noise.svg");
+  background: radial-gradient(#19191980, #19191910);
   border: 1px solid rgba(102 102 102 / 20%);
   white-space: nowrap;
   position: fixed;
@@ -106,13 +106,13 @@ h1 {
 .mode {
   padding: 1vmin;
   border: solid;
-  border-color: hsl(215deg 100% 50%);
+  border-color: hsl(215deg 30% 40%);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .mode:hover:not(.current-mode) {
-  background-color: hsla(215deg 50% 50% / 40%);
+  background-color: hsla(215deg 30% 40% / 40%);
   transition: background-color 0.2s;
 }
 
@@ -131,7 +131,7 @@ h1 {
 }
 
 .current-mode {
-  background-color: hsl(215deg 100% 50%);
+  background-color: hsl(215deg 30% 40%);
 }
 
 .github {
@@ -313,7 +313,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 2vmin;
   border: none;
   border-radius: 100%;
-  background-color: hsl(215deg 100% 50%);
+  background-color: hsl(215deg 30% 40%);
   cursor: pointer;
   margin-top: -0.6vmin;
   box-shadow: 0.1vmin 0.1vmin 0.4vmin hsl(0deg 0% 0% 40%);
@@ -324,7 +324,7 @@ input[type="range"]::-moz-range-thumb {
   width: 2vmin;
   border-radius: 100%;
   border: none;
-  background-color: hsl(215deg 100% 50%);
+  background-color: hsl(215deg 30% 40%);
   cursor: pointer;
   box-shadow: 0.1vmin 0.1vmin 0.4vmin hsl(0deg 0% 0% 40%);
 }
@@ -333,13 +333,13 @@ input[type="range"]::-webkit-slider-runnable-track {
   width: 100%;
   height: 0.8vmin;
   cursor: pointer;
-  background-color: hsl(215deg 100% 45%);
+  background-color: hsl(215deg 30% 35%);
   border-radius: 0.4vmin;
   transition: background-color 0.2s;
 }
 
 input[type="range"]:focus::-webkit-slider-runnable-track {
-  background: hsl(215deg 100% 40%);
+  background: hsl(215deg 30% 30%);
   transition: background-color 0.2s;
 }
 
@@ -347,6 +347,6 @@ input[type="range"]::-moz-range-track {
   width: 100%;
   height: 0.8vmin;
   cursor: pointer;
-  background-color: hsl(215deg 100% 45%);
+  background-color: hsl(215deg 30% 35%);
   border-radius: 0.4vmin;
 }
