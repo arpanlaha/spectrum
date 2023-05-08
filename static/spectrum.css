@@ -77,13 +77,10 @@ h1 {
   font-weight: normal;
 }
 
-.blur {
-  backdrop-filter: blur(1vmin);
-  background-blend-mode: exclusion;
-}
-
 #controls {
-  background: radial-gradient(#19191980, #19191910);
+  background: radial-gradient(#19191980, #19191910), url("/static/noise.svg");
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   border: 1px solid rgba(102 102 102 / 20%);
   white-space: nowrap;
   position: fixed;
